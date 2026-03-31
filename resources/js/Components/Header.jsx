@@ -1,10 +1,11 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Menu, X, LogIn, ShoppingBag, Phone, MessageSquare } from 'lucide-react';
 
 export default function Header() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { auth } = usePage().props;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -32,6 +33,11 @@ export default function Header() {
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-3">
+                            <Link href={route('login')} className="flex items-center gap-1.5 hover:text-white transition-all group">
+                                <LogIn className="w-3 h-3 text-secondary transition-transform group-hover:scale-110" />
+                                <span>Acceso al Portal</span>
+                            </Link>
+                            <span className="w-[1px] h-3 bg-white/20"></span>
                             <a href="#" className="hover:text-white transition-all">Bolsa de Trabajo</a>
                             <span className="w-[1px] h-3 bg-white/20"></span>
                             <a href="#" className="hover:text-white transition-all">Preguntas Frecuentes</a>
@@ -160,10 +166,17 @@ export default function Header() {
 
                         {/* CTAs - Refined sizing */}
                         <div className="flex items-center gap-3 lg:gap-5 shrink-0">
-                            <Link href="/login" className="hidden lg:flex font-semibold text-gray-600 hover:text-primary transition-colors items-center gap-1.5 text-[13px] tracking-wide">
-                                <LogIn className="w-4 h-4 text-gray-400" />
-                                Portal Socio
-                            </Link>
+                            {auth.user ? (
+                                <Link href="/dashboard" className="flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <Link href="/login" className="flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                                    <LogIn className="w-4 h-4" />
+                                    Acceso al Portal
+                                </Link>
+                            )}
                             <Link href="/beneficios" className="bg-primary text-white font-semibold px-5 py-2 rounded-full hover:bg-primary-dark hover:shadow-lg transition-all transform hover:-translate-y-0.5 shadow-md shadow-primary/20 hidden sm:flex items-center gap-1.5 text-[13px] tracking-wide">
                                 <ShoppingBag className="w-4 h-4" />
                                 Tienda Virtual
@@ -207,11 +220,11 @@ export default function Header() {
 
                         <div className="space-y-4 pt-8 border-t border-gray-100">
                             <Link 
-                                href="/login" 
+                                href={route('login')} 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="w-full flex items-center justify-center gap-2 bg-gray-50 text-gray-900 font-bold py-4 rounded-2xl border border-gray-100"
+                                className="w-full flex items-center justify-center gap-2 bg-[#F7BD16] text-zinc-900 font-bold py-4 rounded-2xl shadow-lg shadow-[#F7BD16]/20 transition-all active:scale-95"
                             >
-                                <LogIn className="w-5 h-5" /> Portal Socio
+                                <LogIn className="w-5 h-5" /> Acceso al Portal
                             </Link>
                             <Link 
                                 href="/beneficios" 

@@ -54,7 +54,7 @@ export default function Footer() {
                         <div className="flex gap-6 font-bold text-gray-300">
                             <Link href={route('welcome')} className="hover:text-white transition-colors">Inicio</Link>
                             <Link href={route('register')} className="hover:text-white transition-colors">Regístrate</Link>
-                            <Link href={route('login')} className="hover:text-white transition-colors">Sistema</Link>
+                            <Link href={route('login')} className="hover:text-white transition-colors">Acceso al Portal</Link>
                         </div>
                         <div className="w-px h-4 bg-zinc-700 hidden md:block"></div>
                         <div className="flex gap-4">

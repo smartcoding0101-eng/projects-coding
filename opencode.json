@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {},
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash"
+    ]
+  },
+  "instructions": "You are working on FAPCLAS, a Laravel 12 + Inertia.js + React cooperative ERP system for a Bolivian police financial cooperative. The project uses Filament for admin, Tailwind CSS v4 for styling, and SQLite for the database. Always respond in Spanish. Follow existing code patterns and the FAPCLAS color scheme (primary: olive green #556B2F, secondary: gold #DAA520)."
+}
