@@ -1,22 +1,25 @@
-export default function FloatingWhatsApp() {
+export default function FloatingWhatsApp({ settings = {} }) {
+    const url = settings.url || 'https://wa.link/8yl8ow';
+    const tooltip = settings.tooltip || 'Oficial de Negocios (En línea)';
+
     return (
         <a 
-            href="https://wa.link/8yl8ow" 
+            href={url} 
             target="_blank" 
             rel="noopener noreferrer"
             className="fixed bottom-6 right-6 z-[100] bg-[#25D366] text-white p-3.5 rounded-full shadow-[0_15px_40px_rgba(37,211,102,0.4)] hover:scale-110 hover:-translate-y-1 transition-all duration-300 group flex items-center justify-center cursor-pointer border-4 border-white"
             aria-label="Atención al Socio Fapclas"
         >
-            {/* Ping animation dot for attention */}
+            {/* Ping animation dot */}
             <span className="absolute top-0 right-0 flex auto h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-white"></span>
             </span>
 
-            {/* Smart Tooltip Notification Style */}
+            {/* Smart Tooltip */}
             <span className="absolute right-full mr-5 bg-white border border-gray-100 text-gray-800 text-xs font-bold py-3 px-5 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap flex items-center gap-2 before:absolute before:-right-2 before:top-1/2 before:-translate-y-1/2 before:w-4 before:h-4 before:bg-white before:rotate-45 before:border-r before:border-t before:border-gray-100">
                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                Oficial de Negocios (En línea)
+                {tooltip}
             </span>
             
             {/* SVG WSP Icon */}

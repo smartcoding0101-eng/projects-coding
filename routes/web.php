@@ -11,28 +11,15 @@ use Inertia\Inertia;
 Route::get('/', [App\Http\Controllers\PageController::class, 'welcome'])->name('welcome');
 Route::get('/p/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('page.show');
 
-Route::get('/institucional/mision-vision', function () {
-    return Inertia::render('Institutional/MisionVision');
-});
-Route::get('/institucional/constitucion', function () {
-    return Inertia::render('Institutional/Constitucion');
-});
-Route::get('/institucional/normativas', function () {
-    $page = \App\Models\Page::where('slug', 'normativas')->where('is_active', true)->first();
-    if ($page) {
-        return Inertia::render('Welcome', [
-            'page' => $page->only(['title', 'content', 'metadata']),
-            'isDynamic' => true
-        ]);
-    }
-    return Inertia::render('Institutional/LeyesNormativas');
-});
 // Noticias (Dinámico)
 Route::get('/noticias', [App\Http\Controllers\NoticiaController::class, 'index'])->name('noticias.index');
 Route::get('/noticias/{slug}', [App\Http\Controllers\NoticiaController::class, 'show'])->name('noticias.show');
 Route::get('/institucional/noticias', function () {
     return redirect()->route('noticias.index');
 });
+
+// Institucional dinámico (DESPUÉS de rutas estáticas)
+Route::get('/institucional/{slug}', [App\Http\Controllers\PageController::class, 'institutional'])->name('institucional.show');
 
 // ==========================================
 // 1.5. SERVICIOS INSTITUCIONALES (Páginas de Información)

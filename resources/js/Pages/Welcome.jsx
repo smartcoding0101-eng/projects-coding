@@ -1,5 +1,10 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import Header from '../Components/Header';
+import Footer from '../Components/Footer';
+import FloatingWhatsApp from '../Components/FloatingWhatsApp';
+import BlockRenderer from '../Components/CMS/BlockRenderer';
+
+// Secciones estáticas (fallback)
 import HeroSection from '../Components/HeroSection';
 import ProductCards from '../Components/ProductCards';
 import CreditSimulator from '../Components/CreditSimulator';
@@ -9,16 +14,15 @@ import GallerySection from '../Components/GallerySection';
 import VideoSection from '../Components/VideoSection';
 import TestimonialsSection from '../Components/TestimonialsSection';
 import FAQSection from '../Components/FAQSection';
-import Footer from '../Components/Footer';
-import FloatingWhatsApp from '../Components/FloatingWhatsApp';
-import BlockRenderer from '../Components/CMS/BlockRenderer';
 
-export default function Welcome({ page, isDynamic }) {
+export default function Welcome({ page, isDynamic, siteSettings = {} }) {
+    const { header = {}, footer = {}, whatsapp = {} } = siteSettings;
+
     return (
         <>
             <Head title={page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"} />
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface selection:bg-primary/20">
-                <Header />
+                <Header settings={header} />
 
                 <main className="pt-20">
                     {isDynamic ? (
@@ -48,10 +52,11 @@ export default function Welcome({ page, isDynamic }) {
                         </>
                     )}
                 </main>
-                <Footer />
+                <Footer settings={footer} />
                 
-                {/* Herramienta Global Permanente */}
-                <FloatingWhatsApp />
+                {whatsapp?.enabled !== false && (
+                    <FloatingWhatsApp settings={whatsapp} />
+                )}
             </div>
         </>
     );
