@@ -14,19 +14,11 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
+        'persona_id',
         'name',
         'email',
         'password',
-        'ci',
-        'escalafon',
-        'grado',
-        'destino',
         'whatsapp',
         'theme_preference',
         'pregunta_secreta',
@@ -55,6 +47,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relación con los datos personales/laborales
+     */
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
     }
 
     // ─── Relaciones Financieras ───

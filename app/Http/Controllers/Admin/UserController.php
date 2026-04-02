@@ -16,12 +16,16 @@ class UserController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        $users = User::with('roles')->orderBy('id', 'desc')->paginate(20);
+        $users = User::with(['roles', 'persona'])->orderBy('id', 'desc')->paginate(20);
         $roles = Role::all();
+        
+        // Personas que no tienen usuario (para el selector de creación)
+        $personasDisponibles = \App\Models\Persona::whereDoesntHave('user')->get();
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
-            'roles' => $roles
+            'roles' => $roles,
+            'personasDisponibles' => $personasDisponibles
         ]);
     }
 
@@ -30,24 +34,18 @@ class UserController extends Controller
         Gate::authorize('gestionar usuarios');
 
         $validated = $request->validate([
+            'persona_id' => 'nullable|exists:personas,id|unique:users',
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'ci' => 'nullable|string|max:20',
-            'escalafon' => 'nullable|string|max:50',
-            'grado' => 'nullable|string|max:50',
-            'destino' => 'nullable|string|max:100',
             'roles' => 'array'
         ]);
 
         $user = User::create([
+            'persona_id' => $validated['persona_id'] ?? null,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'ci' => $validated['ci'] ?? null,
-            'escalafon' => $validated['escalafon'] ?? null,
-            'grado' => $validated['grado'] ?? null,
-            'destino' => $validated['destino'] ?? null,
         ]);
 
         if (!empty($validated['roles'])) {
@@ -69,19 +67,11 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'ci' => 'nullable|string|max:20',
-            'escalafon' => 'nullable|string|max:50',
-            'grado' => 'nullable|string|max:50',
-            'destino' => 'nullable|string|max:100',
             'roles' => 'array'
         ]);
 
         $user->update([
             'name' => $validated['name'],
-            'ci' => $validated['ci'] ?? $user->ci,
-            'escalafon' => $validated['escalafon'] ?? $user->escalafon,
-            'grado' => $validated['grado'] ?? $user->grado,
-            'destino' => $validated['destino'] ?? $user->destino,
         ]);
 
         if (in_array('SuperAdmin', $validated['roles']) && $user->id !== 1 && $request->user()->id !== 1) {

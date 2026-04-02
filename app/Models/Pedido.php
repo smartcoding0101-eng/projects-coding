@@ -12,9 +12,10 @@ class Pedido extends Model
     use HasFactory;
 
     protected $fillable = [
-        'numero_orden', 'user_id', 'nombre_cliente', 'ci_cliente', 'telefono_contacto',
+        'numero_orden', 'user_id', 'persona_id', 'nombre_cliente', 'ci_cliente', 'telefono_contacto',
         'tipo_pago', 'estado_pago', 'estado_entrega', 'total',
-        'comprobante_qr_path', 'observaciones'
+        'comprobante_qr_path', 'observaciones',
+        'tipo_entrega', 'direccion_envio', 'costo_envio'
     ];
 
     public function user()

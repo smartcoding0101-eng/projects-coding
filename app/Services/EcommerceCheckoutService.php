@@ -20,7 +20,7 @@ class EcommerceCheckoutService
         $this->accountingService = $accountingService;
     }
 
-    public function procesarCheckout(array $datosCliente, array $carrito, string $tipoPago, array $logistica, ?User $user = null, ?string $comprobantePath = null)
+    public function procesarCheckout(array $datosCliente, array $carrito, string $tipoPago, array $logistica, ?User $user = null, ?string $comprobantePath = null): Pedido
     {
         DB::beginTransaction();
         try {
@@ -100,7 +100,7 @@ class EcommerceCheckoutService
                 $disponible = $limite - $deudaActual;
 
                 if ($total > $disponible) {
-                    throw new \Exception("Límite de crédito insuficiente. Disponible: Bs. " . number_format($disponible, 2));
+                    throw new \Exception("Límite de crédito insuficiente. Disponible: Bs. " . number_format((float)$disponible, 2));
                 }
             }
 
@@ -110,9 +110,34 @@ class EcommerceCheckoutService
                 $estadoPago = 'pagado'; 
             }
 
+            // [KYC AUTOMATION] If guest, ensure they have a record in the 'personas' table
+            $personaId = null;
+            if ($user && method_exists($user, 'persona')) {
+                $personaId = $user->persona_id; // O mediante relación si existe
+            }
+
+            if (!$user) {
+                $persona = \App\Models\Persona::where('ci', $datosCliente['ci'])->first();
+                if (!$persona) {
+                    $persona = \App\Models\Persona::create([
+                        'nombres' => $datosCliente['nombre'],
+                        'apellidos' => '(CLIENTE EXTERNO)',
+                        'ci' => $datosCliente['ci'] ?? 'S/N-' . uniqid(),
+                        'celular' => $datosCliente['telefono'] ?? null,
+                        'genero' => 'OTRO',
+                        'institucion' => 'EXTERNO',
+                        'tipo_afiliacion' => 'EXTERNO',
+                        'garantia_tipo' => 'NINGUNA',
+                        'observaciones' => 'Creado automáticamente vía Ecommerce Checkout.'
+                    ]);
+                }
+                $personaId = $persona->id;
+            }
+
             $pedido = Pedido::create([
-                'numero_orden' => 'ORD-' . strtoupper(uniqid()),
+                'numero_orden' => 'TMP-' . uniqid(), // Placeholder temporal
                 'user_id' => $user ? $user->id : null,
+                'persona_id' => $personaId,
                 'nombre_cliente' => $datosCliente['nombre'],
                 'ci_cliente' => $datosCliente['ci'] ?? null,
                 'telefono_contacto' => $datosCliente['telefono'] ?? null,
@@ -127,32 +152,20 @@ class EcommerceCheckoutService
                 'observaciones' => $datosCliente['observaciones'] ?? null
             ]);
 
+            // Actualizar inmediatamente para asegurar el número incremental exacto de la BD sin colisiones
+            $numeroDefinitivo = 'ORD-' . str_pad($pedido->id, 5, '0', STR_PAD_LEFT);
+            $pedido->update(['numero_orden' => $numeroDefinitivo]);
+
             foreach ($detalles as $detalle) {
                 $detalle['pedido_id'] = $pedido->id;
                 PedidoDetalle::create($detalle);
-
-                // If instantly paid by credit, reduce stock and create kardex
-                if ($estadoPago === 'pagado') {
-                    $producto = Producto::find($detalle['producto_id']);
-                    $nuevoSaldo = $producto->stock_actual - $detalle['cantidad'];
-                    $producto->update(['stock_actual' => $nuevoSaldo]);
-
-                    KardexProducto::create([
-                        'producto_id' => $producto->id,
-                        'tipo_movimiento' => 'egreso',
-                        'cantidad' => $detalle['cantidad'],
-                        'saldo_stock' => $nuevoSaldo,
-                        'concepto' => 'Venta Ecommerce a Crédito (Socio) ORD-' . $pedido->numero_orden,
-                        'usuario_admin_id' => null
-                    ]);
-                }
             }
 
             // Register in the universal Financial Kardex if it's a credit sale
             if ($tipoPago === 'credito_asociado' && $user) {
                 // Instanciate KardexService via app helper or DI
                 $kardexService = app(\App\Services\KardexService::class);
-                $kardexService->registrarCompraConvenio($user, $total, "Compra Ecommerce a Crédito (ORD: {$pedido->numero_orden})", 'Pedido', $pedido->id);
+                $kardexService->registrarCompraConvenio($user, $total, $pedido->id, "Compra Ecommerce ORD-{$pedido->numero_orden}");
             }
 
             DB::commit();

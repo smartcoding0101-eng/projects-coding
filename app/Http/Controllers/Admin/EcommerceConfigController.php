@@ -30,8 +30,8 @@ class EcommerceConfigController extends Controller
         }
 
         if ($request->hasFile('qr_file')) {
-            $path = $request->file('qr_file')->store('ecommerce', 'public');
-            Configuracion::where('key', 'ecommerce_qr_pago')->update(['value' => $path]);
+            $path = $request->file('qr_file')->store('public/ecommerce');
+            Configuracion::where('key', 'ecommerce_qr_pago')->update(['value' => Storage::url($path)]);
         }
 
         return redirect()->back()->with('success', 'Configuración de la tienda actualizada.');

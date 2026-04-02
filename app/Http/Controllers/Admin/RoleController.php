@@ -13,14 +13,12 @@ class RoleController extends Controller
 {
     public function index()
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('gestionar usuarios'); // o 'gestionar roles y permisos' según convenga, mantendré 'gestionar usuarios' por compatibilidad hacia atrás
 
-        $roles = Role::with('permissions')->get();
-        $permissions = Permission::all();
+        $roles = Role::with('permissions')->withCount('users')->get();
 
         return Inertia::render('Admin/Roles/Index', [
-            'roles' => $roles,
-            'permissions' => $permissions
+            'roles' => $roles
         ]);
     }
 
@@ -30,7 +28,7 @@ class RoleController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|unique:roles,name',
-            'permissions' => 'array'
+            'permissions' => 'nullable|array'
         ]);
 
         $role = Role::create(['name' => $validated['name']]);
@@ -46,17 +44,17 @@ class RoleController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        if ($role->name === 'SuperAdmin') {
-            return redirect()->back()->with('error', 'No puedes alterar al SuperAdmin.');
+        if (in_array($role->name, ['SuperAdmin', 'Socio Base'])) {
+            return redirect()->back()->with('error', 'No puedes alterar este rol.');
         }
 
         $validated = $request->validate([
-            'permissions' => 'array'
+            'name' => 'required|string|unique:roles,name,' . $role->id
         ]);
 
-        $role->syncPermissions($validated['permissions']);
+        $role->update($validated);
 
-        return redirect()->back()->with('success', 'Permisos del Rol actualizados.');
+        return redirect()->back()->with('success', 'Nombre del Rol actualizado.');
     }
 
     public function destroy(Role $role)

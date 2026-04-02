@@ -9,6 +9,7 @@ class CuentaAportacion extends Model
     protected $table = 'cuentas_aportacion';
 
     protected $fillable = [
+        'persona_id',
         'user_id',
         'saldo_actual',
         'estado',
@@ -22,6 +23,11 @@ class CuentaAportacion extends Model
     }
 
     // ─── Relaciones ───
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
+    }
 
     public function user()
     {

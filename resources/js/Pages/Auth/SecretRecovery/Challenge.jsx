@@ -12,11 +12,11 @@ export default function Challenge({ pregunta_secreta, ci }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-8 selection:bg-primary/20 leading-relaxed font-sans">
+        <div className="min-h-screen bg-brand/5 flex items-center justify-center p-4 sm:p-8 selection:bg-primary/20 leading-relaxed font-sans">
             <Head title="Verificación de Identidad - FAPCLAS R.L." />
 
             {/* Floating Challenge Card */}
-            <div className="w-full max-w-5xl bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col lg:flex-row border border-gray-100 min-h-[600px] transform transition-all">
+            <div className="w-full max-w-5xl bg-card-fap rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col lg:flex-row border border-brand min-h-[600px] transform transition-all">
                 
                 {/* 1. Left Column (Visual - Validation Theme) */}
                 <div className="hidden lg:flex lg:w-1/2 relative bg-zinc-900 flex-col justify-between overflow-hidden group">
@@ -32,7 +32,7 @@ export default function Challenge({ pregunta_secreta, ci }) {
 
                     {/* Content Badge */}
                     <div className="relative z-10 p-10 lg:p-12 max-w-lg mt-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card-fap/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm">
                             <ShieldAlert className="w-3 h-3 text-amber-400" />
                             Validación de Identidad
                         </div>
@@ -47,7 +47,7 @@ export default function Challenge({ pregunta_secreta, ci }) {
                     {/* Bottom Indicator */}
                     <div className="relative z-10 p-10 lg:p-12 w-full">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                            <div className="w-12 h-12 bg-card-fap/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
                                 <Fingerprint className="w-6 h-6 text-amber-400" />
                             </div>
                             <div>
@@ -59,7 +59,7 @@ export default function Challenge({ pregunta_secreta, ci }) {
                 </div>
 
                 {/* 2. Right Column (The Challenge) */}
-                <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-10 lg:px-16 bg-white z-10">
+                <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-10 lg:px-16 bg-card-fap z-10">
                     <div className="w-full max-w-sm mx-auto">
                         
                         {/* Header & Isologo */}
@@ -68,12 +68,12 @@ export default function Challenge({ pregunta_secreta, ci }) {
                                 <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-display font-bold text-xl group-hover:scale-105 transition-transform shadow-md shadow-primary/30">
                                     F
                                 </div>
-                                <span className="font-display font-bold text-xl tracking-tight text-gray-800">
-                                    FAPCLAS<span className="text-gray-400 font-medium ml-1 text-sm">R.L.</span>
+                                <span className="font-display font-bold text-xl tracking-tight text-brand-main">
+                                    FAPCLAS<span className="text-brand-muted font-medium ml-1 text-sm">R.L.</span>
                                 </span>
                             </Link>
 
-                            <h2 className="font-display text-2xl font-bold text-gray-900 mb-6 tracking-tight">Pregunta de Seguridad</h2>
+                            <h2 className="font-display text-2xl font-bold text-brand-main mb-6 tracking-tight">Pregunta de Seguridad</h2>
                             
                             {/* The Question Box */}
                             <div className="relative p-6 bg-amber-50/50 border border-amber-100 rounded-3xl overflow-hidden shadow-inner group/q">
@@ -81,7 +81,7 @@ export default function Challenge({ pregunta_secreta, ci }) {
                                     <ShieldAlert className="w-12 h-12 text-amber-600" />
                                 </div>
                                 <p className="text-xs uppercase tracking-widest font-black text-amber-600/60 mb-2">Desafío del Sistema</p>
-                                <p className="text-gray-800 font-bold text-lg leading-relaxed font-serif italic">
+                                <p className="text-brand-main font-bold text-lg leading-relaxed font-serif italic">
                                     "{pregunta_secreta}"
                                 </p>
                             </div>
@@ -95,7 +95,7 @@ export default function Challenge({ pregunta_secreta, ci }) {
                                     type="password"
                                     name="respuesta"
                                     value={data.respuesta}
-                                    className={`w-full px-4 py-4 bg-gray-50 border ${errors.respuesta ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' : 'border-gray-200 focus:border-amber-500 focus:ring-amber-500 focus:bg-white'} rounded-xl text-gray-900 text-sm transition-all font-medium focus:ring-2 focus:ring-opacity-20 outline-none shadow-sm`}
+                                    className={`w-full px-4 py-4 bg-brand/5 border ${errors.respuesta ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' : 'border-brand focus:border-amber-500 focus:ring-amber-500 focus:bg-card-fap'} rounded-xl text-brand-main text-sm transition-all font-medium focus:ring-2 focus:ring-opacity-20 outline-none shadow-sm`}
                                     autoFocus={true}
                                     onChange={(e) => setData('respuesta', e.target.value)}
                                     placeholder="Escribe tu respuesta aquí..."
@@ -112,8 +112,8 @@ export default function Challenge({ pregunta_secreta, ci }) {
                                 {processing ? 'Autenticando...' : 'Confirmar Identidad'}
                             </button>
                             
-                            <div className="text-center mt-6 pt-5 border-t border-gray-100 flex flex-col gap-3">
-                                <Link href={route('secret.request')} className="text-gray-500 text-xs font-semibold hover:text-gray-900 transition-colors underline decoration-gray-200 underline-offset-4">
+                            <div className="text-center mt-6 pt-5 border-t border-brand flex flex-col gap-3">
+                                <Link href={route('secret.request')} className="text-brand-muted text-xs font-semibold hover:text-brand-main transition-colors underline decoration-gray-200 underline-offset-4">
                                     Volver al paso anterior
                                 </Link>
                             </div>

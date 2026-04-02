@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Credito extends Model
 {
     protected $fillable = [
+        'persona_id',
         'user_id',
         'tipo_credito_id',
         'monto_aprobado',
@@ -31,6 +32,11 @@ class Credito extends Model
     }
 
     // ─── Relaciones ───
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
+    }
 
     public function user()
     {

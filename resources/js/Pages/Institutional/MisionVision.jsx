@@ -13,10 +13,10 @@ export default function MisionVision() {
                         <div className="text-center mb-16">
                             <span className="bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-4 py-1.5 rounded-full inline-block mb-4">Nuestra Identidad</span>
                             <h1 className="font-display text-5xl font-bold text-primary-dark mb-4 drop-shadow-sm">Misión y Visión</h1>
-                            <p className="text-xl text-gray-500 max-w-2xl mx-auto">El horizonte corporativo que guía nuestro servicio, compromiso y acción económica con la familia policial boliviana.</p>
+                            <p className="text-xl text-brand-muted max-w-2xl mx-auto">El horizonte corporativo que guía nuestro servicio, compromiso y acción económica con la familia policial boliviana.</p>
                         </div>
                         <div className="space-y-12">
-                            <div className="bg-white rounded-[2rem] p-10 md:p-14 border border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-500">
+                            <div className="bg-card-fap rounded-[2rem] p-10 md:p-14 border border-brand shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-500">
                                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-bl-full group-hover:scale-110 transition-transform duration-700"></div>
                                 <div className="flex items-center gap-4 mb-6 relative z-10">
                                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
@@ -29,7 +29,7 @@ export default function MisionVision() {
                                 </p>
                             </div>
                             
-                            <div className="bg-white rounded-[2rem] p-10 md:p-14 border border-gray-100 shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-500">
+                            <div className="bg-card-fap rounded-[2rem] p-10 md:p-14 border border-brand shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-500">
                                 <div className="absolute top-0 right-0 w-48 h-48 bg-secondary/20 rounded-bl-full group-hover:scale-110 transition-transform duration-700"></div>
                                 <div className="flex items-center gap-4 mb-6 relative z-10">
                                     <div className="w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center text-primary-dark">

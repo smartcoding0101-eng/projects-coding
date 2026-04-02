@@ -122,7 +122,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                 <div className="absolute top-6 right-6 lg:right-12 z-40 flex items-center gap-6 font-bold text-sm text-gray-300">
                     <Link href={route('welcome')} className="hover:text-white transition-colors">Inicio</Link>
                     <Link href={route('register')} className="hover:text-white transition-colors border-b border-transparent hover:border-white">Regístrate</Link>
-                    <Link href={route('login')} className="hover:text-white transition-colors bg-white/10 px-5 py-2 rounded-full border border-white/20 hover:bg-white/20">Sistema</Link>
+                    <Link href={route('login')} className="hover:text-white transition-colors bg-card-fap/10 px-5 py-2 rounded-full border border-white/20 hover:bg-card-fap/20">Sistema</Link>
                 </div>
 
                 {/* Imagen de fondo — deslizamiento horizontal */}
@@ -169,16 +169,16 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                 {slides[currentSlide].description}
                             </p>
                             <div className="flex flex-wrap gap-4">
-                                <a href={slides[currentSlide].button_link} className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-sm font-black rounded-2xl text-white bg-primary hover:bg-white hover:text-primary transition-all shadow-2xl uppercase tracking-widest group">
+                                <a href={slides[currentSlide].button_link} className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-sm font-black rounded-2xl text-white bg-primary hover:bg-card-fap hover:text-primary transition-all shadow-2xl uppercase tracking-widest group">
                                     {slides[currentSlide].button_text}
                                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </a>
                                 {auth?.user ? (
-                                    <Link href={route('dashboard')} className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-white/10 transition-all backdrop-blur-sm bg-white/5">
+                                    <Link href={route('dashboard')} className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
                                         Mi Portal Socio
                                     </Link>
                                 ) : (
-                                    <Link href="/login" className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-white/10 transition-all backdrop-blur-sm bg-white/5">
+                                    <Link href="/login" className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
                                         Iniciar Sesión
                                     </Link>
                                 )}
@@ -194,7 +194,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                             <button
                                 key={i}
                                 onClick={() => goToSlide(i)}
-                                className={`rounded-full transition-all duration-500 ${i === currentSlide ? 'w-10 h-2.5 bg-primary shadow-lg shadow-primary/40' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`}
+                                className={`rounded-full transition-all duration-500 ${i === currentSlide ? 'w-10 h-2.5 bg-primary shadow-lg shadow-primary/40' : 'w-2.5 h-2.5 bg-card-fap/40 hover:bg-card-fap/70'}`}
                                 aria-label={`Ir a slide ${i + 1}`}
                             />
                         ))}
@@ -257,7 +257,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                             setSearchQuery(''); setMinPrice(''); setMaxPrice('');
                                             router.get(route('beneficios.index'), { categoria: filtros?.categoria }, { preserveState: true });
                                         }}
-                                        className="w-full py-2 mt-2 bg-white/5 border border-brand hover:bg-white/10 text-brand-muted text-xs font-bold rounded-xl transition-all"
+                                        className="w-full py-2 mt-2 bg-card-fap/5 border border-brand hover:bg-card-fap/10 text-brand-muted text-xs font-bold rounded-xl transition-all"
                                     >
                                         Limpiar Filtros
                                     </button>
@@ -306,12 +306,12 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {[...Array(8)].map((_, i) => (
                                     <div key={i} className="bg-card-fap rounded-2xl border border-brand p-4 animate-pulse">
-                                        <div className="aspect-[4/3] bg-white/5 rounded-xl mb-4"></div>
-                                        <div className="h-4 bg-white/5 rounded w-1/3 mb-2"></div>
-                                        <div className="h-5 bg-white/5 rounded w-3/4 mb-4"></div>
+                                        <div className="aspect-[4/3] bg-card-fap/5 rounded-xl mb-4"></div>
+                                        <div className="h-4 bg-card-fap/5 rounded w-1/3 mb-2"></div>
+                                        <div className="h-5 bg-card-fap/5 rounded w-3/4 mb-4"></div>
                                         <div className="flex justify-between items-end mt-4">
-                                            <div className="h-6 bg-white/5 rounded w-1/2"></div>
-                                            <div className="h-10 w-10 bg-white/5 rounded-full"></div>
+                                            <div className="h-6 bg-card-fap/5 rounded w-1/2"></div>
+                                            <div className="h-10 w-10 bg-card-fap/5 rounded-full"></div>
                                         </div>
                                     </div>
                                 ))}

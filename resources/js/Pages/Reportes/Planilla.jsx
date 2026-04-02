@@ -1,104 +1,188 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { 
+    CalendarDays, 
+    DownloadCloud, 
+    ArrowLeft, 
+    Users, 
+    ReceiptText, 
+    HandCoins,
+    Search,
+    FileSpreadsheet,
+    FileText
+} from 'lucide-react';
 
 export default function Planilla({ auth, titulo, cooperativa, periodo, fecha_generacion, total_socios, total_cuotas, total_general, items }) {
     const [mes, setMes] = useState('');
+    const [isDownloading, setIsDownloading] = useState(false);
 
-    const cambiarMes = () => {
+    const cambiarMes = (e) => {
+        e.preventDefault();
         if (mes) router.get(route('reportes.planilla'), { mes }, { preserveState: true });
+    };
+
+    const handleExport = async (formato) => {
+        setIsDownloading(true);
+        try {
+            const response = await window.axios({
+                url: route('reportes.planilla'),
+                params: { mes, formato },
+                method: 'GET',
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const extension = formato === 'csv' ? 'csv' : 'pdf';
+            link.setAttribute('download', `planilla_descuento_${mes || 'actual'}.${extension}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            alert('Error exportando la planilla.');
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Planilla de Descuento Policial</h2>}
+            header={
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 py-1">
+                        <ReceiptText className="w-6 h-6 text-purple-600" />
+                        <h2 className="font-semibold text-xl text-brand-main leading-tight tracking-tight">
+                            Planilla de Descuentos (RRHH / Tesorería)
+                        </h2>
+                    </div>
+                    <a href={route('reportes.index')} className="text-sm text-brand-muted hover:text-brand-main font-semibold transition-colors flex items-center gap-1">
+                        <ArrowLeft className="w-4 h-4" /> Volver
+                    </a>
+                </div>
+            }
         >
-            <Head title="Planilla de Descuento" />
-            <div className="py-8">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <Head title="Exportación de Planillas | FAPCLAS" />
 
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                        <div className="flex items-center space-x-3">
-                            <input type="month" value={mes} onChange={(e) => setMes(e.target.value)} className="text-sm border-gray-300 rounded-md" />
-                            <button onClick={cambiarMes} className="px-3 py-2 bg-fapclas-600 hover:bg-fapclas-700 text-white text-sm font-bold rounded-md">Consultar</button>
+            <div className="py-8 min-h-screen bg-main">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+                    {/* Filtros y Resumen */}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        
+                        {/* Selector de Período */}
+                        <div className="lg:col-span-1 bg-card-fap border border-brand p-5 rounded-2xl shadow-sm">
+                            <h3 className="text-[10px] font-black uppercase text-brand-muted mb-4 tracking-wider flex items-center gap-2">
+                                <CalendarDays className="w-4 h-4 text-purple-500" /> Periodo de Consulta
+                            </h3>
+                            <form onSubmit={cambiarMes} className="space-y-4">
+                                <input 
+                                    type="month" 
+                                    value={mes} 
+                                    onChange={(e) => setMes(e.target.value)} 
+                                    className="w-full bg-main text-brand-main border border-brand text-sm px-3 py-2 rounded-xl focus:ring-purple-500 font-bold" 
+                                />
+                                <button type="submit" className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                    <Search className="w-4 h-4" /> Actualizar Datos
+                                </button>
+                                
+                                <div className="pt-4 border-t border-brand/50 flex flex-col gap-2">
+                                    <button 
+                                        type="button"
+                                        onClick={() => handleExport('pdf')}
+                                        disabled={isDownloading}
+                                        className="w-full py-2 bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white text-[11px] font-bold rounded-xl border border-red-600/20 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <FileText className="w-4 h-4" /> Descargar PDF
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => handleExport('csv')}
+                                        disabled={isDownloading}
+                                        className="w-full py-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-600 hover:text-white text-[11px] font-bold rounded-xl border border-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <FileSpreadsheet className="w-4 h-4" /> Exportar CSV
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div className="flex space-x-3">
-                            <a href={`${route('reportes.planilla')}?formato=pdf&mes=${mes}`} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg" target="_blank">📄 PDF</a>
-                            <a href={`${route('reportes.planilla')}?formato=csv&mes=${mes}`} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg">📊 CSV</a>
-                            <Link href={route('reportes.index')} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm rounded-lg">← Volver</Link>
+
+                        {/* KPIs */}
+                        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-card-fap border border-brand p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                                <Users className="w-8 h-8 text-purple-500 mb-3" />
+                                <p className="text-[10px] font-black uppercase text-brand-muted">Total Afiliados</p>
+                                <p className="text-3xl font-black text-brand-main">{total_socios}</p>
+                                <p className="text-[9px] text-brand-muted mt-1 font-bold">CON DESCUENTOS ESTE MES</p>
+                            </div>
+
+                            <div className="bg-card-fap border border-brand p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                                <ReceiptText className="w-8 h-8 text-blue-500 mb-3" />
+                                <p className="text-[10px] font-black uppercase text-brand-muted">Total Cuotas</p>
+                                <p className="text-3xl font-black text-brand-main">{total_cuotas}</p>
+                                <p className="text-[9px] text-brand-muted mt-1 font-bold">REGISTROS IDENTIFICADOS</p>
+                            </div>
+
+                            <div className="bg-card-fap border-2 border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-6 rounded-2xl shadow-sm">
+                                <HandCoins className="w-8 h-8 text-emerald-500 mb-3" />
+                                <p className="text-[10px] font-black uppercase text-brand-muted">Monto Total Recaudar</p>
+                                <p className="text-3xl font-black text-emerald-600">Bs {Number(total_general).toLocaleString()}</p>
+                                <p className="text-[9px] text-emerald-600 font-bold mt-1 uppercase">Para transferencia inmediata</p>
+                            </div>
                         </div>
+
                     </div>
 
-                    {/* Período y KPIs */}
-                    <div className="bg-white shadow-sm rounded-lg p-5">
-                        <h3 className="text-lg font-bold text-fapclas-800 uppercase">{periodo}</h3>
-                        <p className="text-sm text-gray-500">{fecha_generacion}</p>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow-sm border p-5 text-center">
-                            <p className="text-xs text-gray-500 uppercase">Socios</p>
-                            <p className="text-2xl font-bold text-fapclas-700">{total_socios}</p>
+                    {/* Tabla de Detalle */}
+                    <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden">
+                        <div className="p-4 border-b border-brand bg-main flex items-center justify-between">
+                            <h3 className="text-xs font-bold uppercase text-brand-main">Desglose de Planilla: {periodo}</h3>
                         </div>
-                        <div className="bg-white rounded-lg shadow-sm border p-5 text-center">
-                            <p className="text-xs text-gray-500 uppercase">Cuotas</p>
-                            <p className="text-2xl font-bold text-blue-600">{total_cuotas}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-sm border p-5 text-center">
-                            <p className="text-xs text-gray-500 uppercase">Total a Descontar</p>
-                            <p className="text-2xl font-bold text-red-600">Bs. {Number(total_general).toFixed(2)}</p>
-                        </div>
-                    </div>
-
-                    {/* Tabla */}
-                    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="w-full text-[11px] text-left">
+                                <thead className="bg-main text-brand-muted uppercase font-black border-b border-brand">
                                     <tr>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Socio</th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">CI</th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grado</th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Destino</th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cuota</th>
-                                        <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Capital</th>
-                                        <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Interés</th>
-                                        <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Mora</th>
-                                        <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                        <th className="p-4 w-1/4">Socio / CI</th>
+                                        <th className="p-4">Credencial / Destino</th>
+                                        <th className="p-4 text-center">Cuota</th>
+                                        <th className="p-4 text-right">Capital + Int.</th>
+                                        <th className="p-4 text-right text-red-500">Mora</th>
+                                        <th className="p-4 text-right font-black">Total a Cubrir</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {items.length === 0 && (
-                                        <tr><td colSpan={10} className="px-6 py-8 text-center text-gray-400">Sin descuentos para este período</td></tr>
-                                    )}
-                                    {items.map((item, i) => (
-                                        <tr key={i} className="hover:bg-gray-50">
-                                            <td className="px-3 py-3 text-sm font-medium">{item.socio_nombre}</td>
-                                            <td className="px-3 py-3 text-sm">{item.socio_ci}</td>
-                                            <td className="px-3 py-3 text-sm">{item.socio_grado}</td>
-                                            <td className="px-3 py-3 text-sm">{item.socio_destino}</td>
-                                            <td className="px-3 py-3 text-sm text-gray-600">{item.tipo_credito}</td>
-                                            <td className="px-3 py-3 text-sm">{item.nro_cuota}</td>
-                                            <td className="px-3 py-3 text-sm text-right">Bs. {Number(item.capital).toFixed(2)}</td>
-                                            <td className="px-3 py-3 text-sm text-right">Bs. {Number(item.interes).toFixed(2)}</td>
-                                            <td className="px-3 py-3 text-sm text-right text-red-600">{Number(item.mora) > 0 ? `Bs. ${Number(item.mora).toFixed(2)}` : '—'}</td>
-                                            <td className="px-3 py-3 text-sm text-right font-bold">Bs. {Number(item.total_descontar).toFixed(2)}</td>
+                                <tbody className="divide-y divide-brand/50">
+                                    {items.length === 0 ? (
+                                        <tr><td colSpan={6} className="p-12 text-center text-brand-muted font-bold text-sm">No existen registros de descuento para el período seleccionado.</td></tr>
+                                    ) : items.map((item, i) => (
+                                        <tr key={i} className="hover:bg-brand/5 border-b border-brand/10 transition-colors">
+                                            <td className="p-4">
+                                                <div className="font-black text-brand-main uppercase">{item.socio_nombre}</div>
+                                                <div className="text-[10px] text-brand-muted">CI: {item.socio_ci}</div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="font-bold">{item.socio_grado}</div>
+                                                <div className="text-[10px] text-brand-muted">{item.socio_destino}</div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span className="bg-brand/10 px-2 py-0.5 rounded text-[10px] font-bold">N° {item.nro_cuota}</span>
+                                            </td>
+                                            <td className="p-4 text-right text-brand-main">
+                                                Bs {(Number(item.capital) + Number(item.interes)).toFixed(2)}
+                                            </td>
+                                            <td className={`p-4 text-right font-black ${Number(item.mora) > 0 ? 'text-red-500' : 'text-brand-muted'}`}>
+                                                {Number(item.mora) > 0 ? `Bs ${Number(item.mora).toFixed(2)}` : '—'}
+                                            </td>
+                                            <td className="p-4 text-right font-black text-brand-main text-xs">
+                                                Bs {Number(item.total_descontar).toLocaleString()}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
-                                {items.length > 0 && (
-                                    <tfoot className="bg-fapclas-50">
-                                        <tr>
-                                            <td colSpan={9} className="px-3 py-3 text-right font-bold text-fapclas-800">TOTAL GENERAL</td>
-                                            <td className="px-3 py-3 text-right font-bold text-fapclas-800 text-lg">Bs. {Number(total_general).toFixed(2)}</td>
-                                        </tr>
-                                    </tfoot>
-                                )}
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
         </AuthenticatedLayout>

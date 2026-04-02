@@ -2,10 +2,10 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-function StatCard({ label, value, color = 'text-gray-900', prefix = '' }) {
+function StatCard({ label, value, color = 'text-brand-main', prefix = '' }) {
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
+        <div className="bg-card-fap rounded-lg shadow-sm border border-brand p-5">
+            <p className="text-xs font-medium text-brand-muted uppercase tracking-wider">{label}</p>
             <p className={`text-2xl font-bold mt-1 ${color}`}>{prefix}{value}</p>
         </div>
     );
@@ -31,7 +31,7 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Reporte de Cartera de Créditos</h2>}
+            header={<h2 className="font-semibold text-xl text-brand-main leading-tight">Reporte de Cartera de Créditos</h2>}
         >
             <Head title="Cartera de Créditos" />
 
@@ -39,7 +39,7 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
                     <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-500">Generado: {fecha_generacion}</p>
+                        <p className="text-sm text-brand-muted">Generado: {fecha_generacion}</p>
                         <ExportBar baseRoute="reportes.cartera" />
                     </div>
 
@@ -48,33 +48,33 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
                         <StatCard label="Vigentes" value={resumen.vigentes} color="text-blue-600" />
                         <StatCard label="En Mora" value={resumen.en_mora} color="text-red-600" />
                         <StatCard label="Pagados" value={resumen.pagados} color="text-green-600" />
-                        <StatCard label="Monto Otorgado" value={Number(resumen.monto_total_otorgado).toFixed(2)} prefix="Bs. " color="text-gray-800" />
+                        <StatCard label="Monto Otorgado" value={Number(resumen.monto_total_otorgado).toFixed(2)} prefix="Bs. " color="text-brand-main" />
                         <StatCard label="Saldo Vigente" value={Number(resumen.monto_vigente).toFixed(2)} prefix="Bs. " color="text-blue-700" />
                         <StatCard label="Saldo Mora" value={Number(resumen.monto_mora).toFixed(2)} prefix="Bs. " color="text-red-700" />
                     </div>
 
-                    <div className="bg-white shadow-sm sm:rounded-lg overflow-hidden">
+                    <div className="bg-card-fap shadow-sm sm:rounded-lg overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-brand/5">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Socio</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CI</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Saldo</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tasa</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Desembolso</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">#</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Socio</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">CI</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Tipo</th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-brand-muted uppercase">Monto</th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-brand-muted uppercase">Saldo</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Tasa</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Estado</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Desembolso</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-card-fap divide-y divide-gray-200">
                                     {creditos.map((c) => (
-                                        <tr key={c.id} className="hover:bg-gray-50">
+                                        <tr key={c.id} className="hover:bg-brand/5">
                                             <td className="px-4 py-3 text-sm">{c.id}</td>
                                             <td className="px-4 py-3 text-sm font-medium">{c.socio}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">{c.ci}</td>
+                                            <td className="px-4 py-3 text-sm text-brand-muted">{c.ci}</td>
                                             <td className="px-4 py-3 text-sm text-gray-600">{c.tipo}</td>
                                             <td className="px-4 py-3 text-sm text-right">Bs. {Number(c.monto_aprobado).toFixed(2)}</td>
                                             <td className="px-4 py-3 text-sm text-right font-bold">Bs. {Number(c.saldo_capital).toFixed(2)}</td>
@@ -86,7 +86,7 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
                                                     'bg-blue-100 text-blue-800'
                                                 }`}>{c.estado}</span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">{c.fecha_desembolso}</td>
+                                            <td className="px-4 py-3 text-sm text-brand-muted">{c.fecha_desembolso}</td>
                                         </tr>
                                     ))}
                                 </tbody>

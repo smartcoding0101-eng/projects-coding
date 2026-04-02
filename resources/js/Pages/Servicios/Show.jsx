@@ -70,12 +70,12 @@ export default function Show({ servicio, whatsappSoporte }) {
                                                     whileInView={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: idx * 0.1 }}
                                                     viewport={{ once: true }}
-                                                    className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group"
+                                                    className="bg-card-fap p-6 rounded-3xl border border-brand shadow-sm hover:shadow-md transition-shadow group"
                                                 >
                                                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-all">
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                                                     </div>
-                                                    <p className="font-semibold text-gray-800 leading-snug">
+                                                    <p className="font-semibold text-brand-main leading-snug">
                                                         {detalle}
                                                     </p>
                                                 </motion.div>
@@ -94,31 +94,31 @@ export default function Show({ servicio, whatsappSoporte }) {
 
                                 {/* Columna Derecha: Sidebar de Acción */}
                                 <div className="space-y-8">
-                                    <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-gray-200/50 border border-gray-100 relative overflow-hidden">
+                                    <div className="bg-card-fap rounded-[2.5rem] p-8 shadow-2xl shadow-gray-200/50 border border-brand relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                                         
                                         <h3 className="font-display text-2xl font-bold text-primary-dark mb-6 relative z-10">Solicitar Servicio</h3>
                                         
                                         <div className="space-y-6 relative z-10">
                                             <div className="flex items-start gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary-dark shrink-0">
+                                                <div className="w-12 h-12 rounded-2xl bg-brand/5 flex items-center justify-center text-primary-dark shrink-0">
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Horario de Atención</p>
-                                                    <p className="font-semibold text-gray-800">Lunes a Viernes: 08:30 - 18:30</p>
-                                                    <p className="text-gray-500 text-sm">Sábados: 09:00 - 13:00</p>
+                                                    <p className="text-sm font-bold text-brand-muted uppercase tracking-widest leading-none mb-1">Horario de Atención</p>
+                                                    <p className="font-semibold text-brand-main">Lunes a Viernes: 08:30 - 18:30</p>
+                                                    <p className="text-brand-muted text-sm">Sábados: 09:00 - 13:00</p>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-start gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary-dark shrink-0">
+                                                <div className="w-12 h-12 rounded-2xl bg-brand/5 flex items-center justify-center text-primary-dark shrink-0">
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Ubicación</p>
-                                                    <p className="font-semibold text-gray-800">Sede Central FAPCLAS</p>
-                                                    <p className="text-gray-500 text-sm">Av. 20 de Octubre esq. J.J. Pérez</p>
+                                                    <p className="text-sm font-bold text-brand-muted uppercase tracking-widest leading-none mb-1">Ubicación</p>
+                                                    <p className="font-semibold text-brand-main">Sede Central FAPCLAS</p>
+                                                    <p className="text-brand-muted text-sm">Av. 20 de Octubre esq. J.J. Pérez</p>
                                                 </div>
                                             </div>
 

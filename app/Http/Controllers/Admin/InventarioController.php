@@ -15,9 +15,20 @@ class InventarioController extends Controller
         $productos = Producto::with('categoria')->paginate(30);
         $categorias = Categoria::where('activa', true)->get();
 
+        // Calcular próximo SKU incremental
+        $ultimoProducto = Producto::orderBy('id', 'desc')->first();
+        $nextSkuNumber = 1;
+        if ($ultimoProducto && preg_match('/SKU-(\d+)/', $ultimoProducto->codigo_sku, $matches)) {
+            $nextSkuNumber = (int)$matches[1] + 1;
+        } elseif ($ultimoProducto && is_numeric($ultimoProducto->codigo_sku)) {
+             $nextSkuNumber = (int)$ultimoProducto->codigo_sku + 1;
+        }
+        $nextSku = 'SKU-' . str_pad($nextSkuNumber, 4, '0', STR_PAD_LEFT);
+
         return inertia('Admin/Inventario/Index', [
             'productos' => $productos,
-            'categorias' => $categorias
+            'categorias' => $categorias,
+            'nextSku' => $nextSku
         ]);
     }
 
@@ -30,9 +41,18 @@ class InventarioController extends Controller
             'slug' => 'required|string|unique:productos',
             'precio_general' => 'required|numeric|min:0',
             'precio_asociado' => 'required|numeric|min:0',
+            'precio_credito' => 'nullable|numeric|min:0',
+            'precio_costo' => 'nullable|numeric|min:0',
             'stock_actual' => 'required|integer|min:0',
             'stock_minimo' => 'required|integer|min:0',
-            'descripcion' => 'nullable|string'
+            'descripcion' => 'nullable|string',
+            'descripcion_larga' => 'nullable|string',
+            'marca' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'serie' => 'nullable|string|max:100',
+            'calibre' => 'nullable|string|max:50',
+            'fecha_vencimiento' => 'nullable|date',
+            'observacion' => 'nullable|string'
         ]);
 
         $producto = Producto::create($validated);
@@ -59,8 +79,17 @@ class InventarioController extends Controller
             'nombre' => 'required|string|max:255',
             'precio_general' => 'required|numeric|min:0',
             'precio_asociado' => 'required|numeric|min:0',
+            'precio_credito' => 'nullable|numeric|min:0',
+            'precio_costo' => 'nullable|numeric|min:0',
             'stock_minimo' => 'required|integer|min:0',
             'descripcion' => 'nullable|string',
+            'descripcion_larga' => 'nullable|string',
+            'marca' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'serie' => 'nullable|string|max:100',
+            'calibre' => 'nullable|string|max:50',
+            'fecha_vencimiento' => 'nullable|date',
+            'observacion' => 'nullable|string',
             'activo' => 'boolean'
         ]);
 

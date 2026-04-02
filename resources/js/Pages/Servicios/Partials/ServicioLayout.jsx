@@ -9,7 +9,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
     const whatsappUrl = `https://wa.me/${whatsappSoporte || '59170000000'}?text=${encodeURIComponent(`Hola, estoy interesado en el servicio de ${nombre}. ¿Podrían brindarme más información?`)}`;
 
     return (
-        <div className="min-h-screen bg-white font-sans antialiased text-black">
+        <div className="min-h-screen bg-card-fap font-sans antialiased text-black">
             <Head title={`${nombre} - FAPCLAS R.L.`} />
             <Header />
 
@@ -46,7 +46,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
                             </p>
                             
                             <div className="flex justify-center gap-6">
-                                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-secondary hover:bg-white text-primary-dark px-12 py-5 rounded-2xl font-black text-lg transition-all shadow-2xl flex items-center gap-3 group">
+                                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-secondary hover:bg-card-fap text-primary-dark px-12 py-5 rounded-2xl font-black text-lg transition-all shadow-2xl flex items-center gap-3 group">
                                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z"/></svg>
                                     Contactar por WhatsApp
                                 </a>
@@ -60,7 +60,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
                              <motion.div 
                                 animate={{ y: [0, 12, 0] }}
                                 transition={{ repeat: Infinity, duration: 2 }}
-                                className="w-1 h-2 bg-white rounded-full"
+                                className="w-1 h-2 bg-card-fap rounded-full"
                              />
                         </div>
                     </div>
@@ -69,7 +69,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
                 {/* CONTENT FLOW - NO CARDS, Z-PATTERN */}
                 <div className="py-10">
                     {secciones.map((sec, i) => (
-                        <section key={i} className={`py-12 ${i % 2 !== 0 ? 'bg-primary/5' : 'bg-white'}`}>
+                        <section key={i} className={`py-12 ${i % 2 !== 0 ? 'bg-primary/5' : 'bg-card-fap'}`}>
                             <div className="max-w-7xl mx-auto px-4">
                                 <div className={`flex flex-col md:flex-row items-center gap-20 ${i % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
                                     <div className="flex-1">
@@ -81,7 +81,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
                                             <h2 className="text-5xl font-black text-black mb-4 leading-tight tracking-tighter">
                                                 {sec.titulo}
                                             </h2>
-                                            <p className="text-xl text-gray-500 mb-6 leading-relaxed font-medium">
+                                            <p className="text-xl text-brand-muted mb-6 leading-relaxed font-medium">
                                                 {sec.contenido}
                                             </p>
                                             <ul className="space-y-4">
@@ -123,7 +123,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
                     <div className="max-w-3xl mx-auto px-4 relative z-10">
                         <h3 className="text-5xl font-black mb-10 tracking-tighter">¿Listo para aprovechar este beneficio institucional?</h3>
                         <p className="text-xl text-white/60 mb-12">Estamos a un mensaje de distancia para asesorarte en lo que necesites.</p>
-                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-secondary text-primary-dark px-16 py-6 rounded-3xl font-black text-xl hover:bg-white transition-all shadow-2xl shadow-secondary/10">
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-secondary text-primary-dark px-16 py-6 rounded-3xl font-black text-xl hover:bg-card-fap transition-all shadow-2xl shadow-secondary/10">
                             Chatear con un Asesor
                         </a>
                     </div>

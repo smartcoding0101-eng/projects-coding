@@ -35,7 +35,7 @@ export default function NoticiaDetail({ noticia }) {
                                     <span className="px-4 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
                                         {noticia.categoria}
                                     </span>
-                                    <span className="flex items-center text-gray-500 text-sm font-medium">
+                                    <span className="flex items-center text-brand-muted text-sm font-medium">
                                         <Calendar className="mr-2" size={16} />
                                         {new Date(noticia.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                                     </span>
@@ -48,7 +48,7 @@ export default function NoticiaDetail({ noticia }) {
                     </section>
 
                     {/* Article Content */}
-                    <section className="py-12 md:py-20 bg-white">
+                    <section className="py-12 md:py-20 bg-card-fap">
                         <div className="max-w-4xl mx-auto px-6 md:px-8">
                             {noticia.resumen && (
                                 <div className="mb-12 p-8 bg-surface-container/30 rounded-3xl border-l-4 border-primary italic text-xl text-gray-600 leading-relaxed font-serif">
@@ -61,14 +61,14 @@ export default function NoticiaDetail({ noticia }) {
                                 dangerouslySetInnerHTML={{ __html: noticia.contenido }}
                             />
 
-                            <div className="mt-16 pt-8 border-t border-gray-100 flex justify-between items-center">
+                            <div className="mt-16 pt-8 border-t border-brand flex justify-between items-center">
                                 <div className="flex items-center gap-4">
-                                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Compartir:</span>
-                                    <button className="p-2 rounded-full hover:bg-gray-100 transition-colors"><Share2 size={20} className="text-gray-500" /></button>
+                                    <span className="text-sm font-bold text-brand-muted uppercase tracking-widest">Compartir:</span>
+                                    <button className="p-2 rounded-full hover:bg-brand/10 transition-colors"><Share2 size={20} className="text-brand-muted" /></button>
                                 </div>
                                 <Link 
                                     href={route('noticias.index')}
-                                    className="px-8 py-3 rounded-full bg-gray-50 text-gray-600 font-bold hover:bg-primary/10 hover:text-primary transition-all"
+                                    className="px-8 py-3 rounded-full bg-brand/5 text-gray-600 font-bold hover:bg-primary/10 hover:text-primary transition-all"
                                 >
                                     Más Noticias
                                 </Link>

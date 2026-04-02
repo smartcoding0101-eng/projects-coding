@@ -4,14 +4,14 @@ import { Head, Link, router } from '@inertiajs/react';
 import { FileText, Search, CreditCard, Filter, XCircle } from 'lucide-react';
 
 const tipoBadgeColor = {
-    'aporte': 'bg-fapclas-50 text-emerald-700 border-emerald-200',
-    'retiro': 'bg-fapclas-50 text-red-700 border-red-200',
-    'desembolso_credito': 'bg-fapclas-50 text-blue-700 border-blue-200',
-    'pago_cuota': 'bg-fapclas-50 text-purple-700 border-purple-200',
-    'interes_ganado': 'bg-fapclas-50 text-teal-700 border-teal-200',
-    'compra_convenio': 'bg-fapclas-50 text-pink-700 border-pink-200',
-    'ajuste': 'bg-fapclas-50 text-gray-700 border-gray-200',
-    'mora': 'bg-fapclas-50 text-red-800 border-red-300 font-bold',
+    'aporte': 'bg-brand/10 text-emerald-700 border-emerald-200',
+    'retiro': 'bg-brand/10 text-red-700 border-red-500/50',
+    'desembolso_credito': 'bg-brand/10 text-blue-700 border-blue-200',
+    'pago_cuota': 'bg-brand/10 text-purple-700 border-purple-200',
+    'interes_ganado': 'bg-brand/10 text-teal-700 border-teal-200',
+    'compra_convenio': 'bg-brand/10 text-pink-700 border-pink-200',
+    'ajuste': 'bg-brand/10 text-gray-700 border-brand',
+    'mora': 'bg-brand/10 text-red-800 border-red-300 font-bold',
 };
 
 export default function Index({ auth, movimientos, resumen, socio, socios, filtros, tiposMovimiento }) {
@@ -41,31 +41,31 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Módulo de Kardex</h2>}
+            header={<h2 className="font-semibold text-xl text-brand-main leading-tight">Módulo de Kardex</h2>}
         >
             <Head title="Kardex" />
 
-            <div className="py-8 bg-[#f8faf6] min-h-screen">
+            <div className="py-8 bg-main min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
                     
                     {/* ══════════ ENCABEZADO Y KPI BAR ══════════ */}
-                    <div className="bg-white border border-fapclas-200 shadow-sm rounded-lg overflow-hidden">
-                        <div className="px-5 py-4 border-b border-fapclas-100 bg-[#fafaf6] flex items-center justify-between">
+                    <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden">
+                        <div className="px-5 py-4 border-b border-brand bg-card-fap flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <FileText className="w-5 h-5 text-fapclas-600" />
+                                <FileText className="w-5 h-5 text-primary" />
                                 <div>
-                                    <h3 className="text-sm font-bold text-fapclas-900 uppercase tracking-wide">
+                                    <h3 className="text-sm font-bold text-brand-main uppercase tracking-wide">
                                         Libreta Kardex de Movimientos
                                     </h3>
-                                    <p className="text-[11px] text-fapclas-500 font-medium">
-                                        Historial detallado de operaciones financieras para <strong className="text-fapclas-800">{socio.name}</strong>
+                                    <p className="text-[11px] text-brand-muted font-medium">
+                                        Historial detallado de operaciones financieras para <strong className="text-brand-main">{socio.name}</strong>
                                     </p>
                                 </div>
                             </div>
                         </div>
                         
                         {/* Datos del Socio Compactos */}
-                        <div className="flex flex-wrap items-center gap-4 md:gap-8 px-5 py-3 border-b border-fapclas-50 bg-[#fdfdfc]">
+                        <div className="flex flex-wrap items-center gap-4 md:gap-8 px-5 py-3 border-b border-brand bg-card-fap">
                             <SocioData label="Rótulo / Nombre" value={socio.name} highlight />
                             <SocioData label="C.I." value={socio.ci || '—'} />
                             <SocioData label="Grado" value={socio.grado || '—'} />
@@ -74,19 +74,19 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                         </div>
 
                         {/* KPI Bar */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-fapclas-100">
+                        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-brand">
                             <KpiItem label="Total Ingresos" value={`Bs. ${Number(resumen.total_ingresos).toFixed(2)}`} color="text-emerald-700" />
                             <KpiItem label="Total Egresos" value={`Bs. ${Number(resumen.total_egresos).toFixed(2)}`} color="text-red-600" />
-                            <KpiItem label="Saldo Actual Cta." value={`Bs. ${Number(resumen.saldo_actual).toFixed(2)}`} color="text-fapclas-800" highlight />
-                            <KpiItem label="Movimientos Auditados" value={resumen.total_movimientos} color="text-fapclas-600" />
+                            <KpiItem label="Saldo Actual Cta." value={`Bs. ${Number(resumen.saldo_actual).toFixed(2)}`} color="text-brand-main" highlight />
+                            <KpiItem label="Movimientos Auditados" value={resumen.total_movimientos} color="text-primary" />
                         </div>
                     </div>
 
                     {/* ══════════ TOOLBAR: Filtros ══════════ */}
-                    <div className="bg-white border border-fapclas-200 shadow-sm rounded-lg p-3 flex flex-col md:flex-row items-end gap-3">
+                    <div className="bg-card-fap border border-brand shadow-sm rounded-lg p-3 flex flex-col md:flex-row items-end gap-3">
                         {isAdmin && socios.length > 0 && (
                             <div className="w-full md:w-64">
-                                <label className="block text-[10px] font-bold text-fapclas-400 uppercase tracking-wider mb-1">Buscar Socio</label>
+                                <label className="block text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">Buscar Socio</label>
                                 <select
                                     className="field-input text-xs"
                                     value={filters.socio_id}
@@ -100,7 +100,7 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                             </div>
                         )}
                         <div className="w-full md:w-48">
-                            <label className="block text-[10px] font-bold text-fapclas-400 uppercase tracking-wider mb-1">Tipo Movimiento</label>
+                            <label className="block text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">Tipo Movimiento</label>
                             <select
                                 className="field-input text-xs"
                                 value={filters.tipo}
@@ -113,7 +113,7 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                             </select>
                         </div>
                         <div className="w-full md:w-40">
-                            <label className="block text-[10px] font-bold text-fapclas-400 uppercase tracking-wider mb-1">Desde Fecha</label>
+                            <label className="block text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">Desde Fecha</label>
                             <input
                                 type="date"
                                 className="field-input text-xs"
@@ -122,7 +122,7 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                             />
                         </div>
                         <div className="w-full md:w-40">
-                            <label className="block text-[10px] font-bold text-fapclas-400 uppercase tracking-wider mb-1">Hasta Fecha</label>
+                            <label className="block text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">Hasta Fecha</label>
                             <input
                                 type="date"
                                 className="field-input text-xs"
@@ -133,13 +133,13 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                         <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
                             <button
                                 onClick={applyFilters}
-                                className="px-4 py-2 bg-fapclas-800 text-white text-xs font-bold rounded flex items-center gap-1.5 hover:bg-fapclas-900 transition-colors h-[38px] shadow-sm active:translate-y-px"
+                                className="px-4 py-2 bg-primary text-white text-xs font-bold rounded flex items-center gap-1.5 hover:bg-primary-dark transition-colors h-[38px] shadow-sm active:translate-y-px"
                             >
                                 <Search className="w-3.5 h-3.5" /> Filtrar
                             </button>
                             <button
                                 onClick={clearFilters}
-                                className="px-3 py-2 bg-white border border-fapclas-200 text-fapclas-500 hover:text-fapclas-700 hover:bg-fapclas-50 text-xs font-bold rounded flex items-center gap-1.5 transition-colors h-[38px] active:translate-y-px"
+                                className="px-3 py-2 bg-card-fap border border-brand text-brand-muted hover:text-primary hover:bg-brand/10 text-xs font-bold rounded flex items-center gap-1.5 transition-colors h-[38px] active:translate-y-px"
                                 title="Limpiar Filtros"
                             >
                                 <XCircle className="w-3.5 h-3.5" />
@@ -148,23 +148,23 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                     </div>
 
                     {/* ══════════ GRILLA DE DETALLE KARDEX ══════════ */}
-                    <div className="bg-white border border-fapclas-200 shadow-sm rounded-lg overflow-hidden">
+                    <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
-                                <thead className="bg-[#fafaf6] border-b border-fapclas-200">
+                                <thead className="bg-card-fap border-b border-brand">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-fapclas-500 uppercase tracking-wider w-24">Fecha</th>
-                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-fapclas-500 uppercase tracking-wider w-36">Tipo</th>
-                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-fapclas-500 uppercase tracking-wider">Concepto</th>
-                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-fapclas-500 uppercase tracking-wider w-32 border-l border-fapclas-100">Ingreso (Bs)</th>
-                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-fapclas-500 uppercase tracking-wider w-32">Egreso (Bs)</th>
-                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-fapclas-500 uppercase tracking-wider w-36 bg-[#fdfdfc] border-l border-fapclas-100 shadow-[inset_1px_0_0_rgba(0,0,0,0.02)]">Saldo Total</th>
+                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-brand-muted uppercase tracking-wider w-24">Fecha</th>
+                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-brand-muted uppercase tracking-wider w-36">Tipo</th>
+                                        <th className="px-4 py-3 text-left text-[10px] font-bold text-brand-muted uppercase tracking-wider">Concepto</th>
+                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-brand-muted uppercase tracking-wider w-32 border-l border-brand">Ingreso (Bs)</th>
+                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-brand-muted uppercase tracking-wider w-32">Egreso (Bs)</th>
+                                        <th className="px-4 py-3 text-right text-[10px] font-bold text-brand-muted uppercase tracking-wider w-36 bg-card-fap border-l border-brand shadow-[inset_1px_0_0_rgba(0,0,0,0.02)]">Saldo Total</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-fapclas-100">
+                                <tbody className="divide-y divide-brand">
                                     {movimientos.data?.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-fapclas-400 bg-fapclas-50/30">
+                                            <td colSpan="6" className="px-6 py-12 text-center text-brand-muted bg-brand/10">
                                                 <Filter className="w-8 h-8 mx-auto mb-3 text-fapclas-300 opacity-50" />
                                                 <p className="text-sm font-bold uppercase tracking-wider">No se encontraron movimientos</p>
                                                 <p className="text-[11px] mt-1">Intente cambiar los parámetros del filtro.</p>
@@ -172,25 +172,25 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                                         </tr>
                                     ) : (
                                         movimientos.data?.map((mov) => (
-                                            <tr key={mov.id} className="hover:bg-fapclas-50/60 transition-colors">
-                                                <td className="px-4 py-2.5 text-xs text-fapclas-500 font-medium whitespace-nowrap">
+                                            <tr key={mov.id} className="hover:bg-brand/10 transition-colors">
+                                                <td className="px-4 py-2.5 text-xs text-brand-muted font-medium whitespace-nowrap">
                                                     {mov.fecha}
                                                 </td>
                                                 <td className="px-4 py-2.5 whitespace-nowrap">
-                                                    <span className={`inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border rounded ${tipoBadgeColor[mov.tipo_movimiento] || 'bg-fapclas-50 text-fapclas-600 border-fapclas-200'}`}>
+                                                    <span className={`inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border rounded ${tipoBadgeColor[mov.tipo_movimiento] || 'bg-brand/10 text-primary border-brand'}`}>
                                                         {tiposMovimiento[mov.tipo_movimiento] || mov.tipo_movimiento}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-2.5 text-xs text-fapclas-900 font-medium truncate max-w-[250px]">
+                                                <td className="px-4 py-2.5 text-xs text-brand-main font-medium truncate max-w-[250px]">
                                                     {mov.concepto}
                                                 </td>
-                                                <td className="px-4 py-2.5 text-xs text-right font-bold text-emerald-700 border-l border-fapclas-50">
+                                                <td className="px-4 py-2.5 text-xs text-right font-bold text-emerald-700 border-l border-brand">
                                                     {Number(mov.ingreso) > 0 ? Number(mov.ingreso).toLocaleString('en-US', { minimumFractionDigits: 2 }) : ''}
                                                 </td>
                                                 <td className="px-4 py-2.5 text-xs text-right font-bold text-red-600">
                                                     {Number(mov.egreso) > 0 ? Number(mov.egreso).toLocaleString('en-US', { minimumFractionDigits: 2 }) : ''}
                                                 </td>
-                                                <td className="px-4 py-2.5 text-xs text-right font-bold text-fapclas-950 bg-[#fdfdfc] border-l border-fapclas-100 shadow-[inset_1px_0_0_rgba(0,0,0,0.02)]">
+                                                <td className="px-4 py-2.5 text-xs text-right font-bold text-fapclas-950 bg-card-fap border-l border-brand shadow-[inset_1px_0_0_rgba(0,0,0,0.02)]">
                                                     {Number(mov.saldo_acumulado).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                 </td>
                                             </tr>
@@ -202,8 +202,8 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
 
                         {/* Paginación Lineal */}
                         {movimientos.links && movimientos.links.length > 3 && (
-                            <div className="px-4 py-3 border-t border-fapclas-100 bg-[#fafaf6] flex items-center justify-between">
-                                <p className="text-[11px] text-fapclas-500 font-semibold uppercase tracking-wider">
+                            <div className="px-4 py-3 border-t border-brand bg-card-fap flex items-center justify-between">
+                                <p className="text-[11px] text-brand-muted font-semibold uppercase tracking-wider">
                                     Mostrando {movimientos.from} – {movimientos.to} de {movimientos.total} registros
                                 </p>
                                 <div className="flex gap-1">
@@ -213,10 +213,10 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
                                             href={link.url || '#'}
                                             className={`px-2.5 py-1 text-xs font-bold rounded border ${
                                                 link.active
-                                                    ? 'bg-fapclas-800 text-white border-fapclas-800'
+                                                    ? 'bg-primary text-white border-brand'
                                                     : link.url
-                                                        ? 'bg-white text-fapclas-600 border-fapclas-200 hover:bg-fapclas-50'
-                                                        : 'bg-[#fafaf6] text-fapclas-300 border-fapclas-100 cursor-not-allowed hidden md:block'
+                                                        ? 'bg-card-fap text-primary border-brand hover:bg-brand/10'
+                                                        : 'bg-card-fap text-fapclas-300 border-brand cursor-not-allowed hidden md:block'
                                             }`}
                                             preserveState
                                             dangerouslySetInnerHTML={{ __html: link.label }}
@@ -235,16 +235,16 @@ export default function Index({ auth, movimientos, resumen, socio, socios, filtr
 function SocioData({ label, value, highlight }) {
     return (
         <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-fapclas-400 uppercase tracking-wide">{label}</span>
-            <span className={`text-xs ${highlight ? 'font-bold text-fapclas-900' : 'font-medium text-fapclas-700'}`}>{value}</span>
+            <span className="text-[9px] font-bold text-brand-muted uppercase tracking-wide">{label}</span>
+            <span className={`text-xs ${highlight ? 'font-bold text-brand-main' : 'font-medium text-primary'}`}>{value}</span>
         </div>
     );
 }
 
 function KpiItem({ label, value, color, highlight }) {
     return (
-        <div className={`p-4 ${highlight ? 'bg-[#fdfdfc] shadow-[inset_0_-2px_0_rgba(72,107,44,0.1)]' : ''}`}>
-            <p className="text-[9px] font-bold text-fapclas-400 uppercase tracking-widest mb-1.5">{label}</p>
+        <div className={`p-4 ${highlight ? 'bg-card-fap shadow-[inset_0_-2px_0_rgba(72,107,44,0.1)]' : ''}`}>
+            <p className="text-[9px] font-bold text-brand-muted uppercase tracking-widest mb-1.5">{label}</p>
             <p className={`text-lg md:text-xl font-extrabold ${color}`}>{value}</p>
         </div>
     );

@@ -40,7 +40,7 @@ function KpiCard({ label, value, icon, iconBg, trend, warn }) {
         <div className={`relative overflow-hidden bg-card-fap border rounded-xl p-5 flex items-center gap-4 transition-shadow hover:shadow-md ${warn ? 'border-red-500/30' : 'border-brand'}`}>
             {/* Accent stripe */}
             <div className={`absolute top-0 left-0 h-0.5 w-full ${warn ? 'bg-red-500' : 'bg-primary'}`} />
-            <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${iconBg || 'bg-white/5'}`}>
+            <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${iconBg || 'bg-card-fap/5'}`}>
                 {icon}
             </div>
             <div className="flex-1 min-w-0">
@@ -99,7 +99,7 @@ function EvaluarModal({ credito, onClose }) {
                             { val: 'Aprobado', label: 'Aprobar', Icon: CheckCircle2, cls: 'border-emerald-500 bg-emerald-50 text-emerald-700' },
                             { val: 'Rechazado', label: 'Rechazar', Icon: XCircle, cls: 'border-red-500 bg-red-50 text-red-700' },
                         ].map(({ val, label, Icon, cls }) => (
-                            <label key={val} className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 cursor-pointer font-bold text-sm transition-all ${data.estado === val ? cls : 'border-gray-200 text-gray-400 hover:border-gray-300'}`}>
+                            <label key={val} className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 cursor-pointer font-bold text-sm transition-all ${data.estado === val ? cls : 'border-brand text-brand-muted hover:border-brand'}`}>
                                 <input type="radio" name="eval" value={val} checked={data.estado === val} onChange={() => setData('estado', val)} className="sr-only" />
                                 <Icon className="w-4 h-4" /> {label}
                             </label>
@@ -107,7 +107,7 @@ function EvaluarModal({ credito, onClose }) {
                     </div>
                     {data.estado === 'Aprobado' && (
                         <div>
-                            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Monto Final Aprobado (Bs.)</label>
+                            <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-1">Monto Final Aprobado (Bs.)</label>
                             <input type="number"
                                 className="field-input font-bold"
                                 value={data.monto_aprobado} onChange={e => setData('monto_aprobado', e.target.value)} />
@@ -119,7 +119,7 @@ function EvaluarModal({ credito, onClose }) {
                             rows="2" placeholder="Observaciones resolutivas..." value={data.observaciones} onChange={e => setData('observaciones', e.target.value)} />
                     </div>
                     <div className="flex justify-end gap-3 pt-1">
-                        <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancelar</button>
+                        <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-semibold text-gray-600 border border-brand rounded-lg hover:bg-brand/5">Cancelar</button>
                         <button type="submit" disabled={processing}
                             className={`px-6 py-2.5 text-sm font-bold text-white rounded-lg shadow-sm transition-colors disabled:opacity-50 ${data.estado === 'Aprobado' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}>
                             {processing ? 'Procesando...' : 'Confirmar Resolución'}
@@ -218,7 +218,7 @@ export default function Index({ auth, creditos }) {
                             <span className="font-extrabold text-brand-main text-sm tracking-tight transition-colors">
                                 {isAdmin ? 'Gestión de Cartera Crediticia' : 'Mis Créditos'}
                             </span>
-                            <span className="h-4 w-px bg-white/20" />
+                            <span className="h-4 w-px bg-card-fap/20" />
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full ring-1 ring-primary/20">
                                 <PieChart className="w-3 h-3" />
                                 {creditos.length} registros
@@ -242,7 +242,7 @@ export default function Index({ auth, creditos }) {
                     <div className="bg-card-fap rounded-2xl border border-brand shadow-sm overflow-hidden">
 
                         {/* Toolbar */}
-                        <div className="px-5 py-3.5 border-b border-brand flex items-center justify-between gap-4 bg-white/[0.02]">
+                        <div className="px-5 py-3.5 border-b border-brand flex items-center justify-between gap-4 bg-card-fap/[0.02]">
                             <div className="flex items-center gap-2.5 flex-1">
                                 {/* Search */}
                                     <div className="relative flex-1 max-w-sm">
@@ -257,7 +257,7 @@ export default function Index({ auth, creditos }) {
                                     </div>
                                 {/* Filter */}
                                 <div className="relative">
-                                    <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                    <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted pointer-events-none" />
                                     <select
                                         className="appearance-none pl-8 pr-7 py-2 text-sm border border-brand rounded-lg bg-main focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none text-brand-main font-bold cursor-pointer transition-all"
                                         value={filterEstado}
@@ -270,11 +270,11 @@ export default function Index({ auth, creditos }) {
                                         <option value="Pagado">Pagado</option>
                                         <option value="Rechazado">Rechazado</option>
                                     </select>
-                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted pointer-events-none" />
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <span className="text-[11px] text-gray-400 font-semibold whitespace-nowrap">
+                                <span className="text-[11px] text-brand-muted font-semibold whitespace-nowrap">
                                     {filteredCreditos.length} resultado{filteredCreditos.length !== 1 ? 's' : ''}
                                 </span>
                                 <Link
@@ -290,7 +290,7 @@ export default function Index({ auth, creditos }) {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-brand bg-white/[0.04]">
+                                    <tr className="border-b border-brand bg-card-fap/[0.04]">
                                         {[
                                             { label: '#', cls: 'w-14 text-left' },
                                             { label: 'Fecha', cls: 'text-left' },
@@ -315,7 +315,7 @@ export default function Index({ auth, creditos }) {
                                             initial={{ opacity: 0, x: -4 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.02 }}
-                                            className="border-b border-brand hover:bg-white/[0.03] transition-colors group relative bg-card-fap"
+                                            className="border-b border-brand hover:bg-card-fap/[0.03] transition-colors group relative bg-card-fap"
                                         >
                                             {/* ID con acento lateral en hover */}
                                             <td className="px-4 py-3">
@@ -343,7 +343,7 @@ export default function Index({ auth, creditos }) {
                                                     {isAdmin && credito.estado === 'Solicitado' && <EvaluarSolicitudBtn credito={credito} />}
                                                     <Link
                                                         href={route('creditos.show', credito.id)}
-                                                        className="p-1.5 text-gray-400 hover:text-[#28361d] hover:bg-[#f2f6ee] rounded-lg transition-colors"
+                                                        className="p-1.5 text-brand-muted hover:text-[#28361d] hover:bg-[#f2f6ee] rounded-lg transition-colors"
                                                         title="Ver expediente"
                                                     >
                                                         <Eye className="w-4 h-4" />
@@ -356,7 +356,7 @@ export default function Index({ auth, creditos }) {
                                     {filteredCreditos.length === 0 && (
                                         <tr>
                                             <td colSpan={isAdmin ? 10 : 8} className="px-4 py-16 text-center">
-                                                <div className="flex flex-col items-center gap-3 text-gray-400">
+                                                <div className="flex flex-col items-center gap-3 text-brand-muted">
                                                     <Search className="w-10 h-10 text-gray-200" />
                                                     <p className="text-sm font-semibold">No se encontraron créditos</p>
                                                     <p className="text-xs">Ajusta los filtros o el término de búsqueda</p>
@@ -369,8 +369,8 @@ export default function Index({ auth, creditos }) {
                         </div>
 
                         {/* Footer */}
-                        <div className="px-5 py-3 border-t border-brand flex items-center justify-between bg-white/[0.02]">
-                            <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+                        <div className="px-5 py-3 border-t border-brand flex items-center justify-between bg-card-fap/[0.02]">
+                            <div className="flex items-center gap-2 text-[11px] text-brand-muted font-medium">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                 {filteredCreditos.length} de {creditos.length} registros · Datos sincronizados
                             </div>

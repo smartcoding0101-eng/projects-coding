@@ -4,11 +4,16 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function UpdatePasswordForm({ className = '' }) {
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
+
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
     const {
         data,
@@ -47,7 +52,7 @@ export default function UpdatePasswordForm({ className = '' }) {
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-brand-main">
                     Update Password
                 </h2>
 
@@ -64,17 +69,26 @@ export default function UpdatePasswordForm({ className = '' }) {
                         value="Current Password"
                     />
 
-                    <TextInput
-                        id="current_password"
-                        ref={currentPasswordInput}
-                        value={data.current_password}
-                        onChange={(e) =>
-                            setData('current_password', e.target.value)
-                        }
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="current_password"
+                            ref={currentPasswordInput}
+                            value={data.current_password}
+                            onChange={(e) =>
+                                setData('current_password', e.target.value)
+                            }
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            className="block w-full pr-10"
+                            autoComplete="current-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-brand-muted hover:text-gray-600 transition-colors focus:outline-none"
+                        >
+                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
 
                     <InputError
                         message={errors.current_password}
@@ -85,15 +99,24 @@ export default function UpdatePasswordForm({ className = '' }) {
                 <div>
                     <InputLabel htmlFor="password" value="New Password" />
 
-                    <TextInput
-                        id="password"
-                        ref={passwordInput}
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password"
+                            ref={passwordInput}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            type={showPassword ? 'text' : 'password'}
+                            className="block w-full pr-10"
+                            autoComplete="new-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-brand-muted hover:text-gray-600 transition-colors focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
@@ -104,16 +127,25 @@ export default function UpdatePasswordForm({ className = '' }) {
                         value="Confirm Password"
                     />
 
-                    <TextInput
-                        id="password_confirmation"
-                        value={data.password_confirmation}
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password_confirmation"
+                            value={data.password_confirmation}
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
+                            type={showPasswordConfirm ? 'text' : 'password'}
+                            className="block w-full pr-10"
+                            autoComplete="new-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-brand-muted hover:text-gray-600 transition-colors focus:outline-none"
+                        >
+                            {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
 
                     <InputError
                         message={errors.password_confirmation}

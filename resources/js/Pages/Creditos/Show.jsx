@@ -74,7 +74,7 @@ export default function Show({ auth, credito, planPagos }) {
                                 <a 
                                     href={`/creditos/${credito.id}/exportar`} 
                                     target="_blank"
-                                    className="px-4 py-2 text-xs font-semibold text-brand-muted border border-brand rounded-md hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                    className="px-4 py-2 text-xs font-semibold text-brand-muted border border-brand rounded-md hover:bg-card-fap/5 flex items-center gap-2 transition-colors"
                                 >
                                     <Download className="w-3.5 h-3.5" /> XLS
                                 </a>
@@ -117,7 +117,7 @@ export default function Show({ auth, credito, planPagos }) {
                     {/* ══════════ PLAN DE PAGOS (TABLE) ══════════ */}
                     <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden">
                         <div className="h-0.5 bg-primary" />
-                        <div className="px-5 py-4 border-b border-brand flex items-center justify-between bg-white/[0.04]">
+                        <div className="px-5 py-4 border-b border-brand flex items-center justify-between bg-card-fap/[0.04]">
                             <h3 className="text-sm font-extrabold text-brand-main flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-primary" /> Plan de Amortización Mensual
                             </h3>
@@ -128,15 +128,15 @@ export default function Show({ auth, credito, planPagos }) {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b border-brand bg-white/[0.04]">
+                                        <tr className="border-b border-brand bg-card-fap/[0.04]">
                                             <th className="text-center px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider w-16">Nº</th>
                                             <th className="text-left px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider">Vencimiento</th>
                                             <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider">Saldo Inicial</th>
                                             <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider">Capital</th>
                                             <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider">Interés</th>
-                                            <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider bg-white/[0.02]">Cuota Base</th>
+                                            <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider bg-card-fap/[0.02]">Cuota Base</th>
                                             <th className="text-right px-4 py-2.5 text-[10px] font-bold text-red-500 uppercase tracking-wider">Mora</th>
-                                            <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-main uppercase tracking-wider bg-white/[0.05]">Total a Pagar</th>
+                                            <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-main uppercase tracking-wider bg-card-fap/[0.05]">Total a Pagar</th>
                                             <th className="text-center px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider">Estado</th>
                                             {isAdmin && <th className="text-right px-4 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-wider w-24">Cobro</th>}
                                         </tr>
@@ -186,7 +186,7 @@ export default function Show({ auth, credito, planPagos }) {
                                         })}
                                     </tbody>
                                     <tfoot>
-                                        <tr className="border-t-2 border-primary bg-white/[0.04]">
+                                        <tr className="border-t-2 border-primary bg-card-fap/[0.04]">
                                             <td colSpan="3" className="px-4 py-3 text-right text-xs font-bold text-brand-main uppercase">Totales Proyectados</td>
                                             <td className="px-4 py-3 text-right text-sm font-bold text-brand-main font-mono">
                                                 {Number(credito.monto_aprobado).toLocaleString('es-BO', {minimumFractionDigits: 2})}
@@ -194,13 +194,13 @@ export default function Show({ auth, credito, planPagos }) {
                                             <td className="px-4 py-3 text-right text-sm font-bold text-brand-main font-mono">
                                                 {planPagos.reduce((sum, p) => sum + Number(p.interes), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-sm font-bold text-brand-main bg-white/[0.02] font-mono">
+                                            <td className="px-4 py-3 text-right text-sm font-bold text-brand-main bg-card-fap/[0.02] font-mono">
                                                 {planPagos.reduce((sum, p) => sum + Number(p.cuota_total), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
                                             <td className="px-4 py-3 text-right text-sm font-bold text-red-600 font-mono">
                                                 {planPagos.reduce((sum, p) => sum + Number(p.monto_mora || 0), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-main bg-white/[0.06] font-mono">
+                                            <td className="px-4 py-3 text-right text-sm font-black text-brand-main bg-card-fap/[0.06] font-mono">
                                                 {planPagos.reduce((sum, p) => sum + Number(p.cuota_total) + Number(p.monto_mora || 0), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
                                             <td colSpan={isAdmin ? 2 : 1}></td>
@@ -250,7 +250,7 @@ function StatusTag({ estado }) {
         'Desembolsado': { bg: 'bg-emerald-500/10', text: 'text-emerald-500', ring: 'ring-emerald-500/20',  dot: 'bg-emerald-500' },
         'En Mora':      { bg: 'bg-red-500/10',     text: 'text-red-500',     ring: 'ring-red-500/20',      dot: 'bg-red-500' },
         'Pagado':       { bg: 'bg-primary/10',     text: 'text-primary',     ring: 'ring-primary/20',      dot: 'bg-primary' },
-        'Rechazado':    { bg: 'bg-white/10',      text: 'text-brand-muted', ring: 'ring-white/20',       dot: 'bg-white/30' },
+        'Rechazado':    { bg: 'bg-card-fap/10',      text: 'text-brand-muted', ring: 'ring-white/20',       dot: 'bg-card-fap/30' },
     };
     const s = cfg[estado] || cfg['Rechazado'];
     return (
@@ -330,7 +330,7 @@ function EvaluarModal({ credito, onClose }) {
                             rows="2" value={data.observaciones} onChange={e => setData('observaciones', e.target.value)} />
                     </div>
                     <div className="flex justify-end gap-3 pt-1">
-                        <button type="button" onClick={onClose} className="px-5 py-2.5 border border-brand bg-white/[0.04] rounded-lg text-sm font-semibold text-brand-muted hover:text-brand-main transition-colors">Cancelar</button>
+                        <button type="button" onClick={onClose} className="px-5 py-2.5 border border-brand bg-card-fap/[0.04] rounded-lg text-sm font-semibold text-brand-muted hover:text-brand-main transition-colors">Cancelar</button>
                         <button type="submit" disabled={processing}
                             className={`px-6 py-2.5 rounded-lg text-white text-sm font-bold shadow-sm transition-colors disabled:opacity-50 ${data.estado === 'Aprobado' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}>
                             {processing ? 'Procesando...' : 'Confirmar'}
@@ -398,7 +398,7 @@ function PagarModal({ cuota, credito, onClose }) {
                         </div>
                     </div>
                     <div className="flex gap-3 pt-1">
-                        <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-brand bg-white/[0.04] rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-main transition-colors">Cancelar</button>
+                        <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-brand bg-card-fap/[0.04] rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-main transition-colors">Cancelar</button>
                         <button type="submit" disabled={processing} className="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-emerald-700 disabled:opacity-50 transition-all">Procesar Ingreso</button>
                     </div>
                 </form>
@@ -420,7 +420,7 @@ function AnularCreditoBtn({ credito }) {
                             <h4 className="font-bold text-brand-main mb-2">Revertir Operación #{credito.id}</h4>
                             <p className="text-sm text-brand-muted mb-6">Esta acción anulará el préstamo de Bs. {Number(credito.monto_aprobado).toLocaleString()} y borrará su plan. Es definitivo.</p>
                             <div className="flex gap-3">
-                                <button onClick={() => setShow(false)} className="flex-1 py-2 text-sm border border-brand bg-white/[0.04] font-semibold text-brand-muted rounded-md transition-colors">Cancelar</button>
+                                <button onClick={() => setShow(false)} className="flex-1 py-2 text-sm border border-brand bg-card-fap/[0.04] font-semibold text-brand-muted rounded-md transition-colors">Cancelar</button>
                                 <button onClick={() => { router.delete(route('creditos.destroy', credito.id)); setShow(false); }} className="flex-1 py-2 text-sm font-bold bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Anular</button>
                             </div>
                         </motion.div>

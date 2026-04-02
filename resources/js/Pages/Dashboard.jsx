@@ -21,7 +21,7 @@ export default function Dashboard({ auth, metrics, actividadReciente }) {
 
                     {/* ══════════ ENCABEZADO ESTRUCTURAL (Sin tarjetas flotantes) ══════════ */}
                     <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden">
-                        <div className="p-4 border-b border-brand flex items-center justify-between bg-white/[0.02]">
+                        <div className="p-4 border-b border-brand flex items-center justify-between bg-card-fap/[0.02]">
                             <div className="flex items-center gap-3">
                                 {isAdmin ? <ShieldCheck className="w-5 h-5 text-primary" /> : <Wallet className="w-5 h-5 text-primary" />}
                                 <div>
@@ -65,7 +65,7 @@ export default function Dashboard({ auth, metrics, actividadReciente }) {
 
                     {/* ══════════ GRILLA DE DATOS (Actividad Reciente) ══════════ */}
                     <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden">
-                        <div className="px-4 py-3 border-b border-brand flex items-center justify-between bg-white/[0.02]">
+                        <div className="px-4 py-3 border-b border-brand flex items-center justify-between bg-card-fap/[0.02]">
                             <h3 className="text-xs font-bold text-brand-main uppercase tracking-wider flex items-center gap-2">
                                 <ArrowRightLeft className="w-4 h-4 text-primary" />
                                 {isAdmin ? 'Historial de Transacciones' : 'Mis Últimos Movimientos'}

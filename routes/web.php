@@ -88,20 +88,45 @@ Route::middleware('auth')->group(function () {
     Route::get('/reportes/morosidad', [App\Http\Controllers\ReporteController::class, 'morosidad'])->name('reportes.morosidad');
     Route::get('/reportes/estado-cuenta', [App\Http\Controllers\ReporteController::class, 'estadoCuenta'])->name('reportes.estado-cuenta');
     Route::get('/reportes/planilla', [App\Http\Controllers\ReporteController::class, 'planilla'])->name('reportes.planilla');
+    Route::get('/reportes/historico', [App\Http\Controllers\ReporteController::class, 'historico'])->name('reportes.historico');
+    Route::get('/reportes/recaudacion', [App\Http\Controllers\ReporteController::class, 'recaudacion'])->name('reportes.recaudacion');
+    Route::get('/reportes/ecommerce', [App\Http\Controllers\ReporteController::class, 'ecommerce'])->name('reportes.ecommerce');
+    Route::get('/reportes/caja', [App\Http\Controllers\ReporteController::class, 'caja'])->name('reportes.caja');
+    Route::get('/reportes/conciliacion-ecommerce', [App\Http\Controllers\ReporteController::class, 'conciliacionEcommerce'])->name('reportes.conciliacion-ecommerce');
 
     // Panel de Administración Central (Fase 4)
     Route::get('/admin/configuraciones', [App\Http\Controllers\ConfiguracionController::class, 'index'])->name('admin.configuraciones.index');
     Route::post('/admin/configuraciones', [App\Http\Controllers\ConfiguracionController::class, 'store'])->name('admin.configuraciones.store');
+    Route::post('/admin/configuraciones/upload-media', [App\Http\Controllers\ConfiguracionController::class, 'uploadMedia'])->name('admin.configuraciones.media.upload');
 
+    // Módulo de Roles y Matriz de Privilegios
     Route::get('/admin/roles', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.roles.index');
     Route::post('/admin/roles', [App\Http\Controllers\Admin\RoleController::class, 'store'])->name('admin.roles.store');
     Route::put('/admin/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('admin.roles.update');
     Route::delete('/admin/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('admin.roles.destroy');
+    
+    Route::resource('/admin/privilegios', App\Http\Controllers\Admin\PrivilegioController::class)->names('admin.privilegios');
 
     Route::get('/admin/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('admin.users.store');
     Route::put('/admin/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/admin/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Módulo de Personas / Afiliados
+    Route::get('/admin/personas', [App\Http\Controllers\Admin\PersonaController::class, 'index'])->name('admin.personas.index');
+    Route::post('/admin/personas', [App\Http\Controllers\Admin\PersonaController::class, 'store'])->name('admin.personas.store');
+    Route::put('/admin/personas/{persona}', [App\Http\Controllers\Admin\PersonaController::class, 'update'])->name('admin.personas.update');
+    Route::delete('/admin/personas/{persona}', [App\Http\Controllers\Admin\PersonaController::class, 'destroy'])->name('admin.personas.destroy');
+    Route::post('/admin/personas/{persona}/promote', [App\Http\Controllers\Admin\PersonaController::class, 'promote'])->name('admin.personas.promote');
+    Route::get('/admin/personas/{persona}/kardex-pdf', [App\Http\Controllers\Admin\PersonaController::class, 'kardexPdf'])->name('admin.personas.kardex-pdf');
+    Route::get('/admin/personas/{persona}/kardex-excel', [App\Http\Controllers\Admin\PersonaController::class, 'kardexExcel'])->name('admin.personas.kardex-excel');
+
+    // Módulo de Caja General (Fase 8)
+    Route::get('/admin/caja', [App\Http\Controllers\Admin\CajaController::class, 'index'])->name('admin.caja.index');
+    Route::post('/admin/caja/abrir', [App\Http\Controllers\Admin\CajaController::class, 'abrir'])->name('admin.caja.abrir');
+    Route::get('/admin/caja/{caja}', [App\Http\Controllers\Admin\CajaController::class, 'show'])->name('admin.caja.show');
+    Route::post('/admin/caja/{caja}/movimiento', [App\Http\Controllers\Admin\CajaController::class, 'registrarMovimiento'])->name('admin.caja.movimiento');
+    Route::post('/admin/caja/{caja}/cerrar', [App\Http\Controllers\Admin\CajaController::class, 'cerrar'])->name('admin.caja.cerrar');
 
     // Módulo Ecommerce (Fase 6 - Admin)
     Route::get('/admin/ecommerce/dashboard', [App\Http\Controllers\Admin\EcommerceDashboardController::class, 'index'])->name('admin.ecommerce.dashboard');
@@ -110,11 +135,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/ecommerce/inventario/{producto}/kardex', [App\Http\Controllers\Admin\InventarioController::class, 'kardex'])->name('admin.inventario.kardex');
     Route::post('/admin/ecommerce/inventario/{producto}/ajustar-stock', [App\Http\Controllers\Admin\InventarioController::class, 'ajustarStock'])->name('admin.inventario.ajustar');
     
+    // Categorías (Módulo Inventario)
+    Route::resource('/admin/ecommerce/categorias', App\Http\Controllers\Admin\CategoriaController::class)->names('admin.categorias');
+    
     Route::get('/admin/ecommerce/pedidos', [App\Http\Controllers\Admin\PedidoController::class, 'index'])->name('admin.pedidos.index');
     Route::get('/admin/ecommerce/pedidos/{pedido}', [App\Http\Controllers\Admin\PedidoController::class, 'show'])->name('admin.pedidos.show');
     Route::post('/admin/ecommerce/pedidos/{pedido}/validar', [App\Http\Controllers\Admin\PedidoController::class, 'validarPago'])->name('admin.pedidos.validar');
     Route::post('/admin/ecommerce/pedidos/{pedido}/rechazar', [App\Http\Controllers\Admin\PedidoController::class, 'rechazarPago'])->name('admin.pedidos.rechazar');
     Route::post('/admin/ecommerce/pedidos/{pedido}/entregar', [App\Http\Controllers\Admin\PedidoController::class, 'marcarEntregado'])->name('admin.pedidos.entregar');
+
+    // Reportes Ecommerce Avanzados
+    Route::get('/admin/ecommerce/reporte/movimientos', [App\Http\Controllers\Admin\EcommerceReporteController::class, 'movimientos'])->name('admin.ecommerce.reporte.movimientos');
 
     // Configuración Tienda
     Route::get('/admin/ecommerce/configuracion', [App\Http\Controllers\Admin\EcommerceConfigController::class, 'index'])->name('admin.ecommerce.config.index');
@@ -125,6 +156,7 @@ Route::middleware('auth')->group(function () {
 
     // Mantenimiento y Seguridad
     Route::post('/admin/backups/run', [App\Http\Controllers\BackupController::class, 'run'])->name('admin.backups.run');
+    Route::get('/admin/backups/download', [App\Http\Controllers\BackupController::class, 'download'])->name('admin.backups.download');
 });
 
 // ==========================================
@@ -140,3 +172,4 @@ Route::post('/beneficios/checkout', [App\Http\Controllers\EcommerceController::c
     Route::get('/pedidos/comprobante/{numero_orden}', [App\Http\Controllers\PDFController::class, 'comprobantePedido'])->name('pedidos.pdf');
 
 require __DIR__.'/auth.php';
+

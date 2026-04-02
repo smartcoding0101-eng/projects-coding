@@ -11,6 +11,14 @@ export default function AuthenticatedLayout({ header, children }) {
     const theme = user?.theme || user?.theme_preference || 'premium-olive';
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const isAdmin = user.roles?.includes('SuperAdmin');
+    const userPermissions = user.permissions || [];
+
+    // Helper: puede ver el item si es Admin, o si no requiere permisos, o si tiene ALGUNO de los permisos requeridos
+    const canView = (item) => {
+        if (isAdmin) return true;
+        if (!item.permissions || item.permissions.length === 0) return true;
+        return item.permissions.some(p => userPermissions.includes(p));
+    };
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -31,25 +39,28 @@ export default function AuthenticatedLayout({ header, children }) {
     ];
 
     const administrationItems = [
-        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*') },
-        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*') },
-        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*') },
-        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), adminOnly: true },
+        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*'), permissions: ['ver creditos', 'evaluar creditos'] },
+        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*'), permissions: ['ver libro diario'] },
+        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*'), permissions: ['ver kardex general'] },
+        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), permissions: ['ver reportes financieros'] },
+        { label: 'Caja', href: route('admin.caja.index'), active: route().current('admin.caja.*'), permissions: ['gestionar usuarios'] },
     ];
 
     const ecommerceItems = [
-        { label: 'Admin Dashboard', href: route('admin.ecommerce.dashboard'), active: route().current('admin.ecommerce.dashboard'), adminOnly: true },
-        { label: 'Tienda', href: route('beneficios.index'), active: route().current('beneficios.*') },
-        { label: 'Inventario', href: route('admin.inventario.index'), active: route().current('admin.inventario.*'), adminOnly: true },
-        { label: 'Pedidos Web', href: route('admin.pedidos.index'), active: route().current('admin.pedidos.*'), adminOnly: true },
-        { label: 'Configuración', href: route('admin.ecommerce.config.index'), active: route().current('admin.ecommerce.config.*'), adminOnly: true },
+        { label: 'Admin Dashboard', href: route('admin.ecommerce.dashboard'), active: route().current('admin.ecommerce.dashboard'), permissions: ['ver dashboard tienda'] },
+        { label: 'Tienda', href: route('beneficios.index'), active: route().current('beneficios.*') }, // Público a roles básicos
+        { label: 'Inventario', href: route('admin.inventario.index'), active: route().current('admin.inventario.*'), permissions: ['gestionar inventario tienda'] },
+        { label: 'Pedidos Web', href: route('admin.pedidos.index'), active: route().current('admin.pedidos.*'), permissions: ['evaluar pedidos ecommerce'] },
+        { label: 'Movimientos', href: route('admin.ecommerce.reporte.movimientos'), active: route().current('admin.ecommerce.reporte.movimientos'), permissions: ['ver dashboard tienda'] },
+        { label: 'Configuración', href: route('admin.ecommerce.config.index'), active: route().current('admin.ecommerce.config.*'), permissions: ['configurar parametros globales'] },
     ];
 
     const adjustmentsItems = [
-        { label: 'Usuarios', href: route('admin.users.index'), active: route().current('admin.users.*') },
-        { label: 'Roles', href: route('admin.roles.index'), active: route().current('admin.roles.*') },
-        { label: 'Global', href: route('admin.configuraciones.index'), active: route().current('admin.configuraciones.*') },
-        { label: 'Portal CMS', href: '/admin', active: false }, // Filament Path
+        { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['ver personas'] },
+        { label: 'Usuarios', href: route('admin.users.index'), active: route().current('admin.users.*'), permissions: ['gestionar usuarios'] },
+        { label: 'Roles', href: route('admin.roles.index'), active: route().current('admin.roles.*'), permissions: ['gestionar roles y permisos'] },
+        { label: 'Global', href: route('admin.configuraciones.index'), active: route().current('admin.configuraciones.*'), permissions: ['configurar parametros globales'] },
+        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'] }, 
     ];
 
     const ayudaItems = [
@@ -84,7 +95,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${
-                                            route().current('creditos.*') || route().current('libro-diario.*') || route().current('kardex.*') || route().current('reportes.*')
+                                            route().current('creditos.*') || route().current('libro-diario.*') || route().current('kardex.*') || route().current('reportes.*') || route().current('admin.caja.*')
                                                 ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
                                                 : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
                                         }`}>
@@ -93,7 +104,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </button>
                                     </Dropdown.Trigger>
                                     <Dropdown.Content align="left" width="48">
-                                        {administrationItems.filter(i => !i.adminOnly || isAdmin).map((item, idx) => (
+                                        {administrationItems.filter(canView).map((item, idx) => (
                                             <Dropdown.Link key={item.label} href={item.href}>
                                                 {idx + 1}. {item.label}
                                             </Dropdown.Link>
@@ -114,7 +125,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </button>
                                     </Dropdown.Trigger>
                                     <Dropdown.Content align="left" width="48">
-                                        {ecommerceItems.filter(i => !i.adminOnly || isAdmin).map((item, idx) => (
+                                        {ecommerceItems.filter(canView).map((item, idx) => (
                                             <Dropdown.Link key={item.label} href={item.href}>
                                                 {idx + 1}. {item.label}
                                             </Dropdown.Link>
@@ -122,21 +133,21 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Content>
                                 </Dropdown>
 
-                                {/* Ajustes Dropdown */}
-                                {isAdmin && (
+                                {/* Ajustes Dropdown (Visible si hay algún item disponible) */}
+                                {adjustmentsItems.some(canView) && (
                                     <Dropdown>
                                         <Dropdown.Trigger>
                                             <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${
-                                                route().current('admin.users.*') || route().current('admin.roles.*') || route().current('admin.configuraciones.*')
+                                                route().current('admin.users.*') || route().current('admin.roles.*') || route().current('admin.configuraciones.*') || route().current('admin.personas.*')
                                                     ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
                                                     : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
                                             }`}>
-                                                Ajustes
+                                                Ajustes y Core
                                                 <ChevronDown className="ml-2 h-4 w-4" />
                                             </button>
                                         </Dropdown.Trigger>
                                         <Dropdown.Content align="left" width="48" className="bg-card-fap border-brand">
-                                            {adjustmentsItems.map((item, idx) => (
+                                            {adjustmentsItems.filter(canView).map((item, idx) => (
                                                 <Dropdown.Link key={item.label} href={item.href} className="text-brand-main hover:bg-white/5">
                                                     {idx + 1}. {item.label}
                                                 </Dropdown.Link>
@@ -236,7 +247,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="px-4 text-xs font-semibold text-brand-muted uppercase tracking-wider">
                                 Administración
                             </div>
-                            {administrationItems.filter(i => !i.adminOnly || isAdmin).map((item, idx) => (
+                            {administrationItems.filter(canView).map((item, idx) => (
                                 <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
                                     {idx + 1}. {item.label}
                                 </ResponsiveNavLink>
@@ -248,7 +259,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="px-4 text-xs font-semibold text-brand-muted uppercase tracking-wider">
                                 Ecommerce
                             </div>
-                            {ecommerceItems.filter(i => !i.adminOnly || isAdmin).map((item, idx) => (
+                            {ecommerceItems.filter(canView).map((item, idx) => (
                                 <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
                                     {idx + 1}. {item.label}
                                 </ResponsiveNavLink>
@@ -256,10 +267,10 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         {/* Ajustes Móvil */}
-                        {isAdmin && (
+                        {adjustmentsItems.some(canView) && (
                             <div className="pt-4 pb-1 space-y-1 border-t border-brand">
-                                <div className="px-4 font-bold text-xs text-brand-muted uppercase tracking-wider">Ajustes</div>
-                                {adjustmentsItems.map((item, idx) => (
+                                <div className="px-4 font-bold text-xs text-brand-muted uppercase tracking-wider">Ajustes y Core</div>
+                                {adjustmentsItems.filter(canView).map((item, idx) => (
                                     <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
                                         {idx + 1}. {item.label}
                                     </ResponsiveNavLink>

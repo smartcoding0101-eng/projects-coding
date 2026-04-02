@@ -10,6 +10,7 @@ class CompraConvenio extends Model
     protected $table = 'compras_convenio';
     
     protected $fillable = [
+        'persona_id',
         'user_id',
         'beneficio_id',
         'monto_total',
@@ -17,6 +18,11 @@ class CompraConvenio extends Model
         'estado_pago',
         'codigo_transaccion_qr'
     ];
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
+    }
 
     public function user()
     {

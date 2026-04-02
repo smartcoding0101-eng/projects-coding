@@ -9,6 +9,7 @@ class Kardex extends Model
     protected $table = 'kardex';
 
     protected $fillable = [
+        'persona_id',
         'user_id',
         'fecha',
         'tipo_movimiento',
@@ -32,6 +33,11 @@ class Kardex extends Model
     }
 
     // ─── Relaciones ───
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
+    }
 
     public function user()
     {

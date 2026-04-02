@@ -51,7 +51,7 @@ function AdminLineasModal({ tipos, onClose }) {
             <div className="bg-card-fap rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-brand">
                 <div className="flex items-center justify-between px-6 py-4 bg-primary text-white shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white/10 rounded-lg">
+                        <div className="p-2 bg-card-fap/10 rounded-lg">
                             <Settings className="h-5 w-5 text-white/70" />
                         </div>
                         <div>
@@ -59,14 +59,14 @@ function AdminLineasModal({ tipos, onClose }) {
                             <p className="text-xs text-white/50 font-medium mt-0.5">Configuración de parámetros financieros para originación</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-1.5 text-white/60 hover:text-white hover:bg-card-fap/10 rounded-full transition-colors">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                     {view === 'list' ? (
                         <>
-                            <div className="flex justify-between items-center mb-6 bg-white/[0.03] p-3 rounded-xl border border-brand">
+                            <div className="flex justify-between items-center mb-6 bg-card-fap/[0.03] p-3 rounded-xl border border-brand">
                                 <div className="text-xs font-bold text-brand-muted uppercase flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-primary"></span> Catálogo Activo
                                 </div>
@@ -76,7 +76,7 @@ function AdminLineasModal({ tipos, onClose }) {
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="bg-white/[0.04] border-y border-brand">
+                                    <thead className="bg-card-fap/[0.04] border-y border-brand">
                                         <tr>
                                             {['Línea de Crédito', 'Tasa', 'Plazo (Meses)', 'Monto (Bs.)', 'Acciones'].map((h, i) => (
                                                 <th key={h} className={`py-3 px-4 text-[10px] font-black text-brand-muted uppercase tracking-widest ${i === 3 ? 'text-right' : i === 4 ? 'text-center' : ''}`}>{h}</th>
@@ -85,7 +85,7 @@ function AdminLineasModal({ tipos, onClose }) {
                                     </thead>
                                 <tbody>
                                     {(tipos || []).map(tipo => (
-                                        <tr key={tipo.id} className="border-b border-brand hover:bg-white/[0.03] transition-colors group relative">
+                                        <tr key={tipo.id} className="border-b border-brand hover:bg-card-fap/[0.03] transition-colors group relative">
                                             <td className="py-4 px-4">
                                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary transition-colors"></div>
                                                 <span className="font-bold text-brand-main">{tipo.nombre}</span>
@@ -107,8 +107,8 @@ function AdminLineasModal({ tipos, onClose }) {
                             </div>
                         </>
                     ) : (
-                            <div className="ring-1 ring-brand rounded-2xl overflow-hidden bg-white/[0.02] shadow-sm">
-                            <div className="bg-white/[0.04] px-6 py-4 border-b border-brand flex items-center gap-3">
+                            <div className="ring-1 ring-brand rounded-2xl overflow-hidden bg-card-fap/[0.02] shadow-sm">
+                            <div className="bg-card-fap/[0.04] px-6 py-4 border-b border-brand flex items-center gap-3">
                                 <div className="p-2 bg-card-fap rounded-md shadow-sm border border-brand">
                                     <Settings className="h-4 w-4 text-primary" />
                                 </div>
@@ -428,16 +428,16 @@ export default function Solicitar({ auth, socios, tiposCredito, tipos_credito })
                                     { label: 'Total a Pagar', value: `Bs. ${fmt(simulacion.total)}`, green: false },
                                     { label: 'Intereses Totales', value: `Bs. ${fmt(simulacion.intereses)}`, green: true },
                                 ].map(item => (
-                                    <div key={item.label} className="relative bg-white/[0.03] rounded-2xl border border-brand shadow-sm p-6 overflow-hidden group hover:shadow-md transition-all">
+                                    <div key={item.label} className="relative bg-card-fap/[0.03] rounded-2xl border border-brand shadow-sm p-6 overflow-hidden group hover:shadow-md transition-all">
                                         {item.green && <div className="absolute top-0 left-0 right-0 h-1 bg-primary"></div>}
-                                        {!item.green && <div className="absolute top-0 left-0 right-0 h-1 bg-white/10"></div>}
+                                        {!item.green && <div className="absolute top-0 left-0 right-0 h-1 bg-card-fap/10"></div>}
                                         <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-2">{item.label}</p>
                                         <p className={`text-2xl font-black font-mono tracking-tight ${item.green ? 'text-primary' : 'text-brand-main'}`}>{item.value}</p>
-                                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-card-fap/5 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
                                     </div>
                                 ))}
                                 {tipoSeleccionado && data.plazo_meses && (
-                                    <div className="sm:col-span-3 mt-2 bg-white/[0.03] rounded-xl px-5 py-4 border border-brand flex items-center justify-between text-sm shadow-inner group transition-colors">
+                                    <div className="sm:col-span-3 mt-2 bg-card-fap/[0.03] rounded-xl px-5 py-4 border border-brand flex items-center justify-between text-sm shadow-inner group transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-main rounded-lg shadow-sm border border-brand group-hover:rotate-12 transition-transform">
                                                 <Info className="h-5 w-5 text-primary" />
@@ -455,7 +455,7 @@ export default function Solicitar({ auth, socios, tiposCredito, tipos_credito })
                                 )}
                             </div>
                         ) : (
-                            <div className="border-2 border-dashed border-brand bg-white/[0.01] rounded-2xl py-14 flex flex-col items-center gap-4 text-brand-muted">
+                            <div className="border-2 border-dashed border-brand bg-card-fap/[0.01] rounded-2xl py-14 flex flex-col items-center gap-4 text-brand-muted">
                                 <div className="p-4 bg-card-fap rounded-full shadow-sm border border-brand">
                                     <Info className="h-8 w-8 text-white/20" />
                                 </div>
@@ -480,7 +480,7 @@ export default function Solicitar({ auth, socios, tiposCredito, tipos_credito })
                     <div className="flex items-center gap-4 flex-shrink-0">
                         <a href={route('creditos.index')} className="px-5 py-2 text-sm font-bold text-white/60 hover:text-white transition-all">Cancelar</a>
                         <button type="submit" form="form-credito" disabled={processing || !canSubmit}
-                            className="px-6 py-2.5 text-sm font-black text-primary bg-white rounded-lg shadow-lg hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed">
+                            className="px-6 py-2.5 text-sm font-black text-primary bg-card-fap rounded-lg shadow-lg hover:bg-card-fap/90 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed">
                             {processing ? 'Procesando...' : 'Originar Crédito'}
                         </button>
                     </div>

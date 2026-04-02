@@ -176,23 +176,9 @@ class EcommerceController extends Controller
         try {
             $pedido->update(['estado_pago' => 'pagado']);
 
-            // Descontar inventario automáticamente simulando webhook del banco
-            foreach ($pedido->detalles as $detalle) {
-                $producto = Producto::find($detalle->producto_id);
-                if ($producto) {
-                    $nuevo_saldo = $producto->stock_actual - $detalle->cantidad;
-                    $producto->update(['stock_actual' => $nuevo_saldo]);
-
-                    \App\Models\KardexProducto::create([
-                        'producto_id' => $producto->id,
-                        'tipo_movimiento' => 'egreso',
-                        'cantidad' => $detalle->cantidad,
-                        'saldo_stock' => $nuevo_saldo,
-                        'concepto' => 'Venta Ecommerce Orden ' . $pedido->numero_orden . ' (Pasarela QR Automática)',
-                        'usuario_admin_id' => null
-                    ]);
-                }
-            }
+            // NOTA: El stock NO se descuenta aquí automáticamente vía Webhook.
+            // La salida de almacén se registrará formalmente cuando el administrador
+            // marque el pedido como 'Entregado' en el panel de administración.
             \Illuminate\Support\Facades\DB::commit();
 
             if ($pedido->user) {

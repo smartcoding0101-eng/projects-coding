@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('caja_denominaciones', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('caja_id')->constrained('cajas')->onDelete('cascade');
+            $table->enum('tipo', ['apertura', 'cierre'])->index();
+            $table->enum('moneda', ['BOB', 'USD'])->index();
+            $table->decimal('denominacion', 8, 2)->comment('Valor facial del billete/moneda');
+            $table->unsignedInteger('cantidad')->default(0);
+            $table->decimal('subtotal', 12, 2)->default(0);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('caja_denominaciones');
+    }
+};

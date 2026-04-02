@@ -32,7 +32,7 @@ export default function UpdateSecretQuestionForm({ className = '' }) {
             <header>
                 <div className="flex items-center gap-2 mb-2">
                     <ShieldAlert className="w-5 h-5 text-emerald-600" />
-                    <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-brand-main">
                         Pregunta de Seguridad (Recuperación)
                     </h2>
                 </div>
@@ -55,7 +55,7 @@ export default function UpdateSecretQuestionForm({ className = '' }) {
                         id="pregunta_secreta"
                         value={data.pregunta_secreta}
                         onChange={(e) => setData('pregunta_secreta', e.target.value)}
-                        className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        className="mt-1 block w-full border-brand focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                         required
                     >
                         <option value="" disabled>Selecciona una pregunta...</option>

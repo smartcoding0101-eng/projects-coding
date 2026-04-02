@@ -10,7 +10,7 @@ class Categoria extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['nombre', 'slug', 'descripcion', 'activa'];
+    protected $fillable = ['nombre', 'slug', 'descripcion', 'icono', 'color', 'orden', 'activa'];
 
     public function productos()
     {
