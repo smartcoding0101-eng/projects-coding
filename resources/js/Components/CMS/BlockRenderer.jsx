@@ -11,6 +11,7 @@ import ProductCardsBlock from './Blocks/ProductCardsBlock';
 import CreditSimulatorBlock from './Blocks/CreditSimulatorBlock';
 import BenefitsBlock from './Blocks/BenefitsBlock';
 import NormativasBlock from './Blocks/NormativasBlock';
+import InstitutionalTextBlock from './Blocks/InstitutionalTextBlock';
 
 const BlockRenderer = ({ blocks }) => {
     if (!blocks || !Array.isArray(blocks)) return null;
@@ -45,6 +46,8 @@ const BlockRenderer = ({ blocks }) => {
                         return <TestimonialsBlock key={index} data={data} />;
                     case 'normativas':
                         return <NormativasBlock key={index} data={data} />;
+                    case 'institutional_text':
+                        return <InstitutionalTextBlock key={index} data={data} />;
                     default:
                         console.warn(`Unknown block type: ${type}`);
                         return null;

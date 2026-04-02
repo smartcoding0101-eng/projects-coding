@@ -307,6 +307,23 @@ class PageForm
                                     ->collapsible()
                                     ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Documento'),
                             ]),
+                        // ========================================
+                        // INSTITUTIONAL TEXT — Para Misión, Visión, etc.
+                        // ========================================
+                        Block::make('institutional_text')
+                            ->label('Texto Institucional (Fiori Style)')
+                            ->icon('heroicon-o-document-text')
+                            ->schema([
+                                TextInput::make('title')->required()->label('Título Principal'),
+                                TextInput::make('subtitle')->label('Subtítulo'),
+                                Textarea::make('content')->required()->label('Contenido / Párrafos')->rows(6),
+                                FileUpload::make('image')
+                                    ->image()
+                                    ->directory('pages/institutional')
+                                    ->label('Imagen Lateral'),
+                                Toggle::make('image_left')->label('Imagen a la Izquierda')->default(false),
+                                TextInput::make('badge')->label('Badge Superior'),
+                            ]),
                     ])
                     ->collapsible()
                     ->collapsed(false)
