@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle } from 'lucide-react';
+import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle, ShieldCheck, Key, Laptop, Fingerprint } from 'lucide-react';
 
-export default function Index({ auth, users, roles, personasDisponibles }) {
+export default function Index({ auth, users, roles, personasDisponibles, stats }) {
     const isAdmin = auth.user.roles?.includes('SuperAdmin');
 
     const [editingUser, setEditingUser] = useState(null);
@@ -86,8 +86,59 @@ export default function Index({ auth, users, roles, personasDisponibles }) {
             <Head title="Directorio Corporativo" />
 
             <div className="py-8 bg-main min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                     
+                    {/* SAP ERP Executive KPI Tiles */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Total Accesos */}
+                        <div className="bg-card-fap border-t-4 border-blue-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Total Accesos</span>
+                                <Key className="w-4 h-4 text-blue-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-brand-main font-mono">{stats.total_usuarios}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Cuentas Habilitables al ERP</div>
+                            </div>
+                        </div>
+
+                        {/* Socios Vinculados */}
+                        <div className="bg-card-fap border-t-4 border-emerald-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Socios ERP</span>
+                                <Fingerprint className="w-4 h-4 text-emerald-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-emerald-700 font-mono">{stats.socios_vinculados}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Cuentas con Ficha Personal</div>
+                            </div>
+                        </div>
+
+                        {/* Administrativos / Huérfanos */}
+                        <div className="bg-card-fap border-t-4 border-indigo-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">SysAdmins / Raíz</span>
+                                <Laptop className="w-4 h-4 text-indigo-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-indigo-700 font-mono">{stats.sin_vincular}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Cuentas Sin Vínculo Personal</div>
+                            </div>
+                        </div>
+
+                        {/* Roles Maestros */}
+                        <div className="bg-card-fap border-t-4 border-amber-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Altos Privilegios</span>
+                                <ShieldCheck className="w-4 h-4 text-amber-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right flex flex-col items-end">
+                                <span className="text-2xl font-black text-amber-700 font-mono">{stats.roles_admin}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Superan el Nivel "Base"</div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* ENCABEZADO */}
                     <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden p-4 bg-card-fap flex items-center gap-3">
                         <Users className="w-5 h-5 text-primary" />

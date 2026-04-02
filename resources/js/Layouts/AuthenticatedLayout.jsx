@@ -4,7 +4,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { Menu, X, Bell, ChevronDown, Palette } from 'lucide-react';
+import { Menu, X, Bell, ChevronDown, Palette, Banknote, BookOpen, FolderOpen, PieChart, MonitorPlay, LayoutDashboard, Store, Package, ShoppingCart, Activity, Settings, Users, UserCog, ShieldAlert, Sliders, LayoutTemplate, Book, HelpCircle, Headset, FileText, Info, User, LogOut } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -12,6 +12,16 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const isAdmin = user.roles?.includes('SuperAdmin');
     const userPermissions = user.permissions || [];
+
+    // Helper para dividir arreglos en grupos de N
+    const chunkArray = (arr, size) => {
+        const chunks = [];
+        if (!arr) return chunks;
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+    };
 
     // Helper: puede ver el item si es Admin, o si no requiere permisos, o si tiene ALGUNO de los permisos requeridos
     const canView = (item) => {
@@ -39,36 +49,36 @@ export default function AuthenticatedLayout({ header, children }) {
     ];
 
     const administrationItems = [
-        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*'), permissions: ['ver creditos', 'evaluar creditos'] },
-        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*'), permissions: ['ver libro diario'] },
-        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*'), permissions: ['ver kardex general'] },
-        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), permissions: ['ver reportes financieros'] },
-        { label: 'Caja', href: route('admin.caja.index'), active: route().current('admin.caja.*'), permissions: ['gestionar usuarios'] },
+        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*'), permissions: ['ver creditos', 'evaluar creditos'], icon: <Banknote className="w-4 h-4 text-emerald-500" /> },
+        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*'), permissions: ['ver libro diario'], icon: <BookOpen className="w-4 h-4 text-indigo-500" /> },
+        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*'), permissions: ['ver kardex general'], icon: <FolderOpen className="w-4 h-4 text-amber-500" /> },
+        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), permissions: ['ver reportes financieros'], icon: <PieChart className="w-4 h-4 text-blue-500" /> },
+        { label: 'Caja general', href: route('admin.caja.index'), active: route().current('admin.caja.*'), permissions: ['gestionar usuarios'], icon: <MonitorPlay className="w-4 h-4 text-rose-500" /> },
     ];
 
     const ecommerceItems = [
-        { label: 'Admin Dashboard', href: route('admin.ecommerce.dashboard'), active: route().current('admin.ecommerce.dashboard'), permissions: ['ver dashboard tienda'] },
-        { label: 'Tienda', href: route('beneficios.index'), active: route().current('beneficios.*') }, // Público a roles básicos
-        { label: 'Inventario', href: route('admin.inventario.index'), active: route().current('admin.inventario.*'), permissions: ['gestionar inventario tienda'] },
-        { label: 'Pedidos Web', href: route('admin.pedidos.index'), active: route().current('admin.pedidos.*'), permissions: ['evaluar pedidos ecommerce'] },
-        { label: 'Movimientos', href: route('admin.ecommerce.reporte.movimientos'), active: route().current('admin.ecommerce.reporte.movimientos'), permissions: ['ver dashboard tienda'] },
-        { label: 'Configuración', href: route('admin.ecommerce.config.index'), active: route().current('admin.ecommerce.config.*'), permissions: ['configurar parametros globales'] },
+        { label: 'Admin Dashboard', href: route('admin.ecommerce.dashboard'), active: route().current('admin.ecommerce.dashboard'), permissions: ['ver dashboard tienda'], icon: <LayoutDashboard className="w-4 h-4 text-indigo-500" /> },
+        { label: 'Tienda Web', href: route('beneficios.index'), active: route().current('beneficios.*'), icon: <Store className="w-4 h-4 text-emerald-500" /> }, // Público a roles básicos
+        { label: 'Inventario', href: route('admin.inventario.index'), active: route().current('admin.inventario.*'), permissions: ['gestionar inventario tienda'], icon: <Package className="w-4 h-4 text-amber-500" /> },
+        { label: 'Pedidos', href: route('admin.pedidos.index'), active: route().current('admin.pedidos.*'), permissions: ['evaluar pedidos ecommerce'], icon: <ShoppingCart className="w-4 h-4 text-blue-500" /> },
+        { label: 'Movimientos', href: route('admin.ecommerce.reporte.movimientos'), active: route().current('admin.ecommerce.reporte.movimientos'), permissions: ['ver dashboard tienda'], icon: <Activity className="w-4 h-4 text-rose-500" /> },
+        { label: 'Configuración', href: route('admin.ecommerce.config.index'), active: route().current('admin.ecommerce.config.*'), permissions: ['configurar parametros globales'], icon: <Settings className="w-4 h-4 text-gray-500" /> },
     ];
 
     const adjustmentsItems = [
-        { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['ver personas'] },
-        { label: 'Usuarios', href: route('admin.users.index'), active: route().current('admin.users.*'), permissions: ['gestionar usuarios'] },
-        { label: 'Roles', href: route('admin.roles.index'), active: route().current('admin.roles.*'), permissions: ['gestionar roles y permisos'] },
-        { label: 'Global', href: route('admin.configuraciones.index'), active: route().current('admin.configuraciones.*'), permissions: ['configurar parametros globales'] },
-        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'] }, 
+        { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['ver personas'], icon: <Users className="w-4 h-4 text-blue-500" /> },
+        { label: 'Usuarios ERP', href: route('admin.users.index'), active: route().current('admin.users.*'), permissions: ['gestionar usuarios'], icon: <UserCog className="w-4 h-4 text-emerald-500" /> },
+        { label: 'Roles y Acceso', href: route('admin.roles.index'), active: route().current('admin.roles.*'), permissions: ['gestionar roles y permisos'], icon: <ShieldAlert className="w-4 h-4 text-amber-500" /> },
+        { label: 'Ajustes Globales', href: route('admin.configuraciones.index'), active: route().current('admin.configuraciones.*'), permissions: ['configurar parametros globales'], icon: <Sliders className="w-4 h-4 text-indigo-500" /> },
+        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> }, 
     ];
 
     const ayudaItems = [
-        { label: 'Manual de Usuario', href: '#' },
-        { label: 'Preguntas Frecuentes', href: '#' },
-        { label: 'Soporte Técnico', href: '#' },
-        { label: 'Políticas y Términos', href: '#' },
-        { label: 'Acerca del Sistema', href: '#' },
+        { label: 'Manual de Usuario', href: '#', icon: <Book className="w-4 h-4 text-blue-500" /> },
+        { label: 'Preguntas Frecuentes', href: '#', icon: <HelpCircle className="w-4 h-4 text-emerald-500" /> },
+        { label: 'Soporte Técnico', href: '#', icon: <Headset className="w-4 h-4 text-amber-500" /> },
+        { label: 'Políticas y Términos', href: '#', icon: <FileText className="w-4 h-4 text-indigo-500" /> },
+        { label: 'Acerca del Sistema', href: '#', icon: <Info className="w-4 h-4 text-gray-500" /> },
     ];
 
     return (
@@ -103,12 +113,19 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <ChevronDown className="ml-2 h-4 w-4" />
                                         </button>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content align="left" width="48">
-                                        {administrationItems.filter(canView).map((item, idx) => (
-                                            <Dropdown.Link key={item.label} href={item.href}>
-                                                {idx + 1}. {item.label}
-                                            </Dropdown.Link>
-                                        ))}
+                                    <Dropdown.Content align="left" width="auto" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5 overflow-hidden">
+                                        <div className="flex divide-x divide-brand/20">
+                                            {chunkArray(administrationItems.filter(canView), 3).map((chunk, cIdx) => (
+                                                <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
+                                                    {chunk.map((item) => (
+                                                        <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
+                                                            <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                            <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                        </Dropdown.Link>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </Dropdown.Content>
                                 </Dropdown>
 
@@ -124,12 +141,19 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <ChevronDown className="ml-2 h-4 w-4" />
                                         </button>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content align="left" width="48">
-                                        {ecommerceItems.filter(canView).map((item, idx) => (
-                                            <Dropdown.Link key={item.label} href={item.href}>
-                                                {idx + 1}. {item.label}
-                                            </Dropdown.Link>
-                                        ))}
+                                    <Dropdown.Content align="left" width="auto" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5 overflow-hidden">
+                                        <div className="flex divide-x divide-brand/20">
+                                            {chunkArray(ecommerceItems.filter(canView), 3).map((chunk, cIdx) => (
+                                                <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
+                                                    {chunk.map((item) => (
+                                                        <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
+                                                            <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                            <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                        </Dropdown.Link>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </Dropdown.Content>
                                 </Dropdown>
 
@@ -146,12 +170,19 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 <ChevronDown className="ml-2 h-4 w-4" />
                                             </button>
                                         </Dropdown.Trigger>
-                                        <Dropdown.Content align="left" width="48" className="bg-card-fap border-brand">
-                                            {adjustmentsItems.filter(canView).map((item, idx) => (
-                                                <Dropdown.Link key={item.label} href={item.href} className="text-brand-main hover:bg-white/5">
-                                                    {idx + 1}. {item.label}
-                                                </Dropdown.Link>
-                                            ))}
+                                        <Dropdown.Content align="left" width="auto" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5 overflow-hidden">
+                                            <div className="flex divide-x divide-brand/20">
+                                                {chunkArray(adjustmentsItems.filter(canView), 3).map((chunk, cIdx) => (
+                                                    <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
+                                                        {chunk.map((item) => (
+                                                            <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
+                                                                <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                                <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                            </Dropdown.Link>
+                                                        ))}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </Dropdown.Content>
                                     </Dropdown>
                                 )}
@@ -167,12 +198,19 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <ChevronDown className="ml-2 h-4 w-4" />
                                         </button>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content align="left" width="48">
-                                        {ayudaItems.map((item, idx) => (
-                                            <Dropdown.Link key={item.label} href={item.href}>
-                                                {idx + 1}. {item.label}
-                                            </Dropdown.Link>
-                                        ))}
+                                    <Dropdown.Content align="left" width="auto" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5 overflow-hidden">
+                                        <div className="flex divide-x divide-brand/20">
+                                            {chunkArray(ayudaItems, 3).map((chunk, cIdx) => (
+                                                <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
+                                                    {chunk.map((item) => (
+                                                        <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
+                                                            <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                            <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                        </Dropdown.Link>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </Dropdown.Content>
                                 </Dropdown>
                             </div>
@@ -215,10 +253,21 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <ChevronDown className="ms-2 h-4 w-4" />
                                         </button>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content align="right" width="48">
-                                        <Dropdown.Link href={route('profile.edit')}>1. Mi Perfil</Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            2. Cerrar Sesión
+                                    <Dropdown.Content align="right" width="56" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5">
+                                        <div className="px-4 py-2 text-[10px] font-black text-brand-muted uppercase tracking-widest border-b border-brand/50 mb-2">Mi Cuenta</div>
+                                        
+                                        <Dropdown.Link href={route('profile.edit')} className="flex items-center gap-3 px-4 mx-1 rounded-md transition-colors hover:bg-brand/10 mb-1">
+                                            <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm text-primary">
+                                                <User className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-[13px] font-bold text-brand-main">Mi Perfil</span>
+                                        </Dropdown.Link>
+
+                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="w-full flex items-center gap-3 px-4 mx-1 rounded-md transition-colors hover:bg-red-500/10 group">
+                                            <div className="flex-shrink-0 bg-red-500/5 p-1.5 rounded-lg border border-red-500/10 shadow-sm text-red-500 group-hover:scale-110 transition-transform">
+                                                <LogOut className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-[13px] font-bold text-brand-main group-hover:text-red-600 transition-colors">Cerrar Sesión</span>
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>

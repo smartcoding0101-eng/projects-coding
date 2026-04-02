@@ -1,7 +1,41 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
-import { ShieldCheck, Search, DownloadCloud, Wallet, CalendarDays, FileWarning, Banknote } from 'lucide-react';
+import { Head, router, Link } from '@inertiajs/react';
+import { 
+    ShieldCheck, 
+    Search, 
+    DownloadCloud, 
+    Wallet, 
+    CalendarDays, 
+    FileWarning, 
+    Banknote, 
+    Filter, 
+    ChevronLeft,
+    Activity,
+    CreditCard,
+    History as HistoryIcon,
+    AlertTriangle,
+    CheckCircle2,
+    Clock,
+    User
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+function StatCard({ label, value, color = 'text-primary', icon: Icon, sublabel }) {
+    return (
+        <div className="bg-card-fap rounded-2xl shadow-sm border border-brand p-5 relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-brand/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+            <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-lg bg-brand/5 border border-brand/50 ${color.replace('text-', 'text- opacity-70')}`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                </div>
+                <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.15em]">{label}</p>
+            </div>
+            <p className={`text-2xl font-black tracking-tighter ${color} mb-1`}>{value}</p>
+            {sublabel && <p className="text-[9px] font-bold text-brand-muted uppercase opacity-60">{sublabel}</p>}
+        </div>
+    );
+}
 
 export default function Historico({ auth, socios_catalogo, socio_seleccionado, metricas, historial_creditos, historial_pagos, filtros }) {
     const [socioId, setSocioId] = useState(filtros.socioId || '');
@@ -56,14 +90,28 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 py-1">
-                        <ShieldCheck className="w-6 h-6 text-emerald-600" />
-                        <h2 className="font-semibold text-xl text-brand-main leading-tight tracking-tight">
-                            Histórico de Crédito (Central de Riesgos)
-                        </h2>
+                <div className="flex items-center justify-between py-0.5">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-extrabold text-brand-main text-sm tracking-tight transition-colors">
+                                Histórico Crediticio Integral
+                            </span>
+                            <span className="text-[11px] text-brand-muted font-bold tracking-wider uppercase">
+                                Central de Riesgos e Inteligencia Financiera
+                            </span>
+                        </div>
                     </div>
-                    <a href={route('reportes.index')} className="text-sm text-brand-muted hover:text-brand-main font-semibold transition-colors">Volver a Reportes</a>
+                    <div className="hidden md:flex items-center gap-3">
+                        <Link 
+                            href={route('reportes.index')} 
+                            className="bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center px-4 py-2 gap-2"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Volver
+                        </Link>
+                    </div>
                 </div>
             }
         >
@@ -73,191 +121,237 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
                     {/* Fila superior: Filtros y Datos del Socio */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         
                         {/* Panel de Búsqueda */}
-                        <div className="lg:col-span-1 bg-card-fap border border-brand p-5 rounded-xl shadow-sm">
-                            <h3 className="text-sm font-black text-brand-main mb-4 uppercase tracking-wide flex items-center gap-2">
+                        <div className="lg:col-span-4 bg-card-fap border border-brand p-6 rounded-2xl shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110">
+                                <Filter className="w-16 h-16 text-brand-main" />
+                            </div>
+                            <h3 className="text-xs font-black text-brand-main mb-6 uppercase tracking-widest flex items-center gap-2 relative z-10">
                                 <Search className="w-4 h-4 text-emerald-600" /> Explorador de Afiliados
                             </h3>
-                            <form onSubmit={aplicarFiltros} className="space-y-4">
+                            <form onSubmit={aplicarFiltros} className="space-y-5 relative z-10">
                                 <div>
-                                    <label className="block text-[10px] font-black uppercase text-brand-muted mb-1">Seleccionar Socio</label>
-                                    <select 
-                                        value={socioId} 
-                                        onChange={e => setSocioId(e.target.value)}
-                                        className="w-full bg-main text-brand-main border border-brand text-xs py-2 px-3 rounded-md focus:ring-emerald-500 focus:border-emerald-500 font-bold"
-                                    >
-                                        <option value="">-- Elige un Afiliado --</option>
-                                        {socios_catalogo?.map(s => (
-                                            <option key={s.id} value={s.id}>{s.name} ({s.ci || 'Sin CI'}) - {s.grado || 'Socio'}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase text-brand-muted mb-1">Rango Inicio</label>
-                                        <input 
-                                            type="date" 
-                                            value={fechaInicio} 
-                                            onChange={e => setFechaInicio(e.target.value)}
-                                            className="w-full bg-main text-brand-main border border-brand text-[11px] py-1.5 px-2 rounded-md focus:ring-emerald-500"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase text-brand-muted mb-1">Rango Fin</label>
-                                        <input 
-                                            type="date" 
-                                            value={fechaFin} 
-                                            onChange={e => setFechaFin(e.target.value)}
-                                            className="w-full bg-main text-brand-main border border-brand text-[11px] py-1.5 px-2 rounded-md focus:ring-emerald-500"
-                                        />
+                                    <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Seleccionar Socio</label>
+                                    <div className="relative group/input">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                        <select 
+                                            value={socioId} 
+                                            onChange={e => setSocioId(e.target.value)}
+                                            className="w-full bg-main border-brand rounded-xl pl-9 text-[11px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all appearance-none tracking-tight"
+                                        >
+                                            <option value="">-- Elige un Afiliado --</option>
+                                            {socios_catalogo?.map(s => (
+                                                <option key={s.id} value={s.id}>{s.name.toUpperCase()} ({s.ci || 'SIN CI'})</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
-                                <div className="flex gap-2 pt-2">
-                                    <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-md transition-colors shadow-sm">
-                                        Procesar Histórico
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Desde</label>
+                                        <div className="relative group/input">
+                                            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                            <input 
+                                                type="date" 
+                                                value={fechaInicio} 
+                                                onChange={e => setFechaInicio(e.target.value)}
+                                                className="w-full bg-main border-brand rounded-xl pl-9 text-[10px] font-black text-brand-main focus:ring-primary transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Hasta</label>
+                                        <div className="relative group/input">
+                                            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                            <input 
+                                                type="date" 
+                                                value={fechaFin} 
+                                                onChange={e => setFechaFin(e.target.value)}
+                                                className="w-full bg-main border-brand rounded-xl pl-9 text-[10px] font-black text-brand-main focus:ring-primary transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button type="submit" className="flex-1 bg-brand-main hover:bg-brand-hover text-white text-[11px] font-black uppercase tracking-widest py-3 rounded-xl transition-all shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                        <Activity className="w-3.5 h-3.5" /> Procesar Expediente
                                     </button>
-                                    <button type="button" onClick={limpiarFiltros} className="px-3 bg-brand/10 hover:bg-brand/20 text-brand-main text-xs font-bold py-2 rounded-md transition-colors">
-                                        Limpiar
+                                    <button type="button" onClick={limpiarFiltros} className="px-5 bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[11px] font-black uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center">
+                                        Reset
                                     </button>
                                 </div>
                             </form>
                         </div>
 
                         {/* Perfil Resultante */}
-                        <div className="lg:col-span-2 bg-gradient-to-br from-emerald-900/10 to-transparent border border-emerald-500/20 rounded-xl p-5 flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
+                        <div className="lg:col-span-8 bg-card-fap border border-brand rounded-2xl shadow-sm flex items-center justify-center relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
                             {socio_seleccionado ? (
-                                <div className="w-full flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center shadow-inner flex-shrink-0">
-                                        <ShieldCheck className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="w-full p-8 flex flex-col md:flex-row items-center gap-8"
+                                >
+                                    <div className="relative flex-shrink-0">
+                                        <div className="w-24 h-24 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-center shadow-inner group-hover:rotate-3 transition-transform">
+                                            <ShieldCheck className="w-12 h-12 text-emerald-600" />
+                                        </div>
+                                        <div className="absolute -bottom-2 -right-2 bg-emerald-600 text-white p-1.5 rounded-lg shadow-lg border-2 border-card-fap animate-bounce">
+                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <h4 className="text-xl font-black text-brand-main tracking-tight uppercase">{socio_seleccionado.name}</h4>
-                                        <div className="flex items-center gap-4 mt-1">
-                                            <span className="text-xs font-bold text-brand-muted bg-main px-2 py-0.5 rounded border border-brand">CI: {socio_seleccionado.ci || 'N/D'}</span>
-                                            <span className="text-xs font-bold text-brand-muted bg-main px-2 py-0.5 rounded border border-brand">Grado: {socio_seleccionado.grado || 'Socio'}</span>
-                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${metricas.cuotas_mora_historicas > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/30' : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30'}`}>
-                                                {metricas.cuotas_mora_historicas > 0 ? 'Riesgo Advertido' : 'Excelente Pagador'}
+                                    <div className="flex-1 text-center md:text-left">
+                                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] mb-2 leading-none">Expediente Centralizado</p>
+                                        <h4 className="text-2xl font-black text-brand-main tracking-tighter uppercase leading-none mb-3">{socio_seleccionado.name}</h4>
+                                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                            <span className="text-[10px] font-black text-brand-main bg-brand/5 px-3 py-1 rounded-lg border border-brand/50 uppercase tracking-widest">CI: {socio_seleccionado.ci || 'N/D'}</span>
+                                            <span className="text-[10px] font-black text-brand-main bg-brand/5 px-3 py-1 rounded-lg border border-brand/50 uppercase tracking-widest">Grado: {socio_seleccionado.grado || 'SOCIO'}</span>
+                                            <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-lg border shadow-sm tracking-[0.1em] ${
+                                                metricas.cuotas_mora_historicas > 0 
+                                                ? 'bg-red-500/10 text-red-600 border-red-500/20' 
+                                                : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                            }`}>
+                                                {metricas.cuotas_mora_historicas > 0 ? 'Riesgo Crítico' : 'Socio VIP - Sin Mora'}
                                             </span>
                                         </div>
                                     </div>
                                     {/* Botonera de Exportación */}
-                                    <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-3 w-full md:w-auto">
                                         <button 
                                             onClick={() => handleExport('pdf')}
                                             disabled={isDownloading}
-                                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
+                                            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:-translate-y-0.5"
                                         >
                                             <DownloadCloud className="w-4 h-4" /> Certificado PDF
                                         </button>
                                         <button 
                                             onClick={() => handleExport('xlsx')}
                                             disabled={isDownloading}
-                                            className="px-4 py-2 bg-white dark:bg-main border border-brand text-brand-main text-[11px] font-bold rounded-lg hover:bg-brand/5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                            className="px-6 py-3 bg-main border border-brand text-brand-muted hover:text-brand-main text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                         >
-                                            <DownloadCloud className="w-4 h-4" /> Exportar CSV
+                                            <DownloadCloud className="w-4 h-4" /> Resumen CSV
                                         </button>
-                                        {isDownloading && (
-                                            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 animate-pulse px-2">
-                                                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> Generando...
-                                            </div>
-                                        )}
+                                        <AnimatePresence>
+                                            {isDownloading && (
+                                                <motion.div 
+                                                    initial={{ opacity: 0, y: 5 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="flex items-center justify-center gap-2 text-[9px] font-black text-emerald-600 uppercase tracking-widest animate-pulse"
+                                                >
+                                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Procesando Archivos...
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
-                                </div>
+                                </motion.div>
                             ) : (
-                                <div className="text-center">
-                                    <ShieldCheck className="w-10 h-10 text-brand-muted/30 mx-auto mb-2" />
-                                    <p className="text-sm font-bold text-brand-muted uppercase tracking-wider">Esperando Selección...</p>
-                                    <p className="text-xs text-brand-muted/70 mt-1 max-w-sm">Utiliza el explorador de afiliados para cargar su expediente crediticio completo, historial de deudas y perfil de riesgo.</p>
+                                <div className="text-center p-12 opacity-40 group-hover:opacity-60 transition-opacity">
+                                    <ShieldCheck className="w-16 h-16 text-brand-muted mx-auto mb-4 stroke-1" />
+                                    <p className="text-[11px] font-black text-brand-muted uppercase tracking-[0.3em]">Seleccione un Afiliado para Auditar</p>
+                                    <p className="text-[9px] text-brand-muted mt-2 max-w-sm font-bold uppercase tracking-widest leading-relaxed">Se cargará el expediente crediticio institucional completo con calificación de riesgo automatizada.</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {socio_seleccionado && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="space-y-6">
                             {/* Panel de Métricas Rápidas */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-card-fap border border-brand p-4 rounded-xl flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                                        <Wallet className="w-5 h-5 text-blue-500" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] uppercase font-black text-brand-muted">Créditos Totales</p>
-                                        <p className="text-xl font-black text-brand-main">{metricas.creditos_totales}</p>
-                                    </div>
-                                </div>
-                                <div className="bg-card-fap border border-brand p-4 rounded-xl flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                                        <Banknote className="w-5 h-5 text-emerald-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] uppercase font-black text-brand-muted">Capital Aprobado Histórico</p>
-                                        <p className="text-xl font-black text-brand-main">Bs {parseFloat(metricas.monto_total_aprobado).toFixed(2)}</p>
-                                    </div>
-                                </div>
-                                <div className="bg-card-fap border border-brand p-4 rounded-xl flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                                        <ShieldCheck className="w-5 h-5 text-purple-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] uppercase font-black text-brand-muted">Capital Amortizado (Pagado)</p>
-                                        <p className="text-xl font-black text-brand-main">Bs {parseFloat(metricas.capital_pagado_total).toFixed(2)}</p>
-                                    </div>
-                                </div>
-                                <div className="bg-card-fap border border-red-500/20 p-4 rounded-xl flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
-                                        <FileWarning className="w-5 h-5 text-red-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] uppercase font-black text-red-600">Eventos de Mora (Histórico)</p>
-                                        <p className="text-xl font-black text-red-600">{metricas.cuotas_mora_historicas} retrazos</p>
-                                    </div>
-                                </div>
+                                <StatCard 
+                                    label="Créditos Solicitados" 
+                                    value={metricas.creditos_totales} 
+                                    icon={CreditCard} 
+                                    color="text-blue-600"
+                                    sublabel="Consolidado Institucional"
+                                />
+                                <StatCard 
+                                    label="Capital Solicitado" 
+                                    value={`Bs ${parseFloat(metricas.monto_total_aprobado).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                                    icon={Banknote} 
+                                    color="text-emerald-600"
+                                    sublabel="Proyectos / Consumo"
+                                />
+                                <StatCard 
+                                    label="Amortización Total" 
+                                    value={`Bs ${parseFloat(metricas.capital_pagado_total).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                                    icon={ShieldCheck} 
+                                    color="text-blue-700"
+                                    sublabel="Capital Retornado"
+                                />
+                                <StatCard 
+                                    label="Eventos de Mora" 
+                                    value={metricas.cuotas_mora_historicas} 
+                                    icon={AlertTriangle} 
+                                    color="text-red-600"
+                                    sublabel="Alertas de Retraso"
+                                />
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
                                 {/* Tabla de Créditos Gestados */}
-                                <div className="bg-card-fap border border-brand rounded-xl shadow-sm overflow-hidden flex flex-col h-[400px]">
-                                    <div className="p-4 border-b border-brand bg-main flex items-center justify-between">
-                                        <h3 className="text-xs font-black uppercase text-brand-main">Historial de Créditos Solicitados</h3>
-                                        <span className="text-[10px] font-bold text-brand-muted">{historial_creditos.length} expedientes</span>
+                                <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
+                                    <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
+                                        <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
+                                            <CreditCard className="w-4 h-4 text-primary" /> Expedientes de Créditos
+                                        </h3>
+                                        <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter">
+                                            {historial_creditos.length} Operaciones
+                                        </span>
                                     </div>
-                                    <div className="flex-1 overflow-auto p-0">
-                                        <table className="w-full text-left text-xs text-brand-main">
-                                            <thead className="text-[10px] uppercase bg-main text-brand-muted sticky top-0 border-b border-brand">
+                                    <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10">
                                                 <tr>
-                                                    <th className="py-2.5 px-4">Crédito / Tipo</th>
-                                                    <th className="py-2.5 px-4 text-right">Bs Aprobado</th>
-                                                    <th className="py-2.5 px-4 text-center">Estado</th>
+                                                    <th className="p-4 pl-6 text-[10px] tracking-wider">Crédito / Tipo</th>
+                                                    <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Aprobado</th>
+                                                    <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-brand/50">
+                                            <tbody className="divide-y divide-brand/10">
                                                 {historial_creditos.length === 0 ? (
-                                                    <tr><td colSpan="3" className="py-8 text-center text-brand-muted font-medium">No se encontraron créditos en el periodo.</td></tr>
-                                                ) : historial_creditos.map(c => (
-                                                    <tr key={c.id} className="hover:bg-main/50 transition-colors">
-                                                        <td className="py-3 px-4">
-                                                            <div className="font-bold">Solicitud #{c.id}</div>
-                                                            <div className="text-[10px] text-brand-muted">{c.tipo_credito?.nombre || 'General'} (Tasa: {c.tasa_interes}%)</div>
+                                                    <tr>
+                                                        <td colSpan="3" className="py-24 text-center opacity-40">
+                                                            <div className="flex flex-col items-center gap-3">
+                                                                <Activity className="w-10 h-10" />
+                                                                <p className="text-[10px] font-black uppercase tracking-widest">Sin registros de créditos</p>
+                                                            </div>
                                                         </td>
-                                                        <td className="py-3 px-4 text-right font-black">
-                                                            {(c.saldo_capital <= 0 && c.estado === 'Pagado') ? <span className="text-emerald-600 text-[10px] font-bold block">Liquidado</span> : null}
-                                                            Bs {parseFloat(c.monto_aprobado).toFixed(2)}
+                                                    </tr>
+                                                ) : historial_creditos.map((c, index) => (
+                                                    <motion.tr 
+                                                        key={c.id} 
+                                                        initial={{ opacity: 0, x: -5 }}
+                                                        whileInView={{ opacity: 1, x: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: index * 0.02 }}
+                                                        className="hover:bg-brand/5 transition-colors group"
+                                                    >
+                                                        <td className="p-4 pl-6">
+                                                            <div className="font-black text-[12px] text-brand-main mb-1 leading-none">SOLICITUD #{c.id.toString().padStart(6, '0')}</div>
+                                                            <div className="text-[9px] text-brand-muted font-bold uppercase tracking-tight flex items-center gap-1.5 opacity-60">
+                                                                <span className="bg-brand/10 px-1.5 py-0.5 rounded tracking-widest">{c.tipo_credito?.nombre || 'PRESTAMO'}</span>
+                                                                <span className="italic mr-1">Tasa: {c.tasa_interes}%</span>
+                                                            </div>
                                                         </td>
-                                                        <td className="py-3 px-4 text-center">
-                                                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                                                                c.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-600' :
-                                                                c.estado === 'Desembolsado' ? 'bg-blue-500/10 text-blue-600' :
-                                                                c.estado === 'En Mora' ? 'bg-red-500/10 text-red-600' :
-                                                                'bg-brand/10 text-brand-muted'
+                                                        <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
+                                                            <div className="leading-none mb-1">Bs {parseFloat(c.monto_aprobado).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
+                                                            {(c.saldo_capital <= 0 && c.estado === 'Pagado') && <span className="text-[9px] text-emerald-600 font-extrabold uppercase tracking-tighter bg-emerald-500/5 px-2 py-0.5 rounded-lg border border-emerald-500/20">TOTALMENTE LIQUIDADO</span>}
+                                                        </td>
+                                                        <td className="p-4 pr-6 text-center border-l border-brand/50">
+                                                            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                                                                c.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                                                                c.estado === 'Desembolsado' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
+                                                                c.estado === 'En Mora' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                                                'bg-brand/10 text-brand-muted border-brand/50'
                                                             }`}>
                                                                 {c.estado}
                                                             </span>
                                                         </td>
-                                                    </tr>
+                                                    </motion.tr>
                                                 ))}
                                             </tbody>
                                         </table>
@@ -265,48 +359,70 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
                                 </div>
 
                                 {/* Tabla de Movimientos de Pagos y Mora */}
-                                <div className="bg-card-fap border border-brand rounded-xl shadow-sm overflow-hidden flex flex-col h-[400px]">
-                                    <div className="p-4 border-b border-brand bg-main flex items-center justify-between">
-                                        <h3 className="text-xs font-black uppercase text-brand-main">Historial de Amortización (Cuotas)</h3>
-                                        <span className="text-[10px] font-bold text-brand-muted">{historial_pagos.length} registros</span>
+                                <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
+                                    <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
+                                        <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
+                                            <HistoryIcon className="w-4 h-4 text-primary" /> Historial de Amortización
+                                        </h3>
+                                        <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter">
+                                            {historial_pagos.length} Registros
+                                        </span>
                                     </div>
-                                    <div className="flex-1 overflow-auto p-0">
-                                        <table className="w-full text-left text-xs text-brand-main">
-                                            <thead className="text-[10px] uppercase bg-main text-brand-muted sticky top-0 border-b border-brand">
+                                    <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10">
                                                 <tr>
-                                                    <th className="py-2.5 px-4 w-[25%]">Vencimiento</th>
-                                                    <th className="py-2.5 px-4">Concepto</th>
-                                                    <th className="py-2.5 px-4 text-right">Monto</th>
-                                                    <th className="py-2.5 px-4 text-center">Estado</th>
+                                                    <th className="p-4 pl-6 text-[10px] tracking-wider w-36">Vencimiento</th>
+                                                    <th className="p-4 text-[10px] tracking-wider">Concepto Cuota</th>
+                                                    <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Monto Total</th>
+                                                    <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-brand/50">
+                                            <tbody className="divide-y divide-brand/10">
                                                 {historial_pagos.length === 0 ? (
-                                                    <tr><td colSpan="4" className="py-8 text-center text-brand-muted font-medium">No se encontraron cobros/pagos en el periodo.</td></tr>
-                                                ) : historial_pagos.map(p => (
-                                                    <tr key={p.id} className="hover:bg-main/50 transition-colors">
-                                                        <td className="py-3 px-4 whitespace-nowrap">
-                                                            <div className="font-bold">{p.vencimiento}</div>
-                                                            {p.fecha_pago && <div className="text-[9px] text-emerald-600 font-bold uppercase">Pagado el {p.fecha_pago}</div>}
+                                                    <tr>
+                                                        <td colSpan="4" className="py-24 text-center opacity-40">
+                                                            <div className="flex flex-col items-center gap-3">
+                                                                <Clock className="w-10 h-10" />
+                                                                <p className="text-[10px] font-black uppercase tracking-widest">Sin Cronograma de Pagos</p>
+                                                            </div>
                                                         </td>
-                                                        <td className="py-3 px-4">
-                                                            <div className="font-bold">{p.credito}</div>
-                                                            <div className="text-[10px] text-brand-muted">Cuota Nro. {p.cuota}</div>
+                                                    </tr>
+                                                ) : historial_pagos.map((p, index) => (
+                                                    <motion.tr 
+                                                        key={p.id} 
+                                                        initial={{ opacity: 0, x: 5 }}
+                                                        whileInView={{ opacity: 1, x: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: index * 0.02 }}
+                                                        className="hover:bg-brand/5 transition-colors group"
+                                                    >
+                                                        <td className="p-4 pl-6">
+                                                            <div className="font-black text-[11px] text-brand-main leading-none mb-1 font-mono uppercase">{p.vencimiento}</div>
+                                                            {p.fecha_pago && (
+                                                                <div className="text-[8px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/20 inline-block tracking-tighter shadow-sm">
+                                                                    ABONADO: {p.fecha_pago}
+                                                                </div>
+                                                            )}
                                                         </td>
-                                                        <td className="py-3 px-4 text-right">
-                                                            <span className="font-black text-brand-main block">Bs {parseFloat(p.total).toFixed(2)}</span>
-                                                            {p.mora > 0 && <span className="text-[9px] text-red-500 font-bold block">+ Bs {parseFloat(p.mora).toFixed(2)} mora</span>}
+                                                        <td className="p-4">
+                                                            <div className="font-black text-[12px] text-brand-main mb-1 leading-none uppercase truncate max-w-[140px] tracking-tight">{p.credito}</div>
+                                                            <div className="text-[9px] text-brand-muted font-bold uppercase tracking-[0.1em] opacity-60">CUOTA NO. {p.cuota.toString().padStart(2, '0')}</div>
                                                         </td>
-                                                        <td className="py-3 px-4 text-center">
-                                                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                                                                p.estado === 'Pagada' ? 'bg-emerald-500/10 text-emerald-600' :
-                                                                p.estado === 'Retrasada' ? 'bg-red-500/10 text-red-600' :
-                                                                'bg-brand/10 text-brand-muted'
+                                                        <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
+                                                            <div className="leading-none mb-1">Bs {parseFloat(p.total).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
+                                                            {p.mora > 0 && <div className="text-[9px] text-red-600 font-extrabold uppercase tracking-tighter">+ Bs {parseFloat(p.mora).toLocaleString('es-BO', { minimumFractionDigits: 2 })} MORA</div>}
+                                                        </td>
+                                                        <td className="p-4 pr-6 text-center border-l border-brand/50">
+                                                            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                                                                p.estado === 'Pagada' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                                                                p.estado === 'Retrasada' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                                                'bg-brand/10 text-brand-muted border-brand/50'
                                                             }`}>
                                                                 {p.estado}
                                                             </span>
                                                         </td>
-                                                    </tr>
+                                                    </motion.tr>
                                                 ))}
                                             </tbody>
                                         </table>
@@ -315,7 +431,6 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
         </AuthenticatedLayout>

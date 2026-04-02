@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle, Eye, LayoutGrid, Briefcase, PlusCircle, ShieldCheck, X, History, TrendingUp, TrendingDown, Receipt, Printer, FileSpreadsheet, Search, Save } from 'lucide-react';
+import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle, Eye, LayoutGrid, Briefcase, PlusCircle, ShieldCheck, X, History, TrendingUp, TrendingDown, Receipt, Printer, FileSpreadsheet, Search, Save, Landmark } from 'lucide-react';
 import { Tab } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,7 +9,7 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
 
-export default function Index({ personas, auth, roles }) {
+export default function Index({ personas, auth, roles, stats, filters }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPersona, setEditingPersona] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -111,8 +111,93 @@ export default function Index({ personas, auth, roles }) {
             <Head title="Gestión de Personas ERP" />
 
             <div className="py-8 bg-main min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                     
+                    {/* SAP ERP Executive KPI Tiles */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {/* Total Afiliados */}
+                        <div className="bg-card-fap border-t-4 border-blue-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Total Afiliados</span>
+                                <Users className="w-4 h-4 text-blue-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-brand-main font-mono">{stats.total_personas}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Registros Base</div>
+                            </div>
+                        </div>
+
+                        {/* Patrimonio Social */}
+                        <div className="bg-card-fap border-t-4 border-emerald-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Patrimonio Social</span>
+                                <Landmark className="w-4 h-4 text-emerald-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right">
+                                <span className="text-xl font-black text-emerald-700 font-mono">
+                                    {new Intl.NumberFormat('es-BO').format(stats.total_aportes.bob)} <small className="text-[10px]">BOB</small>
+                                </span>
+                                <div className="text-[9px] text-brand-muted font-bold mt-1 uppercase">
+                                    Eq: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(stats.total_aportes.usd)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cartera Vigente */}
+                        <div className="bg-card-fap border-t-4 border-amber-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Cartera Vigente</span>
+                                <TrendingUp className="w-4 h-4 text-amber-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right">
+                                <span className="text-xl font-black text-amber-700 font-mono">
+                                    {new Intl.NumberFormat('es-BO').format(stats.cartera_vigente.bob)} <small className="text-[10px]">BOB</small>
+                                </span>
+                                <div className="text-[9px] text-brand-muted font-bold mt-1 uppercase">
+                                    Eq: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(stats.cartera_vigente.usd)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* En Mora */}
+                        <div 
+                            onClick={() => router.get(route('admin.personas.index'), { filtro: filters.filtro === 'mora' ? null : 'mora' })}
+                            className={classNames(
+                                "bg-card-fap border-t-4 border-red-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-all cursor-pointer",
+                                filters.filtro === 'mora' ? "ring-2 ring-red-500 bg-red-50/10" : ""
+                            )}
+                        >
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Socios en Mora</span>
+                                <AlertCircle className={classNames("w-4 h-4", stats.socios_en_mora > 0 ? "text-red-600" : "text-gray-300")} />
+                            </div>
+                            <div className="mt-2">
+                                <span className={classNames("text-2xl font-black font-mono", stats.socios_en_mora > 0 ? "text-red-700" : "text-brand-main")}>
+                                    {stats.socios_en_mora}
+                                </span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Cuentas con Alerta</div>
+                            </div>
+                        </div>
+
+                        {/* Digitalización */}
+                        <div 
+                            onClick={() => router.get(route('admin.personas.index'), { filtro: filters.filtro === 'digitalizados' ? null : 'digitalizados' })}
+                            className={classNames(
+                                "bg-card-fap border-t-4 border-indigo-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-all cursor-pointer",
+                                filters.filtro === 'digitalizados' ? "ring-2 ring-indigo-500 bg-indigo-50/10" : ""
+                            )}
+                        >
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Digitalización</span>
+                                <ShieldCheck className="w-4 h-4 text-indigo-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right">
+                                <span className="text-2xl font-black text-indigo-700 font-mono">{stats.tasa_digitalizacion}%</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Socio con Cuenta ERP</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="bg-card-fap border border-brand/50 shadow-sm rounded-lg overflow-hidden p-4 bg-card-fap flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-3">
                             <Users className="w-5 h-5 text-primary" />
@@ -127,6 +212,14 @@ export default function Index({ personas, auth, roles }) {
                         </div>
 
                         <div className="flex items-center gap-2 w-full md:w-auto">
+                            {filters.filtro && (
+                                <button 
+                                    onClick={() => router.get(route('admin.personas.index'))}
+                                    className="px-2 py-1 bg-red-100 text-red-600 text-[9px] font-bold rounded uppercase flex items-center gap-1 hover:bg-red-200"
+                                >
+                                    <X className="w-3 h-3" /> Limpiar Filtro: {filters.filtro}
+                                </button>
+                            )}
                             <div className="relative w-full md:w-64">
                                 <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-brand-muted" />
                                 <input

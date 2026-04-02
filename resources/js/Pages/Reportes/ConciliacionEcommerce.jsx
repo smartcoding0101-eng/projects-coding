@@ -11,186 +11,167 @@ import {
     TrendingUp, 
     Wallet,
     Info,
-    Search
+    Search,
+    ChevronLeft,
+    ShieldCheck,
+    Truck,
+    ArrowUpRight,
+    AlertTriangle,
+    Boxes
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function ConciliacionEcommerce({ pendientes, resumen, productos }) {
+function StatCard({ label, value, color = 'text-primary', icon: Icon, sublabel }) {
+    return (
+        <div className="bg-card-fap rounded-2xl shadow-sm border border-brand p-5 relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-brand/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+            <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-lg bg-brand/5 border border-brand/50 ${color.replace('text-', 'text- opacity-70')}`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                </div>
+                <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.15em]">{label}</p>
+            </div>
+            <p className={`text-2xl font-black tracking-tighter ${color} mb-1`}>{value}</p>
+            {sublabel && <p className="text-[9px] font-bold text-brand-muted uppercase opacity-60 tracking-wider">{sublabel}</p>}
+        </div>
+    );
+}
+
+export default function ConciliacionEcommerce({ pendientes, resumen, productos, auth }) {
     return (
         <AuthenticatedLayout
-            header={<h2 className="font-semibold text-xl text-brand-main leading-tight">Conciliación: Finanzas vs Almacén</h2>}
+            user={auth.user}
+            header={
+                <div className="flex items-center justify-between py-0.5">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
+                            <ShieldCheck className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-extrabold text-brand-main text-sm tracking-tight transition-colors uppercase">
+                                Conciliación de Triangulación
+                            </span>
+                            <span className="text-[11px] text-brand-muted font-bold tracking-wider uppercase">
+                                Finanzas (Caja General) vs Almacén Central
+                            </span>
+                        </div>
+                    </div>
+                    <div className="hidden md:flex items-center gap-3">
+                        <Link 
+                            href={route('reportes.index')} 
+                            className="bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center px-4 py-2 gap-2"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Volver
+                        </Link>
+                    </div>
+                </div>
+            }
         >
-            <Head title="Conciliación Ecommerce" />
+            <Head title="Auditoría de Triangulación | FAPCLAS" />
 
             <div className="py-8 bg-main min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                     
-                    {/* INFO ALERTA - CONCENTRACIÓN DE RIESGO */}
-                    <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded shadow-sm">
-                        <div className="flex items-center">
-                            <AlertCircle className="h-5 w-5 text-amber-600 mr-3" />
-                            <div>
-                                <p className="text-sm font-bold text-amber-800 uppercase tracking-wider">
-                                    Control de Triangulación Activo
+                    {/* Alerta de Auditoría Premium */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-card-fap border border-brand border-l-4 border-l-amber-500 p-6 rounded-2xl shadow-sm relative overflow-hidden group"
+                    >
+                        <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform">
+                            <AlertTriangle className="w-24 h-24 text-amber-500" />
+                        </div>
+                        <div className="flex items-start gap-5 relative z-10">
+                            <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                                <AlertCircle className="h-6 w-6 text-amber-600" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs font-black text-amber-700 uppercase tracking-[0.2em] mb-1">
+                                    Protocolo de Control Transaccional Activo
                                 </p>
-                                <p className="text-[11px] text-amber-700 font-medium">
-                                    Este tablero muestra la brecha entre los ingresos validados en **Caja** y los productos que aún no han sido descargados del **Kardex Físico**.
+                                <p className="text-[11px] text-brand-muted font-bold tracking-tight max-w-3xl leading-relaxed uppercase opacity-80">
+                                    Este tablero sistematiza la brecha entre los ingresos validados en <span className="text-brand-main">Caja General</span> y los compromisos de entrega pendientes en el <span className="text-brand-main">Kardex de Almacén</span>. El sistema garantiza que no existan fugas de capital ni discrepancias físicas.
                                 </p>
                             </div>
+                            <div className="hidden lg:block text-right">
+                                <span className="text-[10px] font-black text-amber-600 bg-amber-500/5 px-3 py-1 rounded-lg border border-amber-500/20 uppercase tracking-widest">Estado: Auditando</span>
+                            </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* KPI CARDS */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-card-fap border border-brand p-4 rounded-lg shadow-sm">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">Monto Retenido</p>
-                                    <h3 className="text-xl font-black text-brand-main font-mono">Bs. {Number(resumen.monto_total_retenido).toFixed(2)}</h3>
-                                </div>
-                                <div className="p-2 bg-emerald-100 rounded text-emerald-700">
-                                    <Wallet className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <p className="text-[9px] text-brand-muted mt-2 font-medium">Flujo de caja recibido y auditado.</p>
-                        </div>
-
-                        <div className="bg-card-fap border border-brand p-4 rounded-lg shadow-sm">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">Órdenes en Almacén</p>
-                                    <h3 className="text-xl font-black text-brand-main font-mono">{resumen.total_pedidos_retenidos}</h3>
-                                </div>
-                                <div className="p-2 bg-blue-100 rounded text-blue-700">
-                                    <Clock className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <p className="text-[9px] text-brand-muted mt-2 font-medium">Pedidos pagados pendientes de Pick-up.</p>
-                        </div>
-
-                        <div className="bg-card-fap border border-brand p-4 rounded-lg shadow-sm">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">Unidades Pendientes</p>
-                                    <h3 className="text-xl font-black text-brand-main font-mono">{resumen.unidades_totales_pendientes}</h3>
-                                </div>
-                                <div className="p-2 bg-amber-100 rounded text-amber-700">
-                                    <Package className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <p className="text-[9px] text-brand-muted mt-2 font-medium">Total de items físicos comprometidos.</p>
-                        </div>
-
-                        <div className="bg-card-fap border border-brand p-4 rounded-lg shadow-sm">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">Último Corte</p>
-                                    <h3 className="text-[12px] font-bold text-brand-main mt-1.5 uppercase">{resumen.fecha_corte}</h3>
-                                </div>
-                                <div className="p-2 bg-brand/10 rounded text-primary">
-                                    <TrendingUp className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <p className="text-[9px] text-brand-muted mt-3 font-medium">Sincronización en tiempo real.</p>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <StatCard 
+                            label="Monto Retenido" 
+                            value={`Bs ${parseFloat(resumen.monto_total_retenido).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                            icon={Wallet} 
+                            color="text-emerald-600"
+                            sublabel="TOTAL EN CUSTODIA"
+                        />
+                        <StatCard 
+                            label="Órdenes Pendientes" 
+                            value={resumen.total_pedidos_retenidos} 
+                            icon={Clock} 
+                            color="text-blue-600"
+                            sublabel="PICK-UP ESPERA"
+                        />
+                        <StatCard 
+                            label="Items en Tránsito" 
+                            value={resumen.unidades_totales_pendientes} 
+                            icon={Boxes} 
+                            color="text-amber-600"
+                            sublabel="STOCK COMPROMETIDO"
+                        />
+                        <StatCard 
+                            label="Último Sincronizado" 
+                            value={resumen.fecha_corte.toUpperCase()} 
+                            icon={Activity} 
+                            color="text-primary"
+                            sublabel="CORTE DE AUDITORÍA"
+                        />
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         
                         {/* TABLA DE PRODUCTOS RETENIDOS (RESUMEN DE ALMACÉN) */}
-                        <div className="lg:col-span-4 space-y-4">
-                            <div className="bg-card-fap border border-brand rounded-lg shadow-sm overflow-hidden flex flex-col">
-                                <div className="px-4 py-2.5 border-b border-brand flex items-center justify-between">
-                                    <h3 className="text-[10px] font-bold text-brand-main uppercase tracking-widest">Inventario Comprometido</h3>
-                                    <Package className="w-4 h-4 text-brand-muted" />
+                        <motion.div 
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="lg:col-span-4 flex flex-col space-y-4"
+                        >
+                            <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col h-[600px] relative">
+                                <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
+                                    <h3 className="text-xs font-black uppercase text-brand-main tracking-[0.2em] flex items-center gap-2">
+                                        <Package className="w-4 h-4 text-primary" /> Inventario Técnico
+                                    </h3>
+                                    <div className="bg-brand/5 px-2 py-0.5 rounded border border-brand/50 text-[9px] font-black text-brand-muted uppercase tracking-tighter">Resumen Kardex</div>
                                 </div>
-                                <div className="p-0 overflow-y-auto max-h-[500px]">
-                                    <table className="w-full text-left text-[10px]">
-                                        <thead className="bg-brand/5 sticky top-0 z-10">
+                                <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-main text-brand-muted sticky top-0 z-10 border-b border-brand">
                                             <tr>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter">Producto</th>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-right">Cant.</th>
+                                                <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest leading-none">Producto</th>
+                                                <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-right leading-none border-l border-brand">Stock</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-brand/5">
+                                        <tbody className="divide-y divide-brand/10">
                                             {productos.map((prod, idx) => (
-                                                <tr key={idx} className="hover:bg-brand/5 transition-colors">
-                                                    <td className="px-4 py-2">
-                                                        <span className="font-bold block text-brand-main truncate uppercase w-40">{prod.nombre}</span>
-                                                        <span className="text-[8px] text-brand-muted font-mono">{prod.codigo_sku}</span>
+                                                <tr key={idx} className="hover:bg-brand/5 transition-colors group">
+                                                    <td className="px-5 py-4">
+                                                        <span className="font-black block text-brand-main uppercase tracking-tighter text-[11px] mb-1 truncate w-48">{prod.nombre}</span>
+                                                        <span className="text-[9px] text-brand-muted font-bold tracking-widest uppercase opacity-60">{prod.codigo_sku}</span>
                                                     </td>
-                                                    <td className="px-4 py-2 text-right">
-                                                        <span className="font-black text-primary text-[11px]">{prod.total_unidades}</span>
+                                                    <td className="px-5 py-4 text-right border-l border-brand/50">
+                                                        <span className="font-black text-primary text-[13px] tracking-tighter">{prod.total_unidades}</span>
+                                                        <span className="text-[8px] block text-brand-muted font-black uppercase opacity-60 leading-none">Unid.</span>
                                                     </td>
                                                 </tr>
                                             ))}
                                             {productos.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="2" className="px-4 py-8 text-center text-brand-muted italic">No hay productos retenidos</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* LISTADO DE ÓRDENES PENDIENTES DE ENTREGA (FINANZAS) */}
-                        <div className="lg:col-span-8 flex flex-col">
-                            <div className="bg-card-fap border border-brand rounded-lg shadow-sm overflow-hidden flex flex-col">
-                                <div className="px-4 py-2.5 border-b border-brand flex items-center justify-between">
-                                    <h3 className="text-[10px] font-bold text-brand-main uppercase tracking-widest">Órdenes Pagadas Pendientes de Despacho</h3>
-                                    <div className="flex gap-2">
-                                        <button className="px-2 py-1 text-[9px] font-bold uppercase border border-brand rounded bg-brand/5 hover:bg-brand/10 transition-colors">Exportar Auditoría</button>
-                                    </div>
-                                </div>
-                                <div className="p-0 overflow-x-auto">
-                                    <table className="w-full text-left text-[11px]">
-                                        <thead className="bg-brand/5">
-                                            <tr>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-brand-muted text-[10px]">Orden</th>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-brand-muted text-[10px]">Cliente</th>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-brand-muted text-[10px] text-right">Valorizado</th>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-brand-muted text-[10px] text-center">Antigüedad</th>
-                                                <th className="px-4 py-2 font-bold uppercase tracking-tighter text-brand-muted text-[10px] text-right">Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-brand/5">
-                                            {pendientes.map((pedido) => {
-                                                const dias = Math.floor((new Date() - new Date(pedido.created_at)) / (1000 * 60 * 60 * 24));
-                                                return (
-                                                    <tr key={pedido.id} className="hover:bg-brand/10 transition-colors">
-                                                        <td className="px-4 py-4 whitespace-nowrap">
-                                                            <span className="font-black text-brand-main font-mono">{pedido.numero_orden}</span>
-                                                        </td>
-                                                        <td className="px-4 py-4">
-                                                            <div className="flex flex-col">
-                                                                <span className="font-bold text-brand-main uppercase truncate w-32">{pedido.nombre_cliente}</span>
-                                                                <span className="text-[9px] text-brand-muted">{pedido.tipo_pago.toUpperCase()}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-4 text-right font-black font-mono">
-                                                            Bs. {Number(pedido.total).toFixed(2)}
-                                                        </td>
-                                                        <td className="px-4 py-4 text-center">
-                                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${dias > 3 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
-                                                                {dias === 0 ? 'HOY' : `${dias} DÍAS`}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-4 text-right">
-                                                            <Link 
-                                                                href={route('admin.pedidos.show', pedido.id)}
-                                                                className="p-1 px-2.5 bg-primary text-white text-[9px] font-bold uppercase rounded hover:bg-black transition-colors"
-                                                            >
-                                                                Gestionar Entrega
-                                                            </Link>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                            {pendientes.length === 0 && (
-                                                <tr>
-                                                    <td colSpan="5" className="px-6 py-12 text-center text-brand-muted uppercase font-bold text-xs tracking-widest opacity-50">
-                                                        Todo al día: El inventario coincide con los cobros de caja.
+                                                    <td colSpan="2" className="px-5 py-24 text-center opacity-30">
+                                                        <CheckCircle2 className="w-12 h-12 mx-auto mb-4" />
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Todo Despachado</p>
                                                     </td>
                                                 </tr>
                                             )}
@@ -198,7 +179,96 @@ export default function ConciliacionEcommerce({ pendientes, resumen, productos }
                                     </table>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
+
+                        {/* LISTADO DE ÓRDENES PENDIENTES DE ENTREGA (FINANZAS) */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="lg:col-span-8 flex flex-col"
+                        >
+                            <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col h-[600px] relative">
+                                <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
+                                    <h3 className="text-xs font-black uppercase text-brand-main tracking-[0.2em] flex items-center gap-2">
+                                        <Truck className="w-4 h-4 text-primary" /> Compromisos de Despacho
+                                    </h3>
+                                    <div className="flex gap-3">
+                                        <button className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-brand-muted hover:text-brand-main border border-brand rounded-xl bg-main transition-all flex items-center gap-2 shadow-sm">
+                                            <Search className="w-3.5 h-3.5" /> Auditoría Completa
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-main text-brand-muted sticky top-0 z-10 border-b border-brand">
+                                            <tr>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest">Nro de Orden</th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest border-l border-brand">Socio / Cliente</th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-right border-l border-brand">Total Cobrado</th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-center border-l border-brand w-36">Antigüedad</th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-right border-l border-brand">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-brand/10">
+                                            {pendientes.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="5" className="px-6 py-48 text-center bg-emerald-500/5">
+                                                        <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-6 stroke-1 animate-pulse" />
+                                                        <p className="text-xs font-black text-emerald-700 uppercase tracking-[0.3em]">Sistema Sincronizado</p>
+                                                        <p className="text-[10px] text-brand-muted mt-2 font-bold uppercase tracking-widest max-w-sm mx-auto leading-relaxed">
+                                                            No existen discrepancias. Todos los cobros registrados en caja han sido descargados físicamente de almacén.
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            ) : pendientes.map((pedido, index) => {
+                                                const dias = Math.floor((new Date() - new Date(pedido.created_at)) / (1000 * 60 * 60 * 24));
+                                                return (
+                                                    <motion.tr 
+                                                        key={pedido.id} 
+                                                        initial={{ opacity: 0, y: 5 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: index * 0.02 }}
+                                                        className="hover:bg-brand/5 transition-colors group"
+                                                    >
+                                                        <td className="px-6 py-5 whitespace-nowrap">
+                                                            <div className="font-black text-brand-main text-[13px] tracking-tighter font-mono group-hover:text-primary transition-colors">#{pedido.numero_orden}</div>
+                                                            <div className="text-[9px] font-bold text-brand-muted uppercase tracking-widest mt-1 opacity-60">{new Date(pedido.created_at).toLocaleDateString()}</div>
+                                                        </td>
+                                                        <td className="px-6 py-5 border-l border-brand/50">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-black text-brand-main uppercase tracking-tighter text-[11px] truncate w-40 leading-none mb-1.5">{pedido.nombre_cliente}</span>
+                                                                <span className="text-[9px] text-brand-muted font-black uppercase tracking-widest bg-brand/5 px-1.5 py-0.5 rounded border border-brand/50 inline-block leading-none">{pedido.tipo_pago.replace('_', ' ')}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5 text-right font-black border-l border-brand/50 text-brand-main font-mono text-[12px]">
+                                                            Bs {parseFloat(pedido.total).toLocaleString('es-BO', { minimumFractionDigits: 2 })}
+                                                        </td>
+                                                        <td className="px-6 py-5 text-center border-l border-brand/50">
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[9px] font-black tracking-widest uppercase border shadow-sm ${
+                                                                dias > 3 ? 'bg-red-500/10 text-red-600 border-red-500/20' : 
+                                                                dias > 1 ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                                                                'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                                            }`}>
+                                                                <Clock className="w-3 h-3" />
+                                                                {dias === 0 ? 'HOY' : `${dias} DÍAS`}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5 text-right border-l border-brand/50">
+                                                            <Link 
+                                                                href={route('admin.pedidos.show', pedido.id)}
+                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-main hover:bg-brand-hover text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:-translate-y-0.5"
+                                                            >
+                                                                Gestionar <ArrowRight className="w-3.5 h-3.5" />
+                                                            </Link>
+                                                        </td>
+                                                    </motion.tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </motion.div>
 
                     </div>
                 </div>

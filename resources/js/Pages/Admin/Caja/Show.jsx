@@ -16,20 +16,33 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 
 /* ──── DataCell (Reutilizable SAP-style) ──── */
 function DataCell({ label, value, subtext, icon: Icon, accent }) {
-    const accentColors = {
-        blue: 'text-blue-500',
-        green: 'text-emerald-500',
-        red: 'text-red-500',
-        primary: 'text-primary',
+    const accents = {
+        blue: { text: 'text-blue-500', border: 'border-t-blue-500' },
+        green: { text: 'text-emerald-500', border: 'border-t-emerald-500' },
+        red: { text: 'text-red-500', border: 'border-t-red-500' },
+        primary: { text: 'text-primary', border: 'border-t-primary' },
     };
+    const s = accents[accent] || accents.primary;
+    
     return (
-        <div className="px-5 py-4">
-            <div className="flex items-center gap-2 mb-1">
-                {Icon && <Icon className={`w-3.5 h-3.5 ${accentColors[accent] || 'text-brand-muted'}`} />}
-                <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">{label}</p>
+        <div className={`px-5 py-5 border-t-4 ${s.border} relative overflow-hidden group hover:bg-card-fap/[0.02] transition-colors`}>
+            <div className="flex items-start justify-between relative z-10">
+                <div>
+                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1 mt-1">{label}</p>
+                    <p className={`font-black text-xl tabular-nums tracking-tight ${s.text}`}>{value}</p>
+                    {subtext && <p className="text-[11px] font-semibold text-brand-muted mt-1">{subtext}</p>}
+                </div>
+                {Icon && (
+                    <div className={`p-2.5 rounded-lg bg-brand/5 border border-brand/10 group-hover:scale-110 transition-transform ${s.text}`}>
+                        <Icon className="w-5 h-5" />
+                    </div>
+                )}
             </div>
-            <p className={`font-black text-lg ${accentColors[accent] || 'text-brand-main'}`}>{value}</p>
-            {subtext && <p className="text-[11px] text-brand-muted mt-0.5 font-medium">{subtext}</p>}
+            {Icon && (
+                <div className={`absolute -bottom-4 -right-4 opacity-[0.03] transform group-hover:scale-150 group-hover:-rotate-12 transition-transform duration-500 ${s.text}`}>
+                    <Icon className="w-24 h-24" />
+                </div>
+            )}
         </div>
     );
 }
@@ -172,7 +185,7 @@ export default function CajaShow({ auth, caja, movimientos, kpis, porCategoria, 
                     {/* ══════════ SUMMARY DATA (SAP DataCells) ══════════ */}
                     <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden">
                         <div className="h-0.5 bg-primary" />
-                        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-brand">
+                        <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-brand relative">
                             <DataCell icon={Landmark} label="Saldo Apertura" accent="blue"
                                 value={`Bs ${kpis.saldo_inicial_bob.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                 subtext={kpis.saldo_inicial_usd > 0 ? `$ ${kpis.saldo_inicial_usd.toLocaleString()}` : null} />
@@ -182,14 +195,9 @@ export default function CajaShow({ auth, caja, movimientos, kpis, porCategoria, 
                             <DataCell icon={ArrowDownRight} label="Total Egresos" accent="red"
                                 value={`-Bs ${kpis.total_egresos_bob.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                 subtext={kpis.total_egresos_usd > 0 ? `-$ ${kpis.total_egresos_usd.toLocaleString()}` : null} />
-                            <div className="px-5 py-4 bg-primary/5">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <CircleDollarSign className="w-3.5 h-3.5 text-primary" />
-                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Saldo Esperado</p>
-                                </div>
-                                <p className="font-black text-xl text-brand-main">Bs {kpis.saldo_esperado_bob.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                                {kpis.saldo_esperado_usd > 0 && <p className="text-[11px] text-brand-muted mt-0.5 font-medium">$ {kpis.saldo_esperado_usd.toLocaleString()}</p>}
-                            </div>
+                            <DataCell icon={CircleDollarSign} label="Saldo Esperado" accent="primary"
+                                value={`Bs ${kpis.saldo_esperado_bob.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                subtext={kpis.saldo_esperado_usd > 0 ? `$ ${kpis.saldo_esperado_usd.toLocaleString()}` : null} />
                         </div>
 
                         {/* Observaciones de apertura */}

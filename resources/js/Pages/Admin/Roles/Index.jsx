@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { ShieldCheck, Plus, Trash2, KeyRound, AlertCircle, Settings, Pencil, Search, ShieldAlert, X, Save } from 'lucide-react';
+import { ShieldCheck, Plus, Trash2, KeyRound, AlertCircle, Settings, Pencil, Search, ShieldAlert, X, Save, Layers, Lock, Unlock } from 'lucide-react';
 
-export default function Index({ auth, roles }) {
+export default function Index({ auth, roles, stats }) {
     const isAdmin = auth.user.roles?.includes('SuperAdmin');
     const [searchTerm, setSearchTerm] = useState('');
     const [editingRole, setEditingRole] = useState(null);
@@ -63,8 +63,59 @@ export default function Index({ auth, roles }) {
             <Head title="Gestión de Seguridad y Roles" />
 
             <div className="py-8 bg-main min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                     
+                    {/* SAP ERP Executive KPI Tiles */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Total Roles */}
+                        <div className="bg-card-fap border-t-4 border-blue-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Total Roles</span>
+                                <Layers className="w-4 h-4 text-blue-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-brand-main font-mono">{stats.total_roles}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Perfiles Operativos</div>
+                            </div>
+                        </div>
+
+                        {/* Roles de Sistema */}
+                        <div className="bg-card-fap border-t-4 border-amber-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Jerarquías Nativas</span>
+                                <Lock className="w-4 h-4 text-amber-500 opacity-60" />
+                            </div>
+                            <div className="mt-2">
+                                <span className="text-2xl font-black text-amber-700 font-mono">{stats.roles_sistema}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Perfiles Base Inmutables</div>
+                            </div>
+                        </div>
+
+                        {/* Roles Personalizados */}
+                        <div className="bg-card-fap border-t-4 border-emerald-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Personalizados</span>
+                                <Unlock className="w-4 h-4 text-emerald-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right">
+                                <span className="text-2xl font-black text-emerald-700 font-mono">{stats.roles_custom}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Niveles Creados (Custom)</div>
+                            </div>
+                        </div>
+
+                        {/* Permisos */}
+                        <div className="bg-card-fap border-t-4 border-indigo-500 shadow-sm p-4 rounded-b-lg flex flex-col justify-between hover:shadow-md transition-shadow cursor-default">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Autoridades</span>
+                                <ShieldCheck className="w-4 h-4 text-indigo-500 opacity-60" />
+                            </div>
+                            <div className="mt-2 text-right flex flex-col items-end">
+                                <span className="text-2xl font-black text-indigo-700 font-mono">{stats.total_permisos}</span>
+                                <div className="text-[9px] text-brand-muted font-medium mt-1">Matriz Total de Privilegios</div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* ENCABEZADO SAP / HEADER GRID */}
                     <div className="bg-card-fap border border-brand/50 shadow-sm rounded-lg overflow-hidden p-5 flex flex-col gap-5">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

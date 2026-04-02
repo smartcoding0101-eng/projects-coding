@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { 
     BarChart3, 
     DownloadCloud, 
@@ -8,23 +8,156 @@ import {
     Wallet, 
     ShieldCheck,
     CalendarDays,
-    CheckCircle
+    CheckCircle,
+    ArrowRight,
+    Search,
+    TrendingUp,
+    Layers,
+    Activity,
+    ShieldAlert,
+    Clock,
+    FileText,
+    Boxes,
+    CreditCard,
+    ChevronRight,
+    LayoutGrid,
+    Target,
+    Zap,
+    Filter,
+    ListFilter,
+    FileSpreadsheet,
+    FileJson
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+function ReportListItem({ 
+    title, 
+    description, 
+    icon: Icon, 
+    colorClass, 
+    href, 
+    onDownloadXLSX, 
+    onDownloadPDF, 
+    isDownloading, 
+    success,
+    category 
+}) {
+    return (
+        <motion.div 
+            layout
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="group bg-card-fap border-b border-brand/50 last:border-0 hover:bg-brand/5 transition-all flex items-center px-6 py-5 gap-6 relative overflow-hidden"
+        >
+            <div className={`p-3 rounded-xl bg-brand/5 border border-brand/40 text-brand-muted group-hover:${colorClass} transition-colors shrink-0`}>
+                <Icon className="w-5 h-5" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-[13px] font-black text-brand-main tracking-tight group-hover:text-primary transition-colors truncate">{title}</h4>
+                    <span className="text-[9px] font-black text-brand-muted/40 uppercase tracking-widest border border-brand/30 px-2 py-0.5 rounded-md bg-brand/5 group-hover:bg-main group-hover:text-brand-muted transition-colors">{category}</span>
+                </div>
+                <p className="text-[11px] font-medium text-brand-muted truncate opacity-70 group-hover:opacity-100 transition-opacity">
+                    {description}
+                </p>
+            </div>
+            
+            <div className="flex items-center gap-2 shrink-0">
+                <AnimatePresence mode="wait">
+                    {success ? (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                            className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                        >
+                            <CheckCircle className="w-3.5 h-3.5" /> Listo
+                        </motion.div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                             {href ? (
+                                <Link 
+                                    href={href}
+                                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-sm hover:-translate-y-0.5 active:scale-95"
+                                >
+                                    Abrir <ChevronRight className="w-3.5 h-3.5" />
+                                </Link>
+                            ) : (
+                                <>
+                                    <button 
+                                        onClick={() => onDownloadXLSX('xlsx')}
+                                        disabled={isDownloading}
+                                        title="Descargar Excel"
+                                        className="p-2.5 bg-card-fap border border-brand hover:border-emerald-500/50 text-brand-muted hover:text-emerald-600 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-30"
+                                    >
+                                        <FileSpreadsheet className="w-4 h-4" />
+                                    </button>
+                                    {onDownloadPDF && (
+                                        <button 
+                                            onClick={() => onDownloadPDF('pdf')}
+                                            disabled={isDownloading}
+                                            title="Descargar PDF"
+                                            className="p-2.5 bg-card-fap border border-brand hover:border-red-500/50 text-brand-muted hover:text-red-600 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-30"
+                                        >
+                                            <FileText className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+                </AnimatePresence>
+                {isDownloading && (
+                    <div className="w-8 h-8 rounded-full border-2 border-brand/20 border-t-primary animate-spin" />
+                )}
+            </div>
+        </motion.div>
+    );
+}
 
 export default function Index({ auth }) {
     const isAdmin = auth.user.roles?.includes('SuperAdmin') || auth.user.roles?.includes('Oficial Crédito');
+    const [activeTab, setActiveTab] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    
+    // Estados para persistencia de descargas
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadSuccess, setDownloadSuccess] = useState(false);
 
-    const [isDownloadingCartera, setIsDownloadingCartera] = useState(false);
-    const [carteraDownloadSuccess, setCarteraDownloadSuccess] = useState(false);
+    const menuItems = [
+        { id: 'all', name: 'General', icon: LayoutGrid },
+        { id: 'finance', name: 'Finanzas', icon: Wallet },
+        { id: 'audit', name: 'Auditoría', icon: ShieldCheck },
+        { id: 'ops', name: 'Operativo', icon: Activity },
+        { id: 'sales', name: 'Ventas BI', icon: Boxes },
+    ];
 
-    const [isDownloadingMorosidad, setIsDownloadingMorosidad] = useState(false);
-    const [morosidadDownloadSuccess, setMorosidadDownloadSuccess] = useState(false);
+    const reportsMeta = [
+        { id: 'historico', title: 'Buro de Riesgo Socio', category: 'audit', label: 'Auditoría', description: 'Investigación histórica de créditos y comportamientos.', icon: ShieldCheck, color: 'text-emerald-600', href: route('reportes.historico') },
+        { id: 'cartera', title: 'Cartera de Préstamos', category: 'finance', label: 'Finanzas', description: 'Consolidado de capital, intereses y previsiones.', icon: Wallet, color: 'text-blue-600', downloadable: true, slug: 'cartera' },
+        { id: 'morosidad', title: 'Listado de Morosidad', category: 'audit', label: 'Auditoría', description: 'Detección crítica de incumplimientos técnicos.', icon: FileWarning, color: 'text-red-500', downloadable: true, slug: 'morosidad' },
+        { id: 'recaudacion', title: 'BI Recaudación de Cartera', category: 'finance', label: 'Finanzas', description: 'Triangulación de desembolsos vs ingreso de capital.', icon: TrendingUp, color: 'text-blue-500', href: route('reportes.recaudacion') },
+        { id: 'ecommerce', title: 'Ventas Ecommerce & QR', category: 'sales', label: 'Ventas BI', description: 'Métricas analíticas de canal digital y cobros QR.', icon: Zap, color: 'text-orange-500', href: route('reportes.ecommerce') },
+        { id: 'planilla', title: 'Carga de Descuento Planilla', category: 'ops', label: 'Operativo', description: 'Generación de archivos para banca masiva.', icon: CalendarDays, color: 'text-purple-600', href: route('reportes.planilla') },
+        { id: 'caja', title: 'Libro de Caja General', category: 'ops', label: 'Operativo', description: 'Reporte diario de arqueo y movimientos físicos.', icon: Layers, color: 'text-emerald-500', href: route('reportes.caja') },
+        { id: 'triangulacion', title: 'Conciliación Almacén/Caja', category: 'ops', label: 'Operativo', description: 'Control de stock físico contra depósitos.', icon: FileText, color: 'text-amber-600', href: route('reportes.conciliacion-ecommerce') },
+        { id: 'estado_cuenta', title: 'Estado de Cuenta Global', category: 'finance', label: 'Finanzas', description: 'Situación patrimonial del socio ante la cooperativa.', icon: CreditCard, color: 'text-blue-700', href: route('reportes.estado-cuenta') },
+    ];
 
-    const handleCarteraDownload = async (formato) => {
-        setIsDownloadingCartera(true);
+    const filteredReports = useMemo(() => {
+        return reportsMeta.filter(r => {
+            const matchesTab = activeTab === 'all' || r.category === activeTab;
+            const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                r.description.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesTab && matchesSearch;
+        });
+    }, [activeTab, searchQuery]);
+
+    const handleGenericDownload = async (target, formato) => {
+        setIsDownloading(true);
         try {
             const response = await window.axios({
-                url: route('reportes.cartera', { formato }),
+                url: route(`reportes.${target}`, { formato }),
                 method: 'GET',
                 responseType: 'blob'
             });
@@ -32,322 +165,126 @@ export default function Index({ auth }) {
             const link = document.createElement('a');
             link.href = url;
             const extension = formato === 'xlsx' ? 'xlsx' : 'pdf';
-            const filename = `cartera_general_${new Date().getTime()}.${extension}`;
-            link.setAttribute('download', filename);
+            link.setAttribute('download', `${target}_${new Date().getTime()}.${extension}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
-            
-            setIsDownloadingCartera(false);
-            setCarteraDownloadSuccess(true);
-            setTimeout(() => setCarteraDownloadSuccess(false), 5000); 
+            setIsDownloading(false);
+            setDownloadSuccess(true);
+            setTimeout(() => setDownloadSuccess(false), 3000); 
         } catch (error) {
-            setIsDownloadingCartera(false);
-            console.error('Error generando reporte de Cartera:', error);
-            alert('Error generando el reporte de Cartera General.');
+            setIsDownloading(false);
+            alert('Error en la descarga.');
         }
     };
 
-    const handleMorosidadDownload = async (formato) => {
-        setIsDownloadingMorosidad(true);
-        try {
-            const response = await window.axios({
-                url: route('reportes.morosidad', { formato }),
-                method: 'GET',
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = formato === 'xlsx' ? 'xlsx' : 'pdf';
-            const filename = `morosidad_corporativa_${new Date().getTime()}.${extension}`;
-            link.setAttribute('download', filename);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            
-            setIsDownloadingMorosidad(false);
-            setMorosidadDownloadSuccess(true);
-            setTimeout(() => setMorosidadDownloadSuccess(false), 5000); 
-        } catch (error) {
-            setIsDownloadingMorosidad(false);
-            console.error('Error generando reporte de Morosidad:', error);
-            alert('Error generando el reporte de Morosidad Corporativa.');
-        }
-    };
-
-    if (!isAdmin) {
-        return (
-            <AuthenticatedLayout user={auth.user}>
-                <div className="p-8 text-center text-red-500 font-bold">Sin privilegios.</div>
-            </AuthenticatedLayout>
-        );
-    }
+    if (!isAdmin) return <AuthenticatedLayout user={auth.user}><div className="py-32 text-center text-brand-muted font-black uppercase text-[10px] tracking-widest bg-main min-h-screen">Acceso Denegado</div></AuthenticatedLayout>;
 
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center gap-3 py-1">
-                    <BarChart3 className="w-6 h-6 text-brand-main" />
-                    <h2 className="font-semibold text-xl text-brand-main leading-tight tracking-tight">
-                        Centro de Control y Reportes
-                    </h2>
+                <div className="flex items-center justify-between py-0.5">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-lg border border-primary/20">
+                            <BarChart3 className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-extrabold text-brand-main text-sm tracking-tight">Centro Analítico de Reportes</span>
+                            <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">Inteligencia de Datos FAPCLAS</span>
+                        </div>
+                    </div>
                 </div>
             }
         >
-            <Head title="Reportes Gerenciales | FAPCLAS" />
+            <Head title="Reportes | Hub Analítico" />
 
-            <div className="py-8 min-h-screen bg-main">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-
-                    {/* Banner Intro */}
-                    <div className="bg-card-fap border border-brand py-5 px-6 rounded-2xl shadow-sm flex items-start gap-4">
-                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <ShieldCheck className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                            <h3 className="text-base font-extrabold text-brand-main mb-1">Inteligencia de Negocios Corporativa</h3>
-                            <p className="text-sm text-brand-muted max-w-3xl leading-relaxed">
-                                Extrae la información analítica de la cooperativa en tiempo real. 
-                                Todos los documentos generados contienen cierres perimetrales exactos al momento de la descarga.
-                            </p>
+            <div className="min-h-screen bg-main py-8">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                    
+                    {/* ══════════ SUB MENU (TOP TABS) ══════════ */}
+                    <div className="bg-card-fap border border-brand/80 rounded-2xl shadow-sm p-1.5 flex flex-wrap items-center gap-1 mb-8 overflow-x-auto no-scrollbar">
+                        {menuItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = activeTab === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl transition-all text-[11px] font-black uppercase tracking-wider ${
+                                        isActive 
+                                        ? 'bg-primary text-white shadow-md' 
+                                        : 'text-brand-muted hover:bg-brand/5 hover:text-brand-main'
+                                    }`}
+                                >
+                                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'opacity-40'}`} />
+                                    {item.name}
+                                </button>
+                            );
+                        })}
+                        <div className="ml-auto flex items-center gap-3 pl-4 border-l border-brand/50">
+                            <div className="relative">
+                                <Search className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input 
+                                    type="text" 
+                                    placeholder="BUSCAR INFORME..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="bg-brand/5 border-none rounded-xl pl-9 pr-4 py-2 text-[10px] font-black uppercase tracking-widest text-brand-main placeholder-brand-muted focus:ring-1 focus:ring-primary/50 w-48"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Malla de Reportes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                        {/* Reporte 0: Histórico de Crédito (Central de Riesgos) */}
-                        <div className="group bg-card-fap border border-emerald-500/30 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            
-                            <div>
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-emerald-500 transition-colors">
-                                    <ShieldCheck className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Histórico de Crédito</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Explorador interactivo. Actúa como Buro Central de Riesgos detallando movimientos, pagos, atrasos y nivel crediticio por Socio.
-                                </p>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2 mt-auto">
-                                <a 
-                                    href={route('reportes.historico')}
-                                    className="w-full relative px-4 py-2.5 text-xs font-bold text-center text-white bg-emerald-600 rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2"
-                                >
-                                    Abrir Buro de Riesgo
-                                </a>
-                            </div>
+                    {/* ══════════ LISTA ANALÍTICA DE REPORTES ══════════ */}
+                    <div className="bg-card-fap border border-brand shadow-sm rounded-3xl overflow-hidden flex flex-col">
+                        <div className="px-6 py-4 bg-brand/5 border-b border-brand flex items-center justify-between">
+                            <h3 className="text-[11px] font-black text-brand-main uppercase tracking-[0.2em] flex items-center gap-2">
+                                <ListFilter className="w-3.5 h-3.5 text-primary" /> Inventario de Reportes Disponibles
+                            </h3>
+                            <span className="text-[10px] font-bold text-brand-muted uppercase bg-card-fap border border-brand px-2.5 py-1 rounded-lg">
+                                {filteredReports.length} Resultados
+                            </span>
                         </div>
 
-                        {/* Reporte 1: Cartera de Créditos */}
-                        <div className="group bg-card-fap border border-brand rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            
-                            <div>
-                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-primary transition-colors">
-                                    <Wallet className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Cartera General</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Extrae el patrón completo de créditos vigentes, finalizados y en mora. Incluye detalle de socios, montos y saldos actuales de capital.
-                                </p>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2 mt-auto">
-                                {!carteraDownloadSuccess ? (
-                                    <>
-                                        <button 
-                                            onClick={() => handleCarteraDownload('xlsx')}
-                                            disabled={isDownloadingCartera}
-                                            className="w-full relative px-4 py-2.5 text-xs font-bold text-center text-white bg-primary rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            {isDownloadingCartera ? (
-                                                <><span className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span> Procesando...</>
-                                            ) : (
-                                                <><DownloadCloud className="w-4 h-4" /> Exportar a Excel (XLSX)</>
-                                            )}
-                                        </button>
-                                        <button 
-                                            onClick={() => handleCarteraDownload('pdf')}
-                                            disabled={isDownloadingCartera}
-                                            className="w-full relative px-4 py-2 text-xs font-semibold text-center text-brand-muted bg-brand/5 border border-brand/10 hover:border-brand/30 hover:bg-brand/10 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            Descargar Resumen PDF
-                                        </button>
-                                    </>
+                        <div className="divide-y divide-brand/30">
+                            <AnimatePresence mode="popLayout">
+                                {filteredReports.length > 0 ? (
+                                    filteredReports.map((report) => (
+                                        <ReportListItem 
+                                            key={report.id}
+                                            {...report}
+                                            category={report.label}
+                                            colorClass={report.color}
+                                            onDownloadXLSX={(f) => handleGenericDownload(report.slug, f)}
+                                            onDownloadPDF={(f) => handleGenericDownload(report.slug, f)}
+                                            isDownloading={isDownloading}
+                                            success={downloadSuccess}
+                                        />
+                                    ))
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-3 text-center px-4 bg-emerald-500/10 border border-emerald-500 rounded-xl animate-in fade-in zoom-in duration-300">
-                                        <CheckCircle className="w-6 h-6 text-emerald-500 mb-1 drop-shadow" />
-                                        <h4 className="text-emerald-600 font-extrabold text-[11px] uppercase tracking-wider">¡Descarga Completada!</h4>
-                                        <p className="text-[9px] font-medium text-emerald-700/80 leading-tight">
-                                            El archivo de Cartera está en tu equipo.
-                                        </p>
+                                    <div className="py-20 text-center">
+                                        <Layers className="w-10 h-10 text-brand-muted/20 mx-auto mb-4" />
+                                        <p className="text-[11px] font-black text-brand-muted uppercase tracking-widest">No se encontraron reportes que coincidan</p>
                                     </div>
                                 )}
-                            </div>
+                            </AnimatePresence>
                         </div>
-
-                        {/* Reporte 2: Morosidad y Riesgo */}
-                        <div className="group bg-card-fap border border-red-500/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            
-                            <div>
-                                <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-red-500 transition-colors">
-                                    <FileWarning className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Morosidad Corporativa</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Listado filtrado estrictamente por créditos en incumplimiento. Incluye cálculo de Mora, días de retraso, y monto total exigible inmediato.
-                                </p>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2 mt-auto">
-                                {!morosidadDownloadSuccess ? (
-                                    <>
-                                        <button 
-                                            onClick={() => handleMorosidadDownload('xlsx')}
-                                            disabled={isDownloadingMorosidad}
-                                            className="w-full relative px-4 py-2.5 text-xs font-bold text-center text-white bg-red-600 rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            {isDownloadingMorosidad ? (
-                                                <><span className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span> Procesando...</>
-                                            ) : (
-                                                <><DownloadCloud className="w-4 h-4" /> Exportar a Excel (XLSX)</>
-                                            )}
-                                        </button>
-                                        <button 
-                                            onClick={() => handleMorosidadDownload('pdf')}
-                                            disabled={isDownloadingMorosidad}
-                                            className="w-full relative px-4 py-2 text-xs font-semibold text-center text-red-600 bg-red-500/5 border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/10 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            Descargar Resumen PDF
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-3 text-center px-4 bg-emerald-500/10 border border-emerald-500 rounded-xl animate-in fade-in zoom-in duration-300">
-                                        <CheckCircle className="w-6 h-6 text-emerald-500 mb-1 drop-shadow" />
-                                        <h4 className="text-emerald-600 font-extrabold text-[11px] uppercase tracking-wider">¡Descarga Completada!</h4>
-                                        <p className="text-[9px] font-medium text-emerald-700/80 leading-tight">
-                                            El archivo de Mora está en tu equipo.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Reporte Propuesta A: Recaudación */}
-                        <div className="group bg-card-fap border border-blue-500/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            <div>
-                                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-blue-500 transition-colors">
-                                    <BarChart3 className="w-5 h-5 text-blue-500 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Recaudación Global</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Muestra comparativa entre Desembolso Total (Colocación) vs Recupero Total de cuotas por rango de tiempo.
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <a 
-                                    href={route('reportes.recaudacion')}
-                                    className="w-full relative px-4 py-2 text-xs font-bold text-center text-blue-600 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl transition-all flex items-center justify-center gap-2"
-                                >
-                                    Ver Análisis de Liquidez
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Reporte Propuesta B: E-Commerce */}
-                        <div className="group bg-card-fap border border-brand/50 rounded-2xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                            <div>
-                                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center mb-5">
-                                    <CalendarDays className="w-5 h-5 text-orange-500" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Rendimiento Comercial</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Métricas de ventas en Tienda Virtual, QR cobrados, Top Productos e Ingresos en línea.
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <a 
-                                    href={route('reportes.ecommerce')}
-                                    className="w-full px-4 py-2 text-xs font-bold text-center text-orange-600 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 rounded-xl flex items-center justify-center gap-2 transition-all"
-                                >
-                                    Ver Análisis de Ventas
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Reporte Propuesta C: Planilla de Descuentos */}
-                        <div className="group bg-card-fap border border-purple-500/30 rounded-2xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            <div>
-                                <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-purple-500 transition-colors">
-                                    <CalendarDays className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Descuentos de Planilla</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Exportación mensual obligatoria para Tesorería listando total de descuentos por aportaciones, comercio y deudas.
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <a 
-                                    href={route('reportes.planilla')}
-                                    className="w-full px-4 py-2.5 text-xs font-bold text-center text-white bg-purple-600 rounded-xl hover:translate-y-[-2px] transition-transform shadow-md hover:shadow-purple-500/30 flex items-center justify-center gap-2"
-                                >
-                                    Generar Planilla (Fase Actual)
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Reporte Propuesta D: Caja General */}
-                        <div className="group bg-card-fap border border-emerald-500/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            <div>
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-emerald-500 transition-colors">
-                                    <Wallet className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Caja General (Libro)</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Visualización cronológica de Ingresos, Egresos y Saldos Reales. Filtrable por Cajero y rango de fechas.
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <a 
-                                    href={route('reportes.caja')}
-                                    className="w-full px-4 py-2.5 text-xs font-bold text-center text-emerald-600 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
-                                >
-                                    Ver Libro de Caja
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Reporte Propuesta E: Triangulación (NUEVO) */}
-                        <div className="group bg-card-fap border border-amber-500/30 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-                            <div>
-                                <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-amber-500 transition-colors">
-                                    <BarChart3 className="w-5 h-5 text-amber-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <h4 className="text-lg font-black text-brand-main mb-2">Triangulación Ecommerce</h4>
-                                <p className="text-xs text-brand-muted leading-relaxed mb-6">
-                                    Tablero de Conciliación: Pagados vs Entregados. Vital para auditar stock comprometido vs dinero físico en caja.
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <a 
-                                    href={route('reportes.conciliacion-ecommerce')}
-                                    className="w-full px-4 py-2.5 text-xs font-bold text-center text-amber-700 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
-                                >
-                                    Auditar Entregas Pendientes
-                                </a>
-                            </div>
-                        </div>
-
                     </div>
+
+                    {/* Legend / Security Footer */}
+                    <div className="mt-8 flex items-center justify-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">Acceso Auditado</span>
+                        </div>
+                        <div className="w-1 h-1 bg-brand-muted rounded-full" />
+                        <div className="flex items-center gap-2">
+                           <Clock className="w-3.5 h-3.5" />
+                           <span className="text-[9px] font-black uppercase tracking-widest">Core FAPCLAS v3.5</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </AuthenticatedLayout>

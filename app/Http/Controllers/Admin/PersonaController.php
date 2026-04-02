@@ -16,24 +16,57 @@ use Spatie\Permission\Models\Role;
 
 class PersonaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         Gate::authorize('gestionar usuarios');
 
-        $personas = Persona::with(['user.roles', 'cuentaAportacion', 'kardex' => function($q) {
+        $filtro = $request->query('filtro');
+        $query = Persona::with(['user.roles', 'cuentaAportacion', 'kardex' => function($q) {
                 $q->orderBy('id', 'desc')->take(50);
             }])
             ->withSum(['creditos as deuda_total' => function($query) {
                 $query->whereIn('estado', ['Desembolsado', 'En Mora']);
-            }], 'saldo_capital')
-            ->orderBy('id', 'desc')
-            ->paginate(20);
+            }], 'saldo_capital');
+
+        // Lógica de filtros rápidos desde KPIs
+        if ($filtro === 'mora') {
+            $query->whereHas('creditos', function($q) {
+                $q->where('estado', 'En Mora');
+            });
+        } elseif ($filtro === 'digitalizados') {
+            $query->whereHas('user');
+        } elseif ($filtro === 'no_digitalizados') {
+            $query->whereDoesntHave('user');
+        }
+
+        $personas = $query->orderBy('id', 'desc')->paginate(20);
             
         $roles = Role::all();
 
+        // Cálculo de KPIs Ejecutivos
+        $tipoCambio = 6.96; // Valor base o recuperado de config
+        
+        $stats = [
+            'total_personas' => Persona::count(),
+            'total_aportes' => [
+                'bob' => (float) \App\Models\CuentaAportacion::sum('saldo_actual'),
+                'usd' => round((float) \App\Models\CuentaAportacion::sum('saldo_actual') / $tipoCambio, 2)
+            ],
+            'cartera_vigente' => [
+                'bob' => (float) \App\Models\Credito::whereIn('estado', ['Desembolsado', 'En Mora'])->sum('saldo_capital'),
+                'usd' => round((float) \App\Models\Credito::whereIn('estado', ['Desembolsado', 'En Mora'])->sum('saldo_capital') / $tipoCambio, 2)
+            ],
+            'socios_en_mora' => \App\Models\Credito::where('estado', 'En Mora')->distinct('persona_id')->count('persona_id'),
+            'tasa_digitalizacion' => Persona::count() > 0 
+                ? round((User::whereNotNull('persona_id')->count() / Persona::count()) * 100, 1) 
+                : 0
+        ];
+
         return Inertia::render('Admin/Personas/Index', [
             'personas' => $personas,
-            'roles' => $roles
+            'roles' => $roles,
+            'stats' => $stats,
+            'filters' => $request->only('filtro')
         ]);
     }
 

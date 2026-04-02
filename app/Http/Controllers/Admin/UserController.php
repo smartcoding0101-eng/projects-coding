@@ -22,10 +22,20 @@ class UserController extends Controller
         // Personas que no tienen usuario (para el selector de creación)
         $personasDisponibles = \App\Models\Persona::whereDoesntHave('user')->get();
 
+        $stats = [
+            'total_usuarios' => User::count(),
+            'socios_vinculados' => User::whereNotNull('persona_id')->count(),
+            'sin_vincular' => User::whereNull('persona_id')->count(),
+            'roles_admin' => User::whereHas('roles', function($q) {
+                $q->where('name', '!=', 'Socio Base');
+            })->count()
+        ];
+
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'roles' => $roles,
-            'personasDisponibles' => $personasDisponibles
+            'personasDisponibles' => $personasDisponibles,
+            'stats' => $stats
         ]);
     }
 

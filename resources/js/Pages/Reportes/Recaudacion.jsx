@@ -1,14 +1,20 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { 
     BarChart3, 
-    ArrowLeft, 
+    ChevronLeft, 
     TrendingUp, 
     TrendingDown, 
     Layers,
     DollarSign,
-    Calendar
+    Calendar,
+    ArrowUpRight,
+    ArrowDownLeft,
+    Activity,
+    ShieldCheck,
+    Briefcase,
+    PieChart
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -20,6 +26,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { motion, AnimatePresence } from 'framer-motion';
 
 ChartJS.register(
   CategoryScale,
@@ -30,28 +37,80 @@ ChartJS.register(
   Legend
 );
 
+function StatCard({ label, value, color = 'text-primary', icon: Icon, sublabel, trend }) {
+    return (
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="bg-card-fap rounded-2xl shadow-sm border border-brand p-6 relative overflow-hidden group hover:shadow-md transition-all cursor-default"
+        >
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-brand/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform ${color.replace('text-', 'bg-').replace('600', '500')}/5`} />
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl bg-brand/5 border border-brand/50 ${color.replace('text-', 'text- opacity-70')}`}>
+                        <Icon className={`w-4 h-4 ${color}`} />
+                    </div>
+                    <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">{label}</p>
+                </div>
+                {trend && (
+                    <div className={`flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-lg border ${trend >= 0 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'}`}>
+                        {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownLeft className="w-3 h-3" />}
+                        {Math.abs(trend)}%
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-col">
+                <p className={`text-2xl font-black tracking-tighter ${color} mb-1`}>{value}</p>
+                {sublabel && <span className="text-[9px] font-bold text-brand-muted uppercase tracking-widest opacity-60">{sublabel}</span>}
+            </div>
+        </motion.div>
+    );
+}
+
 export default function Recaudacion({ auth, labels, dataset_colocacion, dataset_recaudacion, totales }) {
     
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top',
+                align: 'end',
                 labels: {
                     color: '#6b7280',
-                    font: { weight: 'bold', size: 11 }
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded',
+                    padding: 20,
+                    font: { weight: '900', size: 10, family: 'Inter', textTransform: 'uppercase' }
                 }
             },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleFont: { size: 10, weight: '900', family: 'Inter' },
+                bodyFont: { size: 12, weight: 'bold', family: 'Inter' },
+                padding: 12,
+                borderRadius: 12,
+                displayColors: true,
+                boxPadding: 6,
+                callbacks: {
+                    label: (context) => `${context.dataset.label}: Bs ${context.parsed.y.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`
+                }
+            }
         },
         scales: {
             y: {
                 beginAtZero: true,
-                grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                ticks: { color: '#9ca3af', font: { size: 10 } }
+                grid: { color: 'rgba(156, 163, 175, 0.03)', drawBorder: false },
+                ticks: { 
+                    color: '#9ca3af', 
+                    font: { size: 9, weight: 'bold' },
+                    callback: (value) => value >= 1000 ? (value/1000) + 'k' : value
+                }
             },
             x: {
                 grid: { display: false },
-                ticks: { color: '#9ca3af', font: { size: 10 } }
+                ticks: { color: '#9ca3af', font: { size: 9, weight: 'bold' } }
             }
         }
     };
@@ -62,14 +121,18 @@ export default function Recaudacion({ auth, labels, dataset_colocacion, dataset_
             {
                 label: 'Colocación (Préstamos)',
                 data: dataset_colocacion,
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderRadius: 6,
+                backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                hoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+                borderRadius: 8,
+                barThickness: 16,
             },
             {
-                label: 'Recaudación (Pagos)',
+                label: 'Recaudación (Amortización)',
                 data: dataset_recaudacion,
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                borderRadius: 6,
+                backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+                borderRadius: 8,
+                barThickness: 16,
             },
         ],
     };
@@ -78,103 +141,125 @@ export default function Recaudacion({ auth, labels, dataset_colocacion, dataset_
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 py-1">
-                        <BarChart3 className="w-6 h-6 text-blue-600" />
-                        <h2 className="font-semibold text-xl text-brand-main leading-tight tracking-tight">
-                            Recaudación vs Colocación (12 Meses)
-                        </h2>
+                <div className="flex items-center justify-between py-0.5">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
+                            <BarChart3 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-extrabold text-brand-main text-sm tracking-tight transition-colors">
+                                Business Intelligence de Crédito
+                            </span>
+                            <span className="text-[11px] text-brand-muted font-bold tracking-wider uppercase">
+                                Balance de Colocación vs Flujo de Recaudación
+                            </span>
+                        </div>
                     </div>
-                    <a href={route('reportes.index')} className="text-sm text-brand-muted hover:text-brand-main font-semibold transition-colors flex items-center gap-1">
-                        <ArrowLeft className="w-4 h-4" /> Volver
-                    </a>
+                    <div className="hidden md:flex items-center gap-3">
+                        <Link 
+                            href={route('reportes.index')} 
+                            className="bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center px-4 py-2 gap-2"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Volver
+                        </Link>
+                    </div>
                 </div>
             }
         >
-            <Head title="Reporte de Recaudación | FAPCLAS" />
+            <Head title="Inteligencia de Recaudación | FAPCLAS" />
 
             <div className="py-8 min-h-screen bg-main">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-                    {/* Fila de Totales */}
+                    {/* Fila de Totales Premium */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-card-fap border border-brand p-6 rounded-2xl shadow-sm relative overflow-hidden group">
-                            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform" />
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                                    <TrendingUp className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black uppercase text-brand-muted mb-1">Colocación Anual</p>
-                                    <p className="text-2xl font-black text-brand-main">Bs {totales.anual_colocacion.toLocaleString()}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-card-fap border border-brand p-6 rounded-2xl shadow-sm relative overflow-hidden group">
-                            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform" />
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                                    <TrendingDown className="w-6 h-6 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black uppercase text-brand-muted mb-1">Recaudación Anual</p>
-                                    <p className="text-2xl font-black text-brand-main">Bs {totales.anual_recaudacion.toLocaleString()}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-card-fap border border-brand p-6 rounded-2xl shadow-sm relative overflow-hidden group">
-                            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-brand/5 rounded-full group-hover:scale-125 transition-transform" />
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-brand/10 rounded-xl flex items-center justify-center">
-                                    <Layers className="w-6 h-6 text-brand-main" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black uppercase text-brand-muted mb-1">Liquidez Neta (Cashback)</p>
-                                    <p className={`text-2xl font-black ${totales.liquidez_neta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                        Bs {totales.liquidez_neta.toLocaleString()}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        <StatCard 
+                            label="Colocación Bruta Anual" 
+                            value={`Bs ${parseFloat(totales.anual_colocacion).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                            icon={Briefcase} 
+                            color="text-blue-600"
+                            sublabel="CAPITAL EXPUESTO"
+                        />
+                        <StatCard 
+                            label="Recaudación Efectiva Anual" 
+                            value={`Bs ${parseFloat(totales.anual_recaudacion).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                            icon={TrendingUp} 
+                            color="text-emerald-600"
+                            sublabel="RECUPERO DE CARTERA"
+                        />
+                        <StatCard 
+                            label="Delta de Liquidez (Neto)" 
+                            value={`Bs ${parseFloat(totales.liquidez_neta).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                            icon={PieChart} 
+                            color={totales.liquidez_neta >= 0 ? "text-emerald-600" : "text-red-600"}
+                            sublabel="FLUJO DE CAJA NETO"
+                            trend={24}
+                        />
                     </div>
 
-                    {/* Gráfico y Tabla */}
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {/* Gráfico y Tabla Analítica */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         
-                        {/* Gráfico */}
-                        <div className="lg:col-span-3 bg-card-fap border border-brand p-6 rounded-2xl shadow-sm">
-                            <h3 className="text-sm font-black uppercase text-brand-main mb-6 flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-600" /> Rendimiento Comparativo Mensual
-                            </h3>
-                            <div className="h-[350px]">
+                        {/* Gráfico Principal */}
+                        <motion.div 
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="lg:col-span-9 bg-card-fap border border-brand p-8 rounded-2xl shadow-sm relative overflow-hidden group"
+                        >
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform">
+                                <Activity className="w-64 h-64 text-brand-main" />
+                            </div>
+                            <div className="flex items-center justify-between mb-10 relative z-10">
+                                <div>
+                                    <h3 className="text-xs font-black uppercase text-brand-main tracking-[0.2em] flex items-center gap-2 mb-1">
+                                        <Calendar className="w-4 h-4 text-blue-600" /> Rendimiento Comparativo Integral
+                                    </h3>
+                                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest bg-brand/5 px-2 py-0.5 rounded border border-brand/50 inline-block">Perspectiva de 12 Meses Calendario</p>
+                                </div>
+                                <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest bg-brand/5 px-3 py-1.5 rounded-xl border border-brand/50">Datos en Tiempo Real</div>
+                            </div>
+                            <div className="h-[400px] relative z-10">
                                 <Bar options={options} data={data} />
                             </div>
-                        </div>
+                        </motion.div>
 
-                        {/* Desglose Lateral */}
-                        <div className="lg:col-span-1 space-y-4">
-                            <div className="bg-card-fap border border-brand rounded-2xl shadow-sm flex flex-col h-full max-h-[440px] overflow-hidden">
-                                <div className="p-4 border-b border-brand bg-main">
-                                    <h3 className="text-xs font-black uppercase text-brand-main">Detalle Mensual</h3>
+                        {/* Desglose Lateral de Liquidez */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="lg:col-span-3 space-y-4"
+                        >
+                            <div className="bg-card-fap border border-brand rounded-2xl shadow-sm flex flex-col h-full max-h-[550px] overflow-hidden relative">
+                                <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
+                                    <h3 className="text-xs font-black uppercase text-brand-main tracking-[0.2em] flex items-center gap-2">
+                                        <Layers className="w-4 h-4 text-primary" /> Histórico
+                                    </h3>
+                                    <span className="text-[9px] font-black text-brand-muted bg-brand/5 px-2 py-1 rounded border border-brand/50 uppercase">Delta</span>
                                 </div>
-                                <div className="flex-1 overflow-auto">
-                                    <table className="w-full text-[10px] text-left">
-                                        <thead className="bg-main text-brand-muted sticky top-0 uppercase font-black border-b border-brand">
+                                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-main text-brand-muted sticky top-0 z-10 border-b border-brand font-black uppercase">
                                             <tr>
-                                                <th className="p-3">Mes</th>
-                                                <th className="p-3 text-right">Liquidez</th>
+                                                <th className="px-5 py-3 text-[9px] tracking-[0.1em]">Mes / Gestión</th>
+                                                <th className="px-5 py-3 text-[9px] tracking-[0.1em] text-right border-l border-brand">Balance</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-brand/50">
+                                        <tbody className="divide-y divide-brand/10">
                                             {labels.map((label, i) => {
                                                 const diff = dataset_recaudacion[i] - dataset_colocacion[i];
                                                 return (
-                                                    <tr key={i} className="hover:bg-brand/5 border-b border-brand/20">
-                                                        <td className="p-3 font-bold text-brand-main uppercase">{label}</td>
-                                                        <td className={`p-3 text-right font-black ${diff >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                            {diff >= 0 ? '+' : ''}{diff.toLocaleString()}
+                                                    <tr key={i} className="hover:bg-brand/5 transition-colors group/row">
+                                                        <td className="px-5 py-4">
+                                                            <div className="font-black text-brand-main uppercase tracking-tighter text-[11px] group-hover/row:text-primary transition-colors">{label}</div>
+                                                            <div className="text-[8px] font-bold text-brand-muted uppercase tracking-widest mt-0.5 opacity-60">CIERRE MENSUAL</div>
+                                                        </td>
+                                                        <td className="px-5 py-4 text-right border-l border-brand/50">
+                                                            <div className={`font-black font-mono text-[11px] ${diff >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                                {diff >= 0 ? '+' : ''}{diff.toLocaleString('es-BO', { minimumFractionDigits: 2 })}
+                                                            </div>
+                                                            <div className={`text-[8px] font-extrabold uppercase tracking-tighter mt-1 opacity-60 ${diff >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                                {diff >= 0 ? 'SUPERÁVIT' : 'DÉFICIT'}
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
@@ -183,7 +268,7 @@ export default function Recaudacion({ auth, labels, dataset_colocacion, dataset_
                                     </table>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                     </div>
 

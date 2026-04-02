@@ -33,21 +33,23 @@ function StatusTag({ estado }) {
 }
 
 // ═══════════════════════════════════════════════════════
-//  KPI CARD — ERP style con icono en contenedor
+//  KPI CARD — ERP Fiori Style con top border
 // ═══════════════════════════════════════════════════════
-function KpiCard({ label, value, icon, iconBg, trend, warn }) {
+function KpiCard({ label, value, icon, iconColorClass = 'text-primary', borderColorClass = 'border-t-primary' }) {
     return (
-        <div className={`relative overflow-hidden bg-card-fap border rounded-xl p-5 flex items-center gap-4 transition-shadow hover:shadow-md ${warn ? 'border-red-500/30' : 'border-brand'}`}>
-            {/* Accent stripe */}
-            <div className={`absolute top-0 left-0 h-0.5 w-full ${warn ? 'bg-red-500' : 'bg-primary'}`} />
-            <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${iconBg || 'bg-card-fap/5'}`}>
+        <div className={`bg-card-fap border border-brand border-t-4 ${borderColorClass} rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group`}>
+            <div className="flex items-start justify-between">
+                <div>
+                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">{label}</p>
+                    <h3 className="text-2xl font-black text-brand-main tabular-nums tracking-tight">{value}</h3>
+                </div>
+                <div className={`p-2.5 rounded-lg bg-brand/5 border border-brand/10 group-hover:scale-110 transition-transform ${iconColorClass}`}>
+                    {icon}
+                </div>
+            </div>
+            <div className="absolute -bottom-4 -right-4 opacity-[0.03] transform group-hover:scale-150 group-hover:-rotate-12 transition-transform duration-500">
                 {icon}
             </div>
-            <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider truncate">{label}</p>
-                <p className={`text-xl font-black mt-0.5 ${warn ? 'text-red-500' : 'text-brand-main'}`}>{value}</p>
-            </div>
-            {trend && <ArrowUpRight className="w-4 h-4 text-gray-300 flex-shrink-0" />}
         </div>
     );
 }
@@ -109,13 +111,13 @@ function EvaluarModal({ credito, onClose }) {
                         <div>
                             <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-1">Monto Final Aprobado (Bs.)</label>
                             <input type="number"
-                                className="field-input font-bold"
+                                className="field-input font-bold w-full"
                                 value={data.monto_aprobado} onChange={e => setData('monto_aprobado', e.target.value)} />
                         </div>
                     )}
                     <div>
                         <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-1">Observaciones</label>
-                        <textarea className="field-input resize-none bg-main"
+                        <textarea className="field-input resize-none bg-main w-full"
                             rows="2" placeholder="Observaciones resolutivas..." value={data.observaciones} onChange={e => setData('observaciones', e.target.value)} />
                     </div>
                     <div className="flex justify-end gap-3 pt-1">
@@ -173,17 +175,12 @@ function EliminarCreditoBtn({ credito }) {
 // ═══════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════
-export default function Index({ auth, creditos }) {
+export default function Index({ auth, creditos, stats }) {
     const isAdmin = auth.user.roles?.includes('SuperAdmin') || auth.user.roles?.includes('Oficial Crédito');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterEstado, setFilterEstado] = useState('');
 
-    const totalDesembolsado = creditos
-        .filter(c => ['Desembolsado', 'En Mora', 'Pagado'].includes(c.estado))
-        .reduce((sum, c) => sum + Number(c.monto_aprobado), 0);
     const pendientesEvaluacion = creditos.filter(c => c.estado === 'Solicitado').length;
-    const activosMora = creditos.filter(c => c.estado === 'En Mora').length;
-    const totalActivos = creditos.filter(c => c.estado === 'Desembolsado').length;
 
     const filteredCreditos = creditos.filter(c => {
         const matchSearch = !searchTerm ||
@@ -195,16 +192,16 @@ export default function Index({ auth, creditos }) {
     });
 
     const kpisAdmin = [
-        { label: 'Cartera Desembolsada', value: `Bs. ${totalDesembolsado.toLocaleString('es-BO')}`, icon: <Banknote className="w-5 h-5 text-emerald-500" />, iconBg: 'bg-emerald-500/10', trend: true },
-        { label: 'Pendientes Evaluación', value: pendientesEvaluacion, icon: <Clock className="w-5 h-5 text-amber-500" />, iconBg: 'bg-amber-500/10', warn: pendientesEvaluacion > 0 },
-        { label: 'En Mora', value: activosMora, icon: <AlertCircle className="w-5 h-5 text-red-500" />, iconBg: 'bg-red-500/10', warn: activosMora > 0 },
-        { label: 'Créditos Activos', value: totalActivos, icon: <Activity className="w-5 h-5 text-primary" />, iconBg: 'bg-primary/10' },
+        { label: 'Capital Prestado', value: `Bs. ${Number(stats?.capital_prestado || 0).toLocaleString('es-BO')}`, icon: <TrendingUp className="w-6 h-6" />, borderColorClass: 'border-t-emerald-500', iconColorClass: 'text-emerald-500' },
+        { label: 'Créditos Vigentes', value: stats?.vigentes_count || 0, icon: <Activity className="w-6 h-6" />, borderColorClass: 'border-t-blue-500', iconColorClass: 'text-blue-500' },
+        { label: 'Capital Recuperado', value: `Bs. ${Number(stats?.capital_recuperado || 0).toLocaleString('es-BO')}`, icon: <Wallet className="w-6 h-6" />, borderColorClass: 'border-t-indigo-500', iconColorClass: 'text-indigo-500' },
+        { label: 'Puntos en Mora', value: stats?.creditos_mora_count || 0, icon: <AlertCircle className="w-6 h-6" />, borderColorClass: 'border-t-red-500', iconColorClass: 'text-red-500' },
     ];
     const kpisSocio = [
-        { label: 'Deuda Total', value: `Bs. ${totalDesembolsado.toLocaleString('es-BO')}`, icon: <Wallet className="w-5 h-5 text-primary" />, iconBg: 'bg-primary/10' },
-        { label: 'Activos', value: totalActivos, icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />, iconBg: 'bg-emerald-500/10' },
-        { label: 'Pendientes', value: pendientesEvaluacion, icon: <Clock className="w-5 h-5 text-amber-500" />, iconBg: 'bg-amber-500/10', warn: pendientesEvaluacion > 0 },
-        { label: 'En Mora', value: activosMora, icon: <AlertCircle className="w-5 h-5 text-red-500" />, iconBg: 'bg-red-500/10', warn: activosMora > 0 },
+        { label: 'Deuda Total', value: `Bs. ${Number(stats?.capital_prestado || 0).toLocaleString('es-BO')}`, icon: <Wallet className="w-6 h-6" />, borderColorClass: 'border-t-primary', iconColorClass: 'text-primary' },
+        { label: 'Créditos Vigentes', value: stats?.vigentes_count || 0, icon: <CheckCircle2 className="w-6 h-6" />, borderColorClass: 'border-t-emerald-500', iconColorClass: 'text-emerald-500' },
+        { label: 'Eval. Pendientes', value: pendientesEvaluacion, icon: <Clock className="w-6 h-6" />, borderColorClass: 'border-t-amber-500', iconColorClass: 'text-amber-500' },
+        { label: 'Créditos en Mora', value: stats?.creditos_mora_count || 0, icon: <AlertCircle className="w-6 h-6" />, borderColorClass: 'border-t-red-500', iconColorClass: 'text-red-500' },
     ];
     const kpis = isAdmin ? kpisAdmin : kpisSocio;
 
@@ -214,14 +211,15 @@ export default function Index({ auth, creditos }) {
             header={
                 <div className="flex items-center justify-between py-0.5">
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex-shrink-0 bg-primary/10 p-2 rounded-lg border border-primary/20">
+                            <Banknote className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex flex-col">
                             <span className="font-extrabold text-brand-main text-sm tracking-tight transition-colors">
                                 {isAdmin ? 'Gestión de Cartera Crediticia' : 'Mis Créditos'}
                             </span>
-                            <span className="h-4 w-px bg-card-fap/20" />
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full ring-1 ring-primary/20">
-                                <PieChart className="w-3 h-3" />
-                                {creditos.length} registros
+                            <span className="text-[11px] text-brand-muted font-bold tracking-wider uppercase">
+                                Central Financiera ERP
                             </span>
                         </div>
                     </div>
@@ -231,7 +229,7 @@ export default function Index({ auth, creditos }) {
             <Head title="Créditos | Fapclas" />
 
             <div className="py-6 min-h-screen bg-main">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
                     {/* ─── KPIs ─── */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

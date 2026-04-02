@@ -18,19 +18,29 @@ class CreditoController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $isAdmin = $user->hasRole('SuperAdmin') || $user->hasRole('Oficial Crédito');
         
-        // Si es Admin/Oficial ve todos, si es socio ve los suyos
-        if ($user->hasRole('SuperAdmin') || $user->hasRole('Oficial Crédito')) {
-            $creditos = Credito::with('user', 'tipoCredito')
-                ->orderBy('created_at', 'desc')->get();
-        } else {
-            $creditos = Credito::where('user_id', $user->id)
-                ->with('tipoCredito')
-                ->orderBy('created_at', 'desc')->get();
+        $query = Credito::with(['user', 'tipoCredito'])->orderBy('created_at', 'desc');
+        $statsQuery = Credito::query();
+
+        if (!$isAdmin) {
+            $query->where('user_id', $user->id);
+            $statsQuery->where('user_id', $user->id);
         }
 
+        $creditos = $query->get();
+
+        // Calcular Estadisticas Ejecutivas para SAP Fiori KPI Tiles
+        $stats = [
+            'vigentes_count' => (clone $statsQuery)->whereIn('estado', [Credito::ESTADO_DESEMBOLSADO, Credito::ESTADO_EN_MORA])->count(),
+            'capital_prestado' => (clone $statsQuery)->whereIn('estado', [Credito::ESTADO_DESEMBOLSADO, Credito::ESTADO_EN_MORA])->sum('monto_aprobado'),
+            'capital_recuperado' => (clone $statsQuery)->whereIn('estado', [Credito::ESTADO_DESEMBOLSADO, Credito::ESTADO_EN_MORA, Credito::ESTADO_PAGADO])->sum(DB::raw('monto_aprobado - saldo_capital')),
+            'creditos_mora_count' => (clone $statsQuery)->where('estado', Credito::ESTADO_EN_MORA)->count(),
+        ];
+
         return Inertia::render('Creditos/Index', [
-            'creditos' => $creditos
+            'creditos' => $creditos,
+            'stats' => $stats
         ]);
     }
 

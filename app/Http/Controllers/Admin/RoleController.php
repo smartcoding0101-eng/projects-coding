@@ -13,12 +13,21 @@ class RoleController extends Controller
 {
     public function index()
     {
-        Gate::authorize('gestionar usuarios'); // o 'gestionar roles y permisos' según convenga, mantendré 'gestionar usuarios' por compatibilidad hacia atrás
+        Gate::authorize('gestionar usuarios');
 
         $roles = Role::with('permissions')->withCount('users')->get();
+        $permissionsCount = Permission::count();
+
+        $stats = [
+            'total_roles' => $roles->count(),
+            'roles_sistema' => $roles->whereIn('name', ['SuperAdmin', 'Socio Base'])->count(),
+            'roles_custom' => $roles->whereNotIn('name', ['SuperAdmin', 'Socio Base'])->count(),
+            'total_permisos' => $permissionsCount
+        ];
 
         return Inertia::render('Admin/Roles/Index', [
-            'roles' => $roles
+            'roles' => $roles,
+            'stats' => $stats
         ]);
     }
 
