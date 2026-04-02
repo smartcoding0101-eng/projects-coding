@@ -31,7 +31,7 @@ class SiteSettingResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Configuraciones del Sitio';
 
-    protected static ?string $navigationGroup = 'CMS';
+    protected static string|\UnitEnum|null $navigationGroup = 'CMS';
 
     protected static ?int $navigationSort = 0;
 
