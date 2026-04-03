@@ -39,42 +39,84 @@ class ReporteController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        $creditos = Credito::with('user.persona', 'tipoCredito')
-            ->whereIn('estado', [
+        $tipoId = $request->input('tipo_id');
+        $estado = $request->input('estado');
+        $search = $request->input('search');
+        $desde = $request->input('desde');
+        $hasta = $request->input('hasta');
+
+        $query = Credito::join('users', 'creditos.user_id', '=', 'users.id')
+            ->join('personas', 'users.persona_id', '=', 'personas.id')
+            ->with(['user.persona', 'tipoCredito'])
+            ->select('creditos.*', 'users.name', 'personas.ci');
+
+        if ($tipoId) {
+            $query->where('creditos.tipo_credito_id', $tipoId);
+        }
+
+        if ($estado) {
+            $query->where('creditos.estado', $estado);
+        } else {
+            $query->whereIn('creditos.estado', [
                 Credito::ESTADO_DESEMBOLSADO,
                 Credito::ESTADO_EN_MORA,
                 Credito::ESTADO_PAGADO,
-            ])
-            ->get();
+            ]);
+        }
 
-        $vigentes = $creditos->where('estado', Credito::ESTADO_DESEMBOLSADO);
-        $enMora = $creditos->where('estado', Credito::ESTADO_EN_MORA);
-        $pagados = $creditos->where('estado', Credito::ESTADO_PAGADO);
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('users.name', 'like', "%{$search}%")
+                  ->orWhere('personas.ci', 'like', "%{$search}%");
+            });
+        }
+
+        if ($desde) {
+            $query->whereDate('creditos.fecha_desembolso', '>=', $desde);
+        }
+
+        if ($hasta) {
+            $query->whereDate('creditos.fecha_desembolso', '<=', $hasta);
+        }
+
+        $creditosFiltrados = $query->orderBy('creditos.fecha_desembolso', 'desc')->get();
+
+        $vigentes = $creditosFiltrados->where('estado', Credito::ESTADO_DESEMBOLSADO);
+        $enMora = $creditosFiltrados->where('estado', Credito::ESTADO_EN_MORA);
+        $pagados = $creditosFiltrados->where('estado', Credito::ESTADO_PAGADO);
 
         $data = [
             'fecha_generacion' => now()->format('d/m/Y H:i'),
-            'resumen' => [
-                'total_creditos' => $creditos->count(),
-                'vigentes' => $vigentes->count(),
-                'en_mora' => $enMora->count(),
-                'pagados' => $pagados->count(),
-                'monto_vigente' => $vigentes->sum('saldo_capital'),
-                'monto_mora' => $enMora->sum('saldo_capital'),
-                'monto_total_otorgado' => $creditos->sum('monto_aprobado'),
+            'filtros' => [
+                'tipo_id' => $tipoId,
+                'estado' => $estado,
+                'search' => $search,
+                'desde' => $desde,
+                'hasta' => $hasta,
             ],
-            'creditos' => $creditos->map(fn($c) => [
+            'resumen' => [
+                'total_creditos' => (int) $creditosFiltrados->count(),
+                'vigentes' => (int) $vigentes->count(),
+                'en_mora' => (int) $enMora->count(),
+                'pagados' => (int) $pagados->count(),
+                'monto_vigente' => (float) $vigentes->sum('saldo_capital'),
+                'monto_mora' => (float) $enMora->sum('saldo_capital'),
+                'monto_total_otorgado' => (float) $creditosFiltrados->sum('monto_aprobado'),
+            ],
+            'creditos' => $creditosFiltrados->map(fn($c) => [
                 'id' => $c->id,
                 'socio' => $c->user->name,
                 'ci' => $c->user->ci ?? 'N/D',
                 'grado' => $c->user->grado ?? '',
                 'tipo' => $c->tipoCredito?->nombre ?? 'General',
-                'monto_aprobado' => $c->monto_aprobado,
-                'saldo_capital' => $c->saldo_capital,
-                'tasa' => $c->tasa_interes,
-                'plazo' => $c->plazo_meses,
+                'monto_aprobado' => (float) $c->monto_aprobado,
+                'saldo_capital' => (float) $c->saldo_capital,
+                'tasa' => (float) $c->tasa_interes,
+                'plazo' => (int) $c->plazo_meses,
                 'estado' => $c->estado,
                 'fecha_desembolso' => $c->fecha_desembolso?->format('d/m/Y'),
             ])->values(),
+            'tipos_credito' => \App\Models\TipoCredito::select('id', 'nombre')->get(),
         ];
 
         if ($request->query('formato') === 'pdf') {
@@ -83,7 +125,7 @@ class ReporteController extends Controller
         }
 
         if ($request->query('formato') === 'xlsx') {
-            return Excel::download(new CarteraCreditosExport, 'cartera_creditos_' . now()->format('Ymd') . '.xlsx');
+            return Excel::download(new CarteraCreditosExport($data), 'cartera_creditos_' . now()->format('Ymd') . '.xlsx');
         }
 
         if ($request->query('formato') === 'csv') {
@@ -101,33 +143,72 @@ class ReporteController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        $cuotasAtrasadas = PlanPago::where('estado', PlanPago::ESTADO_RETRASADA)
-            ->with('credito.user.persona', 'credito.tipoCredito')
-            ->orderBy('fecha_vencimiento')
-            ->get();
+        $minDias = $request->input('min_dias');
+        $maxDias = $request->input('max_dias');
+        $tipoId = $request->input('tipo_id');
+        $search = $request->input('search');
+
+        $query = PlanPago::where('plan_pagos.estado', PlanPago::ESTADO_RETRASADA)
+            ->join('creditos', 'plan_pagos.credito_id', '=', 'creditos.id')
+            ->join('users', 'creditos.user_id', '=', 'users.id')
+            ->join('personas', 'users.persona_id', '=', 'personas.id')
+            ->with(['credito.user.persona', 'credito.tipoCredito'])
+            ->select('plan_pagos.*', 'creditos.tipo_credito_id', 'users.name', 'personas.ci');
+
+        if ($tipoId) {
+            $query->where('creditos.tipo_credito_id', $tipoId);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('users.name', 'like', "%{$search}%")
+                  ->orWhere('personas.ci', 'like', "%{$search}%");
+            });
+        }
+
+        $cuotasFiltradas = $query->orderBy('plan_pagos.fecha_vencimiento')->get();
+
+        // Aplicar filtro de días de mora en PHP para mayor flexibilidad con Carbon
+        if ($minDias !== null || $maxDias !== null) {
+            $cuotasFiltradas = $cuotasFiltradas->filter(function($c) use ($minDias, $maxDias) {
+                $dias = $c->fecha_vencimiento ? (int) Carbon::parse($c->fecha_vencimiento)->diffInDays(now(), false) : 0;
+                
+                if ($minDias !== null && $dias < $minDias) return false;
+                if ($maxDias !== null && $dias > $maxDias) return false;
+                
+                return true;
+            });
+        }
 
         $data = [
             'fecha_generacion' => now()->format('d/m/Y H:i'),
-            'resumen' => [
-                'total_cuotas_atrasadas' => $cuotasAtrasadas->count(),
-                'total_capital_moroso' => $cuotasAtrasadas->sum('capital_amortizado'),
-                'total_mora_acumulada' => $cuotasAtrasadas->sum('monto_mora'),
-                'socios_afectados' => $cuotasAtrasadas->pluck('credito.user_id')->unique()->count(),
+            'filtros' => [
+                'min_dias' => $minDias,
+                'max_dias' => $maxDias,
+                'tipo_id' => $tipoId,
+                'search' => $search
             ],
-            'cuotas' => $cuotasAtrasadas->map(fn($c) => [
+            'resumen' => [
+                'total_cuotas_atrasadas' => (int) $cuotasFiltradas->count(),
+                'total_capital_moroso' => (float) $cuotasFiltradas->sum('capital_amortizado'),
+                'total_mora_acumulada' => (float) $cuotasFiltradas->sum('monto_mora'),
+                'socios_afectados' => (int) $cuotasFiltradas->pluck('credito.user_id')->unique()->count(),
+            ],
+            'cuotas' => $cuotasFiltradas->map(fn($c) => [
                 'credito_id' => $c->credito_id,
-                'socio' => $c->credito->user->name,
-                'ci' => $c->credito->user->ci ?? 'N/D',
-                'grado' => $c->credito->user->grado ?? '',
+                'socio' => $c->credito->user?->name ?? 'N/D',
+                'ci' => $c->credito->user?->ci ?? 'N/D',
+                'grado' => $c->credito->user?->grado ?? '',
                 'tipo_credito' => $c->credito->tipoCredito?->nombre ?? 'General',
-                'nro_cuota' => $c->nro_cuota,
+                'nro_cuota' => (int) $c->nro_cuota,
                 'fecha_vencimiento' => $c->fecha_vencimiento?->format('d/m/Y'),
-                'dias_mora' => $c->fecha_vencimiento ? Carbon::parse($c->fecha_vencimiento)->diffInDays(now()) : 0,
-                'capital' => $c->capital_amortizado,
-                'interes' => $c->interes_pagado,
-                'mora' => $c->monto_mora,
-                'total' => $c->cuota_total + $c->monto_mora,
+                'dias_mora' => $c->fecha_vencimiento ? (int) Carbon::parse($c->fecha_vencimiento)->diffInDays(now()) : 0,
+                'capital' => (float) $c->capital_amortizado,
+                'interes' => (float) $c->interes_pagado,
+                'mora' => (float) $c->monto_mora,
+                'total' => (float) ($c->cuota_total + $c->monto_mora),
             ])->values(),
+            'tipos_credito' => \App\Models\TipoCredito::select('id', 'nombre')->get(),
         ];
 
         if ($request->query('formato') === 'pdf') {
@@ -136,7 +217,7 @@ class ReporteController extends Controller
         }
 
         if ($request->query('formato') === 'xlsx') {
-            return Excel::download(new MorosidadExport, 'morosidad_' . now()->format('Ymd') . '.xlsx');
+            return Excel::download(new MorosidadExport($data), 'morosidad_' . now()->format('Ymd') . '.xlsx');
         }
 
         if ($request->query('formato') === 'csv') {
@@ -154,7 +235,13 @@ class ReporteController extends Controller
     {
         $user = $request->user();
         $socioId = $request->input('socio_id');
-        $isAdmin = $user->hasRole('SuperAdmin') || $user->hasRole('Oficial Crédito');
+        
+        // Sanitizar socioId: si es literal 'undefined', ignorar para evitar el 404
+        if ($socioId === 'undefined') {
+            $socioId = null;
+        }
+
+        $isAdmin = $user->hasAnyRole(['SuperAdmin', 'Oficial Crédito']);
 
         if ($socioId && $isAdmin) {
             $socio = User::findOrFail($socioId);
@@ -162,18 +249,33 @@ class ReporteController extends Controller
             $socio = $user;
         }
 
+        $desde = $request->input('desde');
+        $hasta = $request->input('hasta');
+
         $creditos = Credito::where('user_id', $socio->id)
-            ->with('tipoCredito', 'planPagos')
+            ->with(['tipoCredito', 'planPagos'])
             ->get();
 
-        $movimientos = Kardex::where('user_id', $socio->id)
-            ->orderBy('id', 'desc')
-            ->limit(50)
-            ->get();
+        $queryMovimientos = Kardex::where('user_id', $socio->id)
+            ->orderBy('id', 'desc');
+        
+        if ($desde && $hasta) {
+            $queryMovimientos->whereBetween('fecha', [$desde . ' 00:00:00', $hasta . ' 23:59:59']);
+        } else {
+            $queryMovimientos->limit(50);
+        }
+
+        $movimientos = $queryMovimientos->get();
 
         $data = [
             'fecha_generacion' => now()->format('d/m/Y H:i'),
+            'filtros' => [
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'socio_id' => $socioId
+            ],
             'socio' => [
+                'id' => $socio->id,
                 'nombre' => $socio->name,
                 'ci' => $socio->ci ?? 'N/D',
                 'grado' => $socio->grado ?? 'N/D',
@@ -197,20 +299,25 @@ class ReporteController extends Controller
                 'cuotas_pendientes' => $c->planPagos->whereIn('estado', ['Pendiente', 'Retrasada'])->count(),
             ])->values(),
             'movimientos' => $movimientos->map(fn($m) => [
-                'fecha' => $m->fecha?->format('d/m/Y'),
+                'fecha' => $m->fecha ? \Carbon\Carbon::parse($m->fecha)->format('d/m/Y') : 'N/D',
                 'tipo' => Kardex::etiquetasTipo()[$m->tipo_movimiento] ?? $m->tipo_movimiento,
-                'concepto' => $m->concepto,
-                'ingreso' => $m->ingreso,
-                'egreso' => $m->egreso,
-                'saldo' => $m->saldo_acumulado,
+                'concepto' => $m->conceptosExport()[$m->concepto] ?? $m->concepto, 
+                'ingreso' => (float) $m->ingreso,
+                'egreso' => (float) $m->egreso,
+                'saldo' => (float) $m->saldo_acumulado,
             ])->values(),
-            'socios' => $isAdmin ? User::with('persona:id,ci,grado')->select('id', 'name', 'persona_id')->orderBy('name')->get()
-                ->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'ci' => $u->ci, 'grado' => $u->grado]) : [],
+            'socios' => $isAdmin ? User::select('id', 'name')->orderBy('name')->get() : [],
         ];
 
+        // Exportación PDF
         if ($request->query('formato') === 'pdf') {
             $pdf = Pdf::loadView('reportes.estado-cuenta', $data)->setPaper('letter');
             return $pdf->download('estado_cuenta_' . $socio->ci . '_' . now()->format('Ymd') . '.pdf');
+        }
+
+        // Exportación EXCEL
+        if ($request->query('formato') === 'xlsx') {
+            return Excel::download(new \App\Exports\EstadoCuentaExport($data), 'estado_cuenta_' . $socio->ci . '.xlsx');
         }
 
         return Inertia::render('Reportes/EstadoCuenta', $data);
@@ -268,7 +375,7 @@ class ReporteController extends Controller
             })->whereIn('estado', [PlanPago::ESTADO_PAGADA, PlanPago::ESTADO_RETRASADA]);
 
             if ($fechaInicio && $fechaFin) {
-                $pagosQuery->whereBetween('fecha_pago', [$fechaInicio, Carbon::parse($fechaFin)->endOfDay()]);
+                $pagosQuery->whereBetween('fecha_pago_real', [$fechaInicio, Carbon::parse($fechaFin)->endOfDay()]);
             }
             $pagosHistoricos = $pagosQuery->orderBy('fecha_vencimiento', 'desc')->get();
         }
@@ -290,7 +397,7 @@ class ReporteController extends Controller
                     'credito' => 'Crédito #' . $p->credito_id,
                     'cuota' => $p->nro_cuota,
                     'vencimiento' => Carbon::parse($p->fecha_vencimiento)->format('Y-m-d'),
-                    'fecha_pago' => $p->fecha_pago ? Carbon::parse($p->fecha_pago)->format('Y-m-d') : null,
+                    'fecha_pago' => $p->fecha_pago_real ? Carbon::parse($p->fecha_pago_real)->format('Y-m-d') : null,
                     'total' => $p->cuota_total,
                     'mora' => $p->monto_mora,
                     'estado' => $p->estado,
@@ -310,7 +417,7 @@ class ReporteController extends Controller
                 'Crédito' => '#' . $p->credito_id,
                 'Cuota' => $p->nro_cuota,
                 'Vencimiento' => $p->fecha_vencimiento->format('d/m/Y'),
-                'Fecha Pago' => $p->fecha_pago?->format('d/m/Y') ?? 'Pendiente',
+                'Fecha Pago' => $p->fecha_pago_real?->format('d/m/Y') ?? 'Pendiente',
                 'Monto Cuota' => $p->cuota_total,
                 'Mora' => $p->monto_mora,
                 'Estado' => $p->estado,
@@ -324,37 +431,150 @@ class ReporteController extends Controller
     /**
      * REPORTE 6: RECAUDACIÓN Y COLOCACIÓN
      */
-    public function recaudacion()
+    public function recaudacion(Request $request)
     {
         Gate::authorize('gestionar usuarios');
-        return Inertia::render('Reportes/Construccion', ['titulo' => 'Reporte de Recaudación y Colocación']);
+
+        $desde = $request->input('desde', now()->startOfMonth()->toDateString());
+        $hasta = $request->input('hasta', now()->toDateString());
+
+        // 1. RECAUDACIÓN: Pagos realizados en el periodo
+        $pagos = PlanPago::with('credito.user.persona')
+            ->where('estado', PlanPago::ESTADO_PAGADA)
+            ->whereBetween('fecha_pago_real', [$desde, Carbon::parse($hasta)->endOfDay()])
+            ->get();
+
+        $totalRecaudado = (float)$pagos->sum('cuota_total');
+        $capitalRecaudado = (float)$pagos->sum('capital_amortizado');
+        $interesRecaudado = (float)$pagos->sum('interes_pagado');
+        $moraRecaudada = (float)$pagos->sum('monto_mora');
+
+        // 2. COLOCACIÓN: Créditos desembolsados en el periodo
+        $colocaciones = Credito::with('user.persona', 'tipoCredito')
+            ->where('estado', Credito::ESTADO_DESEMBOLSADO)
+            ->whereBetween('fecha_desembolso', [$desde, $hasta])
+            ->get();
+
+        $totalColocado = (float)$colocaciones->sum('monto_aprobado');
+
+        // 3. DATOS PARA GRÁFICOS (Últimos 6 meses de tendencia)
+        $grafico = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $mes = now()->subMonths($i);
+            $inicioMes = $mes->copy()->startOfMonth();
+            $finMes = $mes->copy()->endOfMonth();
+
+            $recaudadoMes = PlanPago::where('estado', PlanPago::ESTADO_PAGADA)
+                ->whereBetween('fecha_pago_real', [$inicioMes, $finMes])
+                ->sum('cuota_total');
+            
+            $colocadoMes = Credito::where('estado', Credito::ESTADO_DESEMBOLSADO)
+                ->whereBetween('fecha_desembolso', [$inicioMes, $finMes])
+                ->sum('monto_aprobado');
+
+            $grafico[] = [
+                'name' => ucfirst($mes->translatedFormat('M')),
+                'recaudado' => (float)$recaudadoMes,
+                'colocado' => (float)$colocadoMes
+            ];
+        }
+
+        $data = [
+            'filtros' => [
+                'desde' => $desde,
+                'hasta' => $hasta
+            ],
+            'resumen' => [
+                'total_recaudado' => $totalRecaudado,
+                'capital' => $capitalRecaudado,
+                'interes' => $interesRecaudado,
+                'mora' => $moraRecaudada,
+                'total_colocado' => $totalColocado,
+                'recuperacion_ratio' => $totalColocado > 0 ? round(($totalRecaudado / $totalColocado) * 100, 1) : 100
+            ],
+            'detalle_pagos' => $pagos->map(fn($p) => [
+                'id' => $p->id,
+                'fecha' => $p->fecha_pago_real?->format('d/m/Y'),
+                'socio' => $p->credito->user->name,
+                'credito_id' => $p->credito_id,
+                'cuota' => $p->nro_cuota,
+                'total' => (float)$p->cuota_total,
+                'capital' => (float)$p->capital_amortizado,
+                'interes' => (float)$p->interes_pagado,
+                'metodo' => $p->metodo_pago ?? 'Caja'
+            ]),
+            'detalle_colocaciones' => $colocaciones->map(fn($c) => [
+                'id' => $c->id,
+                'fecha' => $c->fecha_desembolso?->format('d/m/Y'),
+                'socio' => $c->user->name,
+                'tipo' => $c->tipoCredito->nombre ?? 'General',
+                'monto' => (float)$c->monto_aprobado,
+                'tasa' => (float)$c->tasa_interes . '%'
+            ]),
+            'grafico' => $grafico,
+            'fecha_reporte' => now()->format('d/m/Y H:i')
+        ];
+
+        // 4. EXPORTACIÓN
+        if ($request->query('formato') === 'pdf') {
+            $pdf = Pdf::loadView('reportes.recaudacion-pdf', $data)->setPaper('letter', 'landscape');
+            return $pdf->download('recaudacion_' . str_replace('-', '', $desde) . '.pdf');
+        }
+
+        if ($request->query('formato') === 'xlsx') {
+            // Asumimos que existirá la clase RecaudacionExport
+            return Excel::download(new \App\Exports\RecaudacionExport($data), 'recaudacion_' . str_replace('-', '', $desde) . '.xlsx');
+        }
+
+        return Inertia::render('Reportes/Recaudacion', $data);
     }
 
     // ═══════════════════════════════════════════
     //  REPORTE 7: RENDIMIENTO E-COMMERCE
     /**
-     * REPORTE 7: RENDIMIENTO E-COMMERCE
+     * REPORTE 7: RENDIMIENTO E-COMMERCE (DINÁMICO)
      */
-    public function ecommerce()
+    public function ecommerce(Request $request)
     {
         Gate::authorize('gestionar usuarios');
 
-        // Valorizado del Inventario (Activos)
+        $desde = $request->input('desde', now()->startOfMonth()->toDateString());
+        $hasta = $request->input('hasta', now()->toDateString());
+        $estadoPago = $request->input('estado_pago');
+
+        // 1. FILTROS Y QUERIES BASE
+        $queryPedidos = DB::table('pedidos')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59']);
+
+        if ($estadoPago) {
+            $queryPedidos->where('estado_pago', $estadoPago);
+        }
+
+        // 2. KPIs DINÁMICOS
+        $ventasPeriodo = (float)$queryPedidos->where('estado_pago', 'pagado')->sum('total');
+        $pedidosTotal = DB::table('pedidos')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+            ->count();
+        
+        $ticketPromedio = $pedidosTotal > 0 ? ($ventasPeriodo / $pedidosTotal) : 0;
+
         $valorizado = DB::table('productos')
             ->where('activo', true)
             ->sum(DB::raw('stock_actual * precio_general'));
 
-        // Composición de Ventas por Tipo
-        $ventas_data = DB::table('pedidos')
-            ->where('estado_pago', 'pagado')
-            ->select('tipo_pago', DB::raw('SUM(total) as total'))
-            ->groupBy('tipo_pago')
+        // 3. DETALLE DE TRANSACCIONES RECIENTES
+        $recientes = DB::table('pedidos')
+            ->select('id', 'numero_orden', 'nombre_cliente', 'tipo_pago', 'estado_pago', 'total', 'created_at')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+            ->orderByDesc('created_at')
+            ->limit(15)
             ->get();
 
-        // Top 5 Productos más vendidos
+        // 4. TOP PRODUCTOS (DINÁMICO)
         $top_productos = DB::table('pedido_detalles')
             ->join('productos', 'pedido_detalles.producto_id', '=', 'productos.id')
             ->join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
+            ->whereBetween('pedidos.created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
             ->where('pedidos.estado_pago', 'pagado')
             ->select('productos.nombre', DB::raw('SUM(pedido_detalles.cantidad) as total_vendido'), DB::raw('SUM(pedido_detalles.subtotal) as recaudado'))
             ->groupBy('productos.id', 'productos.nombre')
@@ -362,31 +582,67 @@ class ReporteController extends Controller
             ->limit(5)
             ->get();
 
-        // Ventas por Mes (Gráfico)
+        // 5. COMPOSICIÓN DE VENTAS
+        $ventas_data = DB::table('pedidos')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+            ->where('estado_pago', 'pagado')
+            ->select('tipo_pago', DB::raw('SUM(total) as total'))
+            ->groupBy('tipo_pago')
+            ->get();
+
+        // 6. TENDENCIA DINÁMICA (Últimos 6 periodos)
         $meses = [];
         $ventas_mensuales = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $meses[] = ucfirst($date->translatedFormat('M'));
-            $ventas_mensuales[] = DB::table('pedidos')
+            $ventas_mensuales[] = (float)DB::table('pedidos')
                 ->where('estado_pago', 'pagado')
                 ->whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->sum('total');
         }
 
-        return Inertia::render('Reportes/Ecommerce', [
+        $data = [
+            'filtros' => [
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'estado_pago' => $estadoPago
+            ],
             'kpis' => [
                 'stock_valorizado' => $valorizado,
-                'ventas_historicas' => DB::table('pedidos')->where('estado_pago', 'pagado')->sum('total'),
-                'pedidos_hoy' => DB::table('pedidos')->whereDate('created_at', now())->count(),
+                'ventas_periodo' => $ventasPeriodo,
+                'pedidos_total' => $pedidosTotal,
+                'ticket_promedio' => $ticketPromedio,
                 'usuarios_activos' => DB::table('users')->count(),
             ],
+            'recientes' => $recientes->map(fn($p) => [
+                'id' => $p->id,
+                'orden' => $p->numero_orden,
+                'cliente' => $p->nombre_cliente,
+                'metodo' => $p->tipo_pago,
+                'estado' => $p->estado_pago,
+                'total' => (float)$p->total,
+                'fecha' => Carbon::parse($p->created_at)->format('d/m/Y H:i')
+            ]),
             'chart_labels' => $meses,
             'chart_data' => $ventas_mensuales,
             'top_productos' => $top_productos,
-            'ventas_por_tipo' => $ventas_data
-        ]);
+            'ventas_por_tipo' => $ventas_data,
+            'fecha_reporte' => now()->format('d/m/Y H:i')
+        ];
+
+        // 7. EXPORTACIÓN
+        if ($request->query('formato') === 'pdf') {
+            $pdf = Pdf::loadView('reportes.ecommerce-pdf', $data)->setPaper('letter', 'portrait');
+            return $pdf->download('ecommerce_' . str_replace('-', '', $desde) . '.pdf');
+        }
+
+        if ($request->query('formato') === 'xlsx') {
+            return Excel::download(new \App\Exports\EcommerceExport($data), 'ecommerce_' . str_replace('-', '', $desde) . '.xlsx');
+        }
+
+        return Inertia::render('Reportes/Ecommerce', $data);
     }
 
     /**
@@ -519,27 +775,40 @@ class ReporteController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        // 1. Pedidos Pagados pero NO Entregados (Dinero en caja, producto en almacén)
-        $pendientes = \App\Models\Pedido::with('detalles.producto', 'user')
-            ->where('estado_pago', 'pagado')
-            ->where('estado_entrega', 'por_recoger')
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $desde = $request->input('desde', now()->startOfMonth()->toDateString());
+        $hasta = $request->input('hasta', now()->toDateString());
+        $estadoEntrega = $request->input('estado_entrega', 'por_recoger');
 
-        // 2. Resumen de Productos Retenidos
-        $productosRetenidos = DB::table('pedido_detalles')
+        // 1. Pedidos Pagados filtrados por fecha y estado
+        $queryPendientes = \App\Models\Pedido::with('detalles.producto', 'user')
+            ->where('estado_pago', 'pagado')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59']);
+
+        if ($estadoEntrega !== 'todos') {
+            $queryPendientes->where('estado_entrega', $estadoEntrega);
+        }
+
+        $pendientes = $queryPendientes->orderBy('created_at', 'asc')->get();
+
+        // 2. Resumen de Productos Retenidos/Comprometidos
+        $queryProductos = DB::table('pedido_detalles')
             ->join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
             ->join('productos', 'pedido_detalles.producto_id', '=', 'productos.id')
             ->where('pedidos.estado_pago', 'pagado')
-            ->where('pedidos.estado_entrega', 'por_recoger')
-            ->select(
-                'productos.nombre',
-                'productos.codigo_sku',
-                DB::raw('SUM(pedido_detalles.cantidad) as total_unidades'),
-                DB::raw('SUM(pedido_detalles.subtotal) as valor_reservado')
-            )
-            ->groupBy('productos.id', 'productos.nombre', 'productos.codigo_sku')
-            ->get();
+            ->whereBetween('pedidos.created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59']);
+
+        if ($estadoEntrega !== 'todos') {
+            $queryProductos->where('pedidos.estado_entrega', $estadoEntrega);
+        }
+
+        $productosRetenidos = $queryProductos->select(
+            'productos.nombre',
+            'productos.codigo_sku',
+            DB::raw('SUM(pedido_detalles.cantidad) as total_unidades'),
+            DB::raw('SUM(pedido_detalles.subtotal) as valor_reservado')
+        )
+        ->groupBy('productos.id', 'productos.nombre', 'productos.codigo_sku')
+        ->get();
 
         return Inertia::render('Reportes/ConciliacionEcommerce', [
             'pendientes' => $pendientes,
@@ -549,7 +818,12 @@ class ReporteController extends Controller
                 'unidades_totales_pendientes' => $productosRetenidos->sum('total_unidades'),
                 'fecha_corte' => now()->format('d/m/Y H:i'),
             ],
-            'productos' => $productosRetenidos
+            'productos' => $productosRetenidos,
+            'filtros' => [
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'estado_entrega' => $estadoEntrega
+            ]
         ]);
     }
 

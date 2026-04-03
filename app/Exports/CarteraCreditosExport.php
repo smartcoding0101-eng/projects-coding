@@ -12,12 +12,19 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CarteraCreditosExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
+    protected $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return Credito::with(['user', 'tipoCredito'])->get();
+        return collect($this->data['creditos']);
     }
 
     public function headings(): array
@@ -29,28 +36,28 @@ class CarteraCreditosExport implements FromCollection, WithHeadings, WithMapping
             'Grado',
             'Tipo de Crédito',
             'Monto Aprobado (Bs)',
+            'Saldo Capital (Bs)',
+            'Tasa (%)',
             'Plazo (Meses)',
-            'Tasa de Interés (%)',
             'Fecha Desembolso',
-            'Estado',
-            'Fecha Registro'
+            'Estado'
         ];
     }
 
-    public function map($credito): array
+    public function map($c): array
     {
         return [
-            $credito->id,
-            $credito->user ? $credito->user->name : 'N/A',
-            $credito->user ? $credito->user->ci : 'N/A',
-            $credito->user ? $credito->user->grado : 'N/A',
-            $credito->tipoCredito ? $credito->tipoCredito->nombre : 'N/A',
-            $credito->monto_aprobado,
-            $credito->plazo_meses,
-            $credito->tasa_interes,
-            $credito->fecha_desembolso ? \Carbon\Carbon::parse($credito->fecha_desembolso)->format('d/m/Y') : 'Pendiente',
-            strtoupper($credito->estado),
-            $credito->created_at->format('d/m/Y H:i'),
+            $c['id'],
+            $c['socio'],
+            $c['ci'],
+            $c['grado'],
+            $c['tipo'],
+            $c['monto_aprobado'],
+            $c['saldo_capital'],
+            $c['tasa'],
+            $c['plazo'],
+            $c['fecha_desembolso'] ?? 'Pendiente',
+            strtoupper($c['estado']),
         ];
     }
 
@@ -62,6 +69,8 @@ class CarteraCreditosExport implements FromCollection, WithHeadings, WithMapping
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF28361D']],
             ],
+            'F' => ['font' => ['bold' => true]],
+            'G' => ['font' => ['bold' => true, 'color' => ['argb' => 'FF064E3B']]],
         ];
     }
 }

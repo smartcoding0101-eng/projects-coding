@@ -30,9 +30,13 @@ class PageController extends Controller
             ->get(['id', 'titulo', 'slug', 'resumen', 'imagen_path', 'categoria', 'fecha', 'created_at'])
             ->toArray();
 
+        // Buscar página "inicio" en el CMS EXCLUSIVAMENTE para extraer su SEO
+        $page = Page::where('slug', 'inicio')->where('is_active', true)->first();
+        $pageData = $page ? $page->only(['title', 'content', 'metadata']) : ['title' => 'FAPCLAS R.L. - Tu Futuro Seguro', 'content' => [], 'metadata' => null];
+
         return Inertia::render('Welcome', [
-            'page' => ['title' => 'FAPCLAS R.L. - Tu Futuro Seguro', 'content' => []],
-            'isDynamic' => false,
+            'page' => $pageData,
+            'isDynamic' => false, // MUY IMPORTANTE: Forzamos false para que dibuje el diseño "Hardcoded" gigante
             'latest_noticias' => $noticias,
             'siteSettings' => $this->getSiteSettings(),
         ]);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { 
@@ -26,7 +26,9 @@ import {
     Filter,
     ListFilter,
     FileSpreadsheet,
-    FileJson
+    FileJson,
+    X,
+    CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,11 +38,10 @@ function ReportListItem({
     icon: Icon, 
     colorClass, 
     href, 
-    onDownloadXLSX, 
-    onDownloadPDF, 
-    isDownloading, 
-    success,
-    category 
+    onDownload, 
+    category,
+    slug,
+    onDownloadPDF 
 }) {
     return (
         <motion.div 
@@ -65,65 +66,57 @@ function ReportListItem({
             </div>
             
             <div className="flex items-center gap-2 shrink-0">
-                <AnimatePresence mode="wait">
-                    {success ? (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                            className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                <div className="flex items-center gap-2">
+                     {href ? (
+                        <Link 
+                            href={href}
+                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-sm hover:-translate-y-0.5 active:scale-95"
                         >
-                            <CheckCircle className="w-3.5 h-3.5" /> Listo
-                        </motion.div>
+                            Abrir <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
                     ) : (
-                        <div className="flex items-center gap-2">
-                             {href ? (
-                                <Link 
-                                    href={href}
-                                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-sm hover:-translate-y-0.5 active:scale-95"
+                        <>
+                            <a 
+                                href={route(`reportes.${slug}`, { formato: 'xlsx' })}
+                                onClick={() => onDownload(slug, 'xlsx')}
+                                title="Descargar Excel"
+                                className="p-2.5 bg-card-fap border border-brand hover:border-emerald-500/50 text-brand-muted hover:text-emerald-600 rounded-xl transition-all hover:-translate-y-0.5"
+                            >
+                                <FileSpreadsheet className="w-4 h-4" />
+                            </a>
+                            {onDownloadPDF && (
+                                <a 
+                                    href={route(`reportes.${slug}`, { formato: 'pdf' })}
+                                    onClick={() => onDownload(slug, 'pdf')}
+                                    title="Descargar PDF"
+                                    className="p-2.5 bg-card-fap border border-brand hover:border-red-500/50 text-brand-muted hover:text-red-600 rounded-xl transition-all hover:-translate-y-0.5"
                                 >
-                                    Abrir <ChevronRight className="w-3.5 h-3.5" />
-                                </Link>
-                            ) : (
-                                <>
-                                    <button 
-                                        onClick={() => onDownloadXLSX('xlsx')}
-                                        disabled={isDownloading}
-                                        title="Descargar Excel"
-                                        className="p-2.5 bg-card-fap border border-brand hover:border-emerald-500/50 text-brand-muted hover:text-emerald-600 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-30"
-                                    >
-                                        <FileSpreadsheet className="w-4 h-4" />
-                                    </button>
-                                    {onDownloadPDF && (
-                                        <button 
-                                            onClick={() => onDownloadPDF('pdf')}
-                                            disabled={isDownloading}
-                                            title="Descargar PDF"
-                                            className="p-2.5 bg-card-fap border border-brand hover:border-red-500/50 text-brand-muted hover:text-red-600 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-30"
-                                        >
-                                            <FileText className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </>
+                                    <FileText className="w-4 h-4" />
+                                </a>
                             )}
-                        </div>
+                        </>
                     )}
-                </AnimatePresence>
-                {isDownloading && (
-                    <div className="w-8 h-8 rounded-full border-2 border-brand/20 border-t-primary animate-spin" />
-                )}
+                </div>
             </div>
         </motion.div>
     );
 }
 
+
 export default function Index({ auth }) {
     const isAdmin = auth.user.roles?.includes('SuperAdmin') || auth.user.roles?.includes('Oficial Crédito');
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    
-    // Estados para persistencia de descargas
-    const [isDownloading, setIsDownloading] = useState(false);
-    const [downloadSuccess, setDownloadSuccess] = useState(false);
+    const [notification, setNotification] = useState(null);
 
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+    
+    // Lista de categorías
     const menuItems = [
         { id: 'all', name: 'General', icon: LayoutGrid },
         { id: 'finance', name: 'Finanzas', icon: Wallet },
@@ -134,8 +127,8 @@ export default function Index({ auth }) {
 
     const reportsMeta = [
         { id: 'historico', title: 'Buro de Riesgo Socio', category: 'audit', label: 'Auditoría', description: 'Investigación histórica de créditos y comportamientos.', icon: ShieldCheck, color: 'text-emerald-600', href: route('reportes.historico') },
-        { id: 'cartera', title: 'Cartera de Préstamos', category: 'finance', label: 'Finanzas', description: 'Consolidado de capital, intereses y previsiones.', icon: Wallet, color: 'text-blue-600', downloadable: true, slug: 'cartera' },
-        { id: 'morosidad', title: 'Listado de Morosidad', category: 'audit', label: 'Auditoría', description: 'Detección crítica de incumplimientos técnicos.', icon: FileWarning, color: 'text-red-500', downloadable: true, slug: 'morosidad' },
+        { id: 'cartera', title: 'Cartera de Préstamos', category: 'finance', label: 'Finanzas', description: 'Consolidado de capital, intereses y previsiones.', icon: Wallet, color: 'text-blue-600', downloadable: true, slug: 'cartera', href: route('reportes.cartera') },
+        { id: 'morosidad', title: 'Listado de Morosidad', category: 'audit', label: 'Auditoría', description: 'Detección crítica de incumplimientos técnicos.', icon: FileWarning, color: 'text-red-500', downloadable: true, slug: 'morosidad', href: route('reportes.morosidad') },
         { id: 'recaudacion', title: 'BI Recaudación de Cartera', category: 'finance', label: 'Finanzas', description: 'Triangulación de desembolsos vs ingreso de capital.', icon: TrendingUp, color: 'text-blue-500', href: route('reportes.recaudacion') },
         { id: 'ecommerce', title: 'Ventas Ecommerce & QR', category: 'sales', label: 'Ventas BI', description: 'Métricas analíticas de canal digital y cobros QR.', icon: Zap, color: 'text-orange-500', href: route('reportes.ecommerce') },
         { id: 'planilla', title: 'Carga de Descuento Planilla', category: 'ops', label: 'Operativo', description: 'Generación de archivos para banca masiva.', icon: CalendarDays, color: 'text-purple-600', href: route('reportes.planilla') },
@@ -153,29 +146,15 @@ export default function Index({ auth }) {
         });
     }, [activeTab, searchQuery]);
 
-    const handleGenericDownload = async (target, formato) => {
-        setIsDownloading(true);
-        try {
-            const response = await window.axios({
-                url: route(`reportes.${target}`, { formato }),
-                method: 'GET',
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = formato === 'xlsx' ? 'xlsx' : 'pdf';
-            link.setAttribute('download', `${target}_${new Date().getTime()}.${extension}`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            setIsDownloading(false);
-            setDownloadSuccess(true);
-            setTimeout(() => setDownloadSuccess(false), 3000); 
-        } catch (error) {
-            setIsDownloading(false);
-            alert('Error en la descarga.');
-        }
+    const handleGenericDownload = (target, formato) => {
+        setNotification({
+            title: `Exportación de ${target.toUpperCase()} Iniciada`,
+            message: `El servidor está generando tu archivo. La descarga comenzará pronto.`,
+            type: 'success'
+        });
+        
+        // El uso de window.location.href garantiza que el navegador use el nombre de archivo enviado en el header Content-Disposition
+        window.location.href = route(`reportes.${target}`, { formato });
     };
 
     if (!isAdmin) return <AuthenticatedLayout user={auth.user}><div className="py-32 text-center text-brand-muted font-black uppercase text-[10px] tracking-widest bg-main min-h-screen">Acceso Denegado</div></AuthenticatedLayout>;
@@ -184,7 +163,37 @@ export default function Index({ auth }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center justify-between py-0.5">
+                <div className="flex items-center justify-between py-0.5 w-full">
+                    {/* Alerta de Éxito Centrada */}
+                    <AnimatePresence>
+                        {notification && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -20, x: '-50%' }}
+                                animate={{ opacity: 1, y: 0, x: '-50%' }}
+                                exit={{ opacity: 0, y: -20, x: '-50%' }}
+                                className="fixed top-8 left-1/2 z-[100] w-full max-w-md px-4"
+                            >
+                                <div className="bg-white dark:bg-slate-900 border border-emerald-500/30 shadow-[0_20px_50px_rgba(16,185,129,0.2)] rounded-2xl p-5 flex items-center gap-5 backdrop-blur-xl">
+                                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                        <CheckCircle2 className="w-7 h-7" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-[12px] font-black uppercase tracking-[0.1em] text-slate-800 dark:text-white mb-1">{notification.title}</h4>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                                            {notification.message}
+                                        </p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setNotification(null)} 
+                                        className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="flex items-center gap-3">
                         <div className="bg-primary/10 p-2 rounded-lg border border-primary/20">
                             <BarChart3 className="w-5 h-5 text-primary" />
@@ -256,10 +265,9 @@ export default function Index({ auth }) {
                                             {...report}
                                             category={report.label}
                                             colorClass={report.color}
-                                            onDownloadXLSX={(f) => handleGenericDownload(report.slug, f)}
-                                            onDownloadPDF={(f) => handleGenericDownload(report.slug, f)}
-                                            isDownloading={isDownloading}
-                                            success={downloadSuccess}
+                                            onDownload={handleGenericDownload}
+                                            onDownloadPDF={report.downloadable}
+                                            slug={report.slug}
                                         />
                                     ))
                                 ) : (
@@ -290,3 +298,4 @@ export default function Index({ auth }) {
         </AuthenticatedLayout>
     );
 }
+

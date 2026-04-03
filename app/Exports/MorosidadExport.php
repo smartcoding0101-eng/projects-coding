@@ -12,6 +12,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MorosidadExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
+    protected $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
     /**
     * Reporte enfocado solo en créditos con cuotas en Mora.
     * Muestra el monto total vencido.
@@ -19,14 +26,7 @@ class MorosidadExport implements FromCollection, WithHeadings, WithMapping, Shou
     */
     public function collection()
     {
-        // Traer créditos que tengan al menos una cuota en estado Mora
-        return Credito::with(['user', 'tipoCredito', 'planPagos' => function($q) {
-                $q->where('estado', 'Mora');
-            }])
-            ->whereHas('planPagos', function($q) {
-                $q->where('estado', 'Mora');
-            })
-            ->get();
+        return collect($this->data['cuotas']);
     }
 
     public function headings(): array
@@ -35,52 +35,41 @@ class MorosidadExport implements FromCollection, WithHeadings, WithMapping, Shou
             'ID Crédito',
             'Socio',
             'CI',
-            'WhatsApp',
-            'Mont. Aprobado',
-            'Días Atraso (Peor Caso)',
-            'Cuotas Vencidas (Cant)',
-            'Total Mora (Capital + Interés)',
-            'Total Penalidad (Mora Adicional)',
-            'Deuda Inmediata Exigible'
+            'Tipo de Crédito',
+            'Nro Cuota',
+            'Fecha Vencimiento',
+            'Días Atraso',
+            'Capital Moroso (Bs)',
+            'Interés/Mora (Bs)',
+            'Total Exigible (Bs)'
         ];
     }
 
-    public function map($credito): array
+    public function map($c): array
     {
-        $cuotasEnMora = $credito->planPagos; // Filtradas en eager loading
-        
-        $cantidadVencidas = $cuotasEnMora->count();
-        $totalOriginalMora = $cuotasEnMora->sum('cuota_total');
-        $totalPenalidad = $cuotasEnMora->sum('monto_mora');
-        $deudaExigible = $totalOriginalMora + $totalPenalidad;
-
-        // Calcular días de atraso de la cuota más antigua
-        $peorCuota = $cuotasEnMora->sortBy('fecha_vencimiento')->first();
-        $diasAtraso = $peorCuota ? \Carbon\Carbon::parse($peorCuota->fecha_vencimiento)->diffInDays(now()) : 0;
-
         return [
-            $credito->id,
-            $credito->user ? $credito->user->name : 'N/A',
-            $credito->user ? $credito->user->ci : 'N/A',
-            $credito->user ? $credito->user->whatsapp : 'N/A',
-            $credito->monto_aprobado,
-            $diasAtraso . ' días',
-            $cantidadVencidas,
-            $totalOriginalMora,
-            $totalPenalidad,
-            $deudaExigible,
+            $c['credito_id'],
+            $c['socio'],
+            $c['ci'],
+            $c['tipo_credito'],
+            $c['nro_cuota'],
+            $c['fecha_vencimiento'],
+            $c['dias_mora'] . ' días',
+            $c['capital'],
+            $c['mora'],
+            $c['total'],
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
         return [
-            // Row 1 is header
+            // Header styling
             1    => [
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFB91C1C']], // Red for mora
             ],
-            // Resaltar celdas de deuda
+            // Bold totals
             'H' => ['font' => ['bold' => true]],
             'I' => ['font' => ['bold' => true, 'color' => ['argb' => 'FFB91C1C']]],
             'J' => ['font' => ['bold' => true]],

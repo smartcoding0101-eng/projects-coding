@@ -11,6 +11,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class PageForm
@@ -55,8 +56,9 @@ class PageForm
                                             TextInput::make('cta_link')->label('Link Botón'),
                                         ])->columns(2),
                                         FileUpload::make('image')
-                                            ->label('Imagen de Fondo')
-                                            ->image()
+                                            ->label('Imagen o Video FDC (Max 25MB)')
+                                            ->acceptedFileTypes(['image/*', 'video/mp4', 'video/webm'])
+                                            ->maxSize(25600)
                                             ->directory('pages/heros'),
                                     ])
                                     ->defaultItems(3)
@@ -217,7 +219,13 @@ class PageForm
                                 Group::make([
                                     TextInput::make('main_title')->label('Título Video Principal'),
                                     TextInput::make('main_subtitle')->label('Subtítulo Video Principal'),
-                                    TextInput::make('main_url')->label('URL Video Principal')->url(),
+                                    TextInput::make('main_url')->label('URL Video (Youtube/Vimeo)')->url(),
+                                    FileUpload::make('local_video_file')
+                                        ->label('O Subir Video Local (.mp4) -> MAX: 25MB')
+                                        ->acceptedFileTypes(['video/mp4', 'video/webm'])
+                                        ->maxSize(25600)
+                                        ->directory('pages/videos_locales')
+                                        ->hint('Si subes un archivo, sobrescribirá al URL de YouTube.'),
                                     FileUpload::make('main_thumbnail')
                                         ->label('Thumbnail Principal')
                                         ->image()
@@ -325,9 +333,6 @@ class PageForm
                                 TextInput::make('badge')->label('Badge Superior'),
                             ]),
 
-                        // ========================================
-                        // LATEST NEWS — Últimas Noticias del Blog
-                        // ========================================
                         Block::make('latest_news')
                             ->label('Últimas Noticias')
                             ->icon('heroicon-o-newspaper')
@@ -341,6 +346,36 @@ class PageForm
                     ->collapsible()
                     ->collapsed(false)
                     ->blockNumbers(false),
+
+                Section::make('Metadatos y SEO (Optimización de Buscadores)')
+                    ->statePath('metadata')
+                    ->description('Configura cómo se verá tu página en Google, Facebook y WhatsApp.')
+                    ->schema([
+                        TextInput::make('seo_title')
+                            ->label('Título SEO (<title>)')
+                            ->placeholder('Ej: FAPCLAS - Inicio | Expertos en bienestar')
+                            ->maxLength(60)
+                            ->hint('Máximo 60 caracteres (Recomendado)'),
+                            
+                        Textarea::make('seo_description')
+                            ->label('Descripción Meta (<meta name="description">)')
+                            ->placeholder('Resumen corto de lo que ofrece esta página...')
+                            ->maxLength(160)
+                            ->rows(3)
+                            ->hint('Máximo 160 caracteres (Recomendado)'),
+                            
+                        FileUpload::make('og_image')
+                            ->label('Imagen OpenGraph (WhatsApp / Facebook)')
+                            ->image()
+                            ->directory('pages/seo')
+                            ->hint('Resolución recomendada: 1200x630px')
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('1200:630')
+                            ->imageResizeTargetWidth('1200')
+                            ->imageResizeTargetHeight('630'),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 }

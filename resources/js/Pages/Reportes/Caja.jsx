@@ -63,32 +63,21 @@ export default function CajaGeneral({ auth, filtros, resumen, movimientos, grafi
         router.get(route('reportes.caja'), params, { preserveState: true });
     };
 
-    const handleDownload = async (formato) => {
+    const handleDownload = (formato) => {
         setIsDownloading(true);
-        try {
-            const response = await window.axios({
-                url: route('reportes.caja', { ...params, formato }),
-                method: 'GET',
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = formato === 'xlsx' ? 'xlsx' : 'pdf';
-            const filename = `libro_caja_${new Date().getTime()}.${extension}`;
-            link.setAttribute('download', filename);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            
+        
+        const queryParams = new URLSearchParams({
+            formato,
+            ...params
+        }).toString();
+
+        window.location.href = `${route('reportes.caja')}?${queryParams}`;
+        
+        setTimeout(() => {
             setIsDownloading(false);
             setDownloadSuccess(true);
             setTimeout(() => setDownloadSuccess(false), 5000); 
-        } catch (error) {
-            setIsDownloading(false);
-            console.error('Error generando reporte de Caja:', error);
-            alert('Error generando el reporte de Caja.');
-        }
+        }, 2000);
     };
 
     const chartOptions = {

@@ -53,28 +53,19 @@ export default function Planilla({ auth, titulo, cooperativa, periodo, fecha_gen
         if (mes) router.get(route('reportes.planilla'), { mes }, { preserveState: true });
     };
 
-    const handleExport = async (formato) => {
+    const handleExport = (formato) => {
         setIsDownloading(true);
-        try {
-            const response = await window.axios({
-                url: route('reportes.planilla'),
-                params: { mes, formato },
-                method: 'GET',
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = formato === 'csv' ? 'csv' : 'pdf';
-            link.setAttribute('download', `planilla_descuento_${mes || 'actual'}.${extension}`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            alert('Error exportando la planilla.');
-        } finally {
+        
+        const queryParams = new URLSearchParams({
+            mes,
+            formato
+        }).toString();
+
+        window.location.href = `${route('reportes.planilla')}?${queryParams}`;
+
+        setTimeout(() => {
             setIsDownloading(false);
-        }
+        }, 2000);
     };
 
     return (

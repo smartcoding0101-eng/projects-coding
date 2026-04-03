@@ -23,7 +23,12 @@ export default function Welcome({ page, isDynamic, siteSettings = {}, latest_not
 
     return (
         <>
-            <Head title={page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"} />
+            <Head>
+                <title>{page?.metadata?.seo_title || page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"}</title>
+                {page?.metadata?.seo_description && <meta name="description" content={page.metadata.seo_description} />}
+                {page?.metadata?.og_image && <meta property="og:image" content={`/storage/${page.metadata.og_image}`} />}
+                {page?.metadata?.seo_title && <meta property="og:title" content={page.metadata.seo_title} />}
+            </Head>
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface selection:bg-primary/20">
                 <Header settings={header} />
 

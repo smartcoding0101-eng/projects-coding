@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 const VideoBlock = ({ data }) => {
-    const { title, subtitle, main_title, main_subtitle, main_url, main_thumbnail, gallery } = data;
+    const { title, subtitle, main_title, main_subtitle, main_url, local_video_file, main_thumbnail, gallery } = data;
     const [activeVideo, setActiveVideo] = useState(null);
     const videoRef = useRef(null);
 
@@ -27,10 +27,12 @@ const VideoBlock = ({ data }) => {
         setActiveVideo(null);
     };
 
+    const mainVideoUrl = local_video_file ? getImageUrl(local_video_file) : main_url;
+
     const mainVideo = {
         title: main_title || 'Spot Institucional',
         sub: main_subtitle || 'Video Principal',
-        url: main_url || '',
+        url: mainVideoUrl || '',
         img: getImageUrl(main_thumbnail) || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
     };
 

@@ -38,26 +38,13 @@ export default function Index({ auth, configuraciones }) {
 
     const downloadManualBackup = () => {
         setIsDownloading(true);
-        window.axios({
-            url: route('admin.backups.download') + '?filename=' + encodeURIComponent(manualBackupTitle),
-            method: 'GET',
-            responseType: 'blob'
-        }).then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', (manualBackupTitle || 'backup') + '.sql');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            
+        window.location.href = route('admin.backups.download') + '?filename=' + encodeURIComponent(manualBackupTitle);
+        
+        setTimeout(() => {
             setIsDownloading(false);
             setDownloadSuccess(true);
-            setTimeout(() => setDownloadSuccess(false), 8000); // Reset card after 8s
-        }).catch(error => {
-            setIsDownloading(false);
-            alert('Error generando SQL: Revisar permisos o variable PAT de mysqldump');
-        });
+            setTimeout(() => setDownloadSuccess(false), 8000); 
+        }, 3000);
     };
     
     // Función de actualización optimizada

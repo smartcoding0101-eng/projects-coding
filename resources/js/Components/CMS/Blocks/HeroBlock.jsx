@@ -35,6 +35,7 @@ const HeroBlock = ({ data }) => {
         if (img.startsWith('http')) return img;
         return `/storage/${img}`;
     };
+    const isVideo = (url) => url && (url.endsWith('.mp4') || url.endsWith('.webm'));
 
     return (
         <section className="relative h-[700px] flex items-center justify-center bg-zinc-900 overflow-hidden">
@@ -47,13 +48,25 @@ const HeroBlock = ({ data }) => {
                     }`}
                 >
                     {slide.image ? (
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
-                            style={{
-                                backgroundImage: `url(${getImageUrl(slide.image)})`,
-                                transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
-                            }}
-                        ></div>
+                        isVideo(slide.image) ? (
+                            <video
+                                src={getImageUrl(slide.image)}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[12000ms] ease-linear origin-center"
+                                style={{ transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)' }}
+                            />
+                        ) : (
+                            <div
+                                className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
+                                style={{
+                                    backgroundImage: `url(${getImageUrl(slide.image)})`,
+                                    transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
+                                }}
+                            ></div>
+                        )
                     ) : (
                         <div className="absolute inset-0 bg-zinc-800"></div>
                     )}

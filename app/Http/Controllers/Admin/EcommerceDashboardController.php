@@ -50,8 +50,8 @@ class EcommerceDashboardController extends Controller
                 $abc[] = [
                     'producto' => $item->producto->nombre ?? 'N/A',
                     'sku' => $item->producto->codigo_sku ?? 'N/A',
-                    'ventas' => $item->total_vendido,
-                    'recaudado' => $item->total_recaudado,
+                    'ventas' => (int) $item->total_vendido,
+                    'recaudado' => (float) $item->total_recaudado,
                     'clase' => $categoria_abc
                 ];
             }
@@ -59,11 +59,11 @@ class EcommerceDashboardController extends Controller
 
         return inertia('Admin/Ecommerce/Dashboard', [
             'kpis' => [
-                'valorizado_inventario' => $valorizado,
-                'ventas_totales' => $ventasTotales,
-                'ventas_credito' => $ventasCredito,
-                'ventas_qr' => $ventasQr,
-                'nuevos_usuarios_mes' => $nuevosUsuarios,
+                'valorizado_inventario' => (float) $valorizado,
+                'ventas_totales' => (float) $ventasTotales,
+                'ventas_credito' => (float) $ventasCredito,
+                'ventas_qr' => (float) $ventasQr,
+                'nuevos_usuarios_mes' => (int) $nuevosUsuarios,
             ],
             'stockouts' => $stockouts,
             'ranking_abc' => $abc

@@ -159,13 +159,19 @@ class CajaController extends Controller
         $porCategoria = CajaMovimiento::where('caja_id', $caja->id)
             ->select('categoria', 'tipo', DB::raw('SUM(monto_bob) as total_bob'), DB::raw('SUM(monto_usd) as total_usd'), DB::raw('COUNT(*) as cantidad'))
             ->groupBy('categoria', 'tipo')
-            ->get();
+            ->get()
+            ->map(function($item) {
+                $item->total_bob = (float) $item->total_bob;
+                $item->total_usd = (float) $item->total_usd;
+                $item->cantidad = (int) $item->cantidad;
+                return $item;
+            });
 
         // Datos para gráfico por método de pago (Filtrado)
         $porMetodo = $movimientos->groupBy('metodo_pago')->map(function ($items, $key) {
             return (object) [
                 'metodo_pago' => $key,
-                'total_bob' => $items->sum('monto_bob')
+                'total_bob' => (float) $items->sum('monto_bob')
             ];
         })->values();
 

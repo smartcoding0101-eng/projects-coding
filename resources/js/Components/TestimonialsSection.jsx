@@ -27,7 +27,7 @@ export default function TestimonialsSection() {
                             <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Avatar" className="w-14 h-14 rounded-full border-2 border-secondary shadow-lg object-cover" />
                             <div>
                                 <h4 className="font-bold text-white text-lg tracking-tight">Sgto. Jorge Luis</h4>
-                                <p className="text-xs text-secondary tracking-widest uppercase font-bold mt-1">La Paz, Bolivia</p>
+                                <p className="text-xs text-[#F7BD16] tracking-widest uppercase font-bold mt-1">La Paz, Bolivia</p>
                             </div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@ export default function TestimonialsSection() {
                              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Avatar" className="w-14 h-14 rounded-full border-2 border-secondary shadow-lg object-cover" />
                             <div>
                                 <h4 className="font-bold text-white text-lg tracking-tight">Sof. Carmen Rosa</h4>
-                                <p className="text-xs text-secondary tracking-widest uppercase font-bold mt-1">Santa Cruz</p>
+                                <p className="text-xs text-[#F7BD16] tracking-widest uppercase font-bold mt-1">Santa Cruz</p>
                             </div>
                         </div>
                     </div>
@@ -67,7 +67,7 @@ export default function TestimonialsSection() {
                             <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Avatar" className="w-14 h-14 rounded-full border-2 border-secondary shadow-lg object-cover" />
                             <div>
                                 <h4 className="font-bold text-white text-lg tracking-tight">Sgto. My. Alberto C.</h4>
-                                <p className="text-xs text-secondary tracking-widest uppercase font-bold mt-1">Cochabamba</p>
+                                <p className="text-xs text-[#F7BD16] tracking-widest uppercase font-bold mt-1">Cochabamba</p>
                             </div>
                         </div>
                     </div>

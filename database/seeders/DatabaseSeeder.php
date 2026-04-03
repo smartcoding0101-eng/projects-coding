@@ -15,10 +15,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // El orden de ejecución es Crítico para no violar llaves foráneas.
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+            StandardPermissionsSeeder::class,
+            TipoCreditoSeeder::class,
+            InicioPageSeeder::class,
+            PageSeeder::class,
+            NoticiaSeeder::class,
+            NormativasPageSeeder::class,
+            WhatsAppSoporteSeeder::class,
+            EcommerceSettingsSeeder::class,
+            EcommerceCatalogoSeeder::class,
+            HistoricalDataSeeder::class,
+        ]);
+        
+        // Crear un usuario local de desarrollo adicional
         User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'Oficial de Pruebas',
             'email' => 'test@example.com',
         ]);
     }

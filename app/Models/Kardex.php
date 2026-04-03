@@ -111,4 +111,19 @@ class Kardex extends Model
             self::TIPO_MORA => 'Interés Moratorio',
         ];
     }
+    /**
+     * Mapeo de conceptos comunes para exportaciones.
+     */
+    public static function conceptosExport(): array
+    {
+        return [
+            'pago_cuota' => 'Pago de Cuota Mensual',
+            'desembolso_credito' => 'Desembolso de Préstamo Aprobado',
+            'aporte' => 'Aporte Mensual Ordinario',
+            'retiro' => 'Retiro de Fondos / Ahorros',
+            'mora' => 'Interés Moratorio Aplicado',
+            'ajuste' => 'Ajuste Contable Administrativo',
+            'compra_convenio' => 'Compra por Convenio Comercial',
+        ];
+    }
 }

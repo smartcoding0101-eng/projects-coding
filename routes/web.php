@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
 
     // Portal ERP (Fase 3: Contabilidad)
     Route::get('/libro-diario', [App\Http\Controllers\LibroDiarioController::class, 'index'])->name('libro-diario.index');
+    Route::get('/libro-diario/pdf', [App\Http\Controllers\LibroDiarioController::class, 'exportPdf'])->name('libro-diario.pdf');
+    Route::get('/libro-diario/excel', [App\Http\Controllers\LibroDiarioController::class, 'exportExcel'])->name('libro-diario.excel');
     Route::get('/kardex', [App\Http\Controllers\KardexController::class, 'index'])->name('kardex.index');
 
     // Portal ERP (Módulo de Créditos)

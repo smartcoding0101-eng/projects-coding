@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, Link } from '@inertiajs/react';
 import { 
@@ -17,7 +17,8 @@ import {
     AlertTriangle,
     CheckCircle2,
     Clock,
-    User
+    User,
+    X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -43,6 +44,22 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
     const [fechaFin, setFechaFin] = useState(filtros.fechaFin || '');
 
     const [isDownloading, setIsDownloading] = useState(false);
+    const [notification, setNotification] = useState(null);
+
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    const notifyExport = (type) => {
+        setNotification({
+            title: `Exportación de ${type} Iniciada`,
+            message: `Tu archivo se está descargando satisfactoriamente.`,
+            type: 'success'
+        });
+    };
 
     const aplicarFiltros = (e) => {
         e.preventDefault();
@@ -53,30 +70,17 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
         }, { preserveState: true });
     };
 
-    const handleExport = async (formato) => {
+    const handleExport = (formato) => {
         if (!socioId) return;
-        setIsDownloading(true);
-        try {
-            const response = await window.axios({
-                url: route('reportes.historico'),
-                params: { socio_id: socioId, fecha_inicio: fechaInicio, fecha_fin: fechaFin, formato },
-                method: 'GET',
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = formato === 'xlsx' ? 'csv' : 'pdf';
-            link.setAttribute('download', `historico_credito_${socio_seleccionado?.ci || 'socio'}.${extension}`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Export error:', error);
-            alert('Error exportando el historial.');
-        } finally {
-            setIsDownloading(false);
-        }
+        notifyExport(formato === 'xlsx' ? 'Excel' : 'PDF');
+
+        // Redirigir directamente para que el navegador maneje la descarga con el nombre de archivo correcto
+        window.location.href = route('reportes.historico', { 
+            socio_id: socioId, 
+            fecha_inicio: fechaInicio, 
+            fecha_fin: fechaFin, 
+            formato 
+        });
     };
 
     const limpiarFiltros = () => {
@@ -90,7 +94,36 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <div className="flex items-center justify-between py-0.5">
+                <div className="flex items-center justify-between py-0.5 w-full">
+                    <AnimatePresence>
+                        {notification && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -20, x: '-50%' }}
+                                animate={{ opacity: 1, y: 0, x: '-50%' }}
+                                exit={{ opacity: 0, y: -20, x: '-50%' }}
+                                className="fixed top-8 left-1/2 z-[100] w-full max-w-md px-4"
+                            >
+                                <div className="bg-white dark:bg-slate-900 border border-emerald-500/30 shadow-[0_20px_50px_rgba(16,185,129,0.2)] rounded-2xl p-5 flex items-center gap-5 backdrop-blur-xl">
+                                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                        <CheckCircle2 className="w-7 h-7" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-[12px] font-black uppercase tracking-[0.1em] text-slate-800 dark:text-white mb-1">{notification.title}</h4>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                                            {notification.message}
+                                        </p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setNotification(null)} 
+                                        className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="flex items-center gap-3">
                         <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
                             <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -104,14 +137,6 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
                             </span>
                         </div>
                     </div>
-                    <div className="hidden md:flex items-center gap-3">
-                        <Link 
-                            href={route('reportes.index')} 
-                            className="bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center px-4 py-2 gap-2"
-                        >
-                            <ChevronLeft className="w-3.5 h-3.5" /> Volver
-                        </Link>
-                    </div>
                 </div>
             }
         >
@@ -119,67 +144,79 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
 
             <div className="py-8 min-h-screen bg-main">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                    {/* Controles Superiores */}
+                    <div className="flex items-center mb-2">
+                        <Link 
+                            href={route('reportes.index')} 
+                            className="inline-flex items-center gap-2 bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow hover:-translate-x-1"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Retornar
+                        </Link>
+                    </div>
 
                     {/* Fila superior: Filtros y Datos del Socio */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         
                         {/* Panel de Búsqueda */}
-                        <div className="lg:col-span-4 bg-card-fap border border-brand p-6 rounded-2xl shadow-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110">
-                                <Filter className="w-16 h-16 text-brand-main" />
+                        <div className="lg:col-span-4 bg-card-fap border border-brand p-8 rounded-3xl shadow-md relative overflow-hidden group">
+                            <div className="absolute -top-10 -right-10 p-4 opacity-[0.03] pointer-events-none transition-transform group-hover:scale-125 duration-700">
+                                <Filter className="w-40 h-40 text-brand-main" />
                             </div>
-                            <h3 className="text-xs font-black text-brand-main mb-6 uppercase tracking-widest flex items-center gap-2 relative z-10">
-                                <Search className="w-4 h-4 text-emerald-600" /> Explorador de Afiliados
+                            <h3 className="text-sm font-black text-brand-main mb-8 uppercase tracking-widest flex items-center gap-3 relative z-10">
+                                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                    <Search className="w-5 h-5 text-emerald-600" />
+                                </div>
+                                Explorador de Afiliados
                             </h3>
-                            <form onSubmit={aplicarFiltros} className="space-y-5 relative z-10">
+                            <form onSubmit={aplicarFiltros} className="space-y-6 relative z-10">
                                 <div>
-                                    <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Seleccionar Socio</label>
+                                    <label className="text-[11px] font-black uppercase text-brand-muted mb-2.5 block tracking-widest">Seleccionar Socio</label>
                                     <div className="relative group/input">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted group-hover/input:text-primary transition-colors" />
                                         <select 
                                             value={socioId} 
                                             onChange={e => setSocioId(e.target.value)}
-                                            className="w-full bg-main border-brand rounded-xl pl-9 text-[11px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all appearance-none tracking-tight"
+                                            className="w-full bg-main border-brand/80 hover:border-brand rounded-2xl pl-11 py-3.5 text-xs font-black text-brand-main focus:ring-primary focus:border-primary transition-all appearance-none tracking-tight shadow-sm cursor-pointer"
                                         >
                                             <option value="">-- Elige un Afiliado --</option>
                                             {socios_catalogo?.map(s => (
-                                                <option key={s.id} value={s.id}>{s.name.toUpperCase()} ({s.ci || 'SIN CI'})</option>
+                                                <option key={s.id} value={s.id} className="font-sans">{s.name.toUpperCase()} ({s.ci || 'SIN CI'})</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-5">
                                     <div>
-                                        <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Desde</label>
+                                        <label className="text-[11px] font-black uppercase text-brand-muted mb-2.5 block tracking-widest">Desde</label>
                                         <div className="relative group/input">
-                                            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                            <CalendarDays className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted group-hover/input:text-primary transition-colors" />
                                             <input 
                                                 type="date" 
                                                 value={fechaInicio} 
                                                 onChange={e => setFechaInicio(e.target.value)}
-                                                className="w-full bg-main border-brand rounded-xl pl-9 text-[10px] font-black text-brand-main focus:ring-primary transition-all"
+                                                className="w-full bg-main border-brand/80 hover:border-brand rounded-2xl px-10 py-3.5 text-[11px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all shadow-sm"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest leading-none">Hasta</label>
+                                        <label className="text-[11px] font-black uppercase text-brand-muted mb-2.5 block tracking-widest">Hasta</label>
                                         <div className="relative group/input">
-                                            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted group-hover/input:text-primary transition-colors" />
+                                            <CalendarDays className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted group-hover/input:text-primary transition-colors" />
                                             <input 
                                                 type="date" 
                                                 value={fechaFin} 
                                                 onChange={e => setFechaFin(e.target.value)}
-                                                className="w-full bg-main border-brand rounded-xl pl-9 text-[10px] font-black text-brand-main focus:ring-primary transition-all"
+                                                className="w-full bg-main border-brand/80 hover:border-brand rounded-2xl px-10 py-3.5 text-[11px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all shadow-sm"
                                             />
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-3 pt-2">
-                                    <button type="submit" className="flex-1 bg-brand-main hover:bg-brand-hover text-white text-[11px] font-black uppercase tracking-widest py-3 rounded-xl transition-all shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                        <Activity className="w-3.5 h-3.5" /> Procesar Expediente
+                                <div className="flex flex-col gap-3 pt-4">
+                                    <button type="submit" className="w-full bg-primary hover:bg-primary-dark hover:brightness-110 text-white text-xs font-black uppercase tracking-[0.15em] py-4 rounded-2xl transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-1 flex items-center justify-center gap-2">
+                                        <Activity className="w-4 h-4" /> Procesar Expediente
                                     </button>
-                                    <button type="button" onClick={limpiarFiltros} className="px-5 bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[11px] font-black uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center">
-                                        Reset
+                                    <button type="button" onClick={limpiarFiltros} className="w-full text-center px-5 bg-transparent border-none text-brand-muted hover:text-brand-main text-[11px] font-black uppercase tracking-widest py-3 rounded-2xl transition-all items-center justify-center hover:bg-brand/5">
+                                        Restablecer Filtros
                                     </button>
                                 </div>
                             </form>
@@ -291,144 +328,160 @@ export default function Historico({ auth, socios_catalogo, socio_seleccionado, m
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-                                {/* Tabla de Créditos Gestados */}
-                                <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
-                                    <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
-                                        <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
-                                            <CreditCard className="w-4 h-4 text-primary" /> Expedientes de Créditos
-                                        </h3>
-                                        <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter">
-                                            {historial_creditos.length} Operaciones
-                                        </span>
+                            {historial_creditos.length === 0 && historial_pagos.length === 0 ? (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-brand/5 border border-brand/20 rounded-3xl p-12 text-center flex flex-col items-center justify-center -mt-2 pb-16"
+                                >
+                                    <div className="w-24 h-24 bg-brand/10 rounded-full flex items-center justify-center mb-6 border border-brand/20 shadow-inner">
+                                        <AlertTriangle className="w-10 h-10 text-brand-muted opacity-80" />
                                     </div>
-                                    <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10">
-                                                <tr>
-                                                    <th className="p-4 pl-6 text-[10px] tracking-wider">Crédito / Tipo</th>
-                                                    <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Aprobado</th>
-                                                    <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-brand/10">
-                                                {historial_creditos.length === 0 ? (
+                                    <h3 className="text-xl font-black text-brand-main tracking-tighter uppercase mb-2">Sin Registro de Operaciones</h3>
+                                    <p className="text-xs text-brand-muted font-bold max-w-md uppercase tracking-widest leading-relaxed">
+                                        El afiliado seleccionado no posee desembolsos históricos ni cronogramas de amortización en el periodo filtrado. Intente ampliar el rango de fechas.
+                                    </p>
+                                </motion.div>
+                            ) : (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
+                                    {/* Tabla de Créditos Gestados */}
+                                    <div className="bg-card-fap border border-brand rounded-3xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
+                                        <div className="p-6 border-b border-brand bg-card-fap/80 flex items-center justify-between">
+                                            <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
+                                                <CreditCard className="w-4 h-4 text-primary" /> Expedientes de Créditos
+                                            </h3>
+                                            <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter shadow-sm">
+                                                {historial_creditos.length} Operaciones
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10 shadow-sm">
                                                     <tr>
-                                                        <td colSpan="3" className="py-24 text-center opacity-40">
-                                                            <div className="flex flex-col items-center gap-3">
-                                                                <Activity className="w-10 h-10" />
-                                                                <p className="text-[10px] font-black uppercase tracking-widest">Sin registros de créditos</p>
-                                                            </div>
-                                                        </td>
+                                                        <th className="p-4 pl-6 text-[10px] tracking-wider">Crédito / Tipo</th>
+                                                        <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Aprobado</th>
+                                                        <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
                                                     </tr>
-                                                ) : historial_creditos.map((c, index) => (
-                                                    <motion.tr 
-                                                        key={c.id} 
-                                                        initial={{ opacity: 0, x: -5 }}
-                                                        whileInView={{ opacity: 1, x: 0 }}
-                                                        viewport={{ once: true }}
-                                                        transition={{ delay: index * 0.02 }}
-                                                        className="hover:bg-brand/5 transition-colors group"
-                                                    >
-                                                        <td className="p-4 pl-6">
-                                                            <div className="font-black text-[12px] text-brand-main mb-1 leading-none">SOLICITUD #{c.id.toString().padStart(6, '0')}</div>
-                                                            <div className="text-[9px] text-brand-muted font-bold uppercase tracking-tight flex items-center gap-1.5 opacity-60">
-                                                                <span className="bg-brand/10 px-1.5 py-0.5 rounded tracking-widest">{c.tipo_credito?.nombre || 'PRESTAMO'}</span>
-                                                                <span className="italic mr-1">Tasa: {c.tasa_interes}%</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
-                                                            <div className="leading-none mb-1">Bs {parseFloat(c.monto_aprobado).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
-                                                            {(c.saldo_capital <= 0 && c.estado === 'Pagado') && <span className="text-[9px] text-emerald-600 font-extrabold uppercase tracking-tighter bg-emerald-500/5 px-2 py-0.5 rounded-lg border border-emerald-500/20">TOTALMENTE LIQUIDADO</span>}
-                                                        </td>
-                                                        <td className="p-4 pr-6 text-center border-l border-brand/50">
-                                                            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
-                                                                c.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                                                c.estado === 'Desembolsado' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
-                                                                c.estado === 'En Mora' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                                                'bg-brand/10 text-brand-muted border-brand/50'
-                                                            }`}>
-                                                                {c.estado}
-                                                            </span>
-                                                        </td>
-                                                    </motion.tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                {/* Tabla de Movimientos de Pagos y Mora */}
-                                <div className="bg-card-fap border border-brand rounded-2xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
-                                    <div className="p-5 border-b border-brand bg-card-fap/50 flex items-center justify-between">
-                                        <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
-                                            <HistoryIcon className="w-4 h-4 text-primary" /> Historial de Amortización
-                                        </h3>
-                                        <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter">
-                                            {historial_pagos.length} Registros
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10">
-                                                <tr>
-                                                    <th className="p-4 pl-6 text-[10px] tracking-wider w-36">Vencimiento</th>
-                                                    <th className="p-4 text-[10px] tracking-wider">Concepto Cuota</th>
-                                                    <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Monto Total</th>
-                                                    <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-brand/10">
-                                                {historial_pagos.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="4" className="py-24 text-center opacity-40">
-                                                            <div className="flex flex-col items-center gap-3">
-                                                                <Clock className="w-10 h-10" />
-                                                                <p className="text-[10px] font-black uppercase tracking-widest">Sin Cronograma de Pagos</p>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ) : historial_pagos.map((p, index) => (
-                                                    <motion.tr 
-                                                        key={p.id} 
-                                                        initial={{ opacity: 0, x: 5 }}
-                                                        whileInView={{ opacity: 1, x: 0 }}
-                                                        viewport={{ once: true }}
-                                                        transition={{ delay: index * 0.02 }}
-                                                        className="hover:bg-brand/5 transition-colors group"
-                                                    >
-                                                        <td className="p-4 pl-6">
-                                                            <div className="font-black text-[11px] text-brand-main leading-none mb-1 font-mono uppercase">{p.vencimiento}</div>
-                                                            {p.fecha_pago && (
-                                                                <div className="text-[8px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/20 inline-block tracking-tighter shadow-sm">
-                                                                    ABONADO: {p.fecha_pago}
+                                                </thead>
+                                                <tbody className="divide-y divide-brand/10">
+                                                    {historial_creditos.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="3" className="py-24 text-center opacity-40">
+                                                                <div className="flex flex-col items-center gap-3">
+                                                                    <Activity className="w-10 h-10" />
+                                                                    <p className="text-[10px] font-black uppercase tracking-widest">Sin registros de créditos en filtro</p>
                                                                 </div>
-                                                            )}
-                                                        </td>
-                                                        <td className="p-4">
-                                                            <div className="font-black text-[12px] text-brand-main mb-1 leading-none uppercase truncate max-w-[140px] tracking-tight">{p.credito}</div>
-                                                            <div className="text-[9px] text-brand-muted font-bold uppercase tracking-[0.1em] opacity-60">CUOTA NO. {p.cuota.toString().padStart(2, '0')}</div>
-                                                        </td>
-                                                        <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
-                                                            <div className="leading-none mb-1">Bs {parseFloat(p.total).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
-                                                            {p.mora > 0 && <div className="text-[9px] text-red-600 font-extrabold uppercase tracking-tighter">+ Bs {parseFloat(p.mora).toLocaleString('es-BO', { minimumFractionDigits: 2 })} MORA</div>}
-                                                        </td>
-                                                        <td className="p-4 pr-6 text-center border-l border-brand/50">
-                                                            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
-                                                                p.estado === 'Pagada' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                                                p.estado === 'Retrasada' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                                                'bg-brand/10 text-brand-muted border-brand/50'
-                                                            }`}>
-                                                                {p.estado}
-                                                            </span>
-                                                        </td>
-                                                    </motion.tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                            </td>
+                                                        </tr>
+                                                    ) : historial_creditos.map((c, index) => (
+                                                        <motion.tr 
+                                                            key={c.id} 
+                                                            initial={{ opacity: 0, x: -5 }}
+                                                            whileInView={{ opacity: 1, x: 0 }}
+                                                            viewport={{ once: true }}
+                                                            transition={{ delay: index * 0.02 }}
+                                                            className="hover:bg-brand/5 transition-colors group"
+                                                        >
+                                                            <td className="p-4 pl-6">
+                                                                <div className="font-black text-[12px] text-brand-main mb-1 leading-none">SOLICITUD #{c.id.toString().padStart(6, '0')}</div>
+                                                                <div className="text-[9px] text-brand-muted font-bold uppercase tracking-tight flex items-center gap-1.5 opacity-60">
+                                                                    <span className="bg-brand/10 px-1.5 py-0.5 rounded tracking-widest border border-brand/20">{c.tipo_credito?.nombre || 'PRESTAMO'}</span>
+                                                                    <span className="italic mr-1">Tasa: {c.tasa_interes}%</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
+                                                                <div className="leading-none mb-1">Bs {parseFloat(c.monto_aprobado).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
+                                                                {(c.saldo_capital <= 0 && c.estado === 'Pagado') && <span className="text-[9px] text-emerald-600 font-extrabold uppercase tracking-tighter bg-emerald-500/5 px-2 py-0.5 rounded-lg border border-emerald-500/20">TOTALMENTE LIQUIDADO</span>}
+                                                            </td>
+                                                            <td className="p-4 pr-6 text-center border-l border-brand/50">
+                                                                <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                                                                    c.estado === 'Pagada' || c.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                                                                    c.estado === 'Desembolsado' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
+                                                                    c.estado === 'En Mora' || c.estado === 'Retrasada' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                                                    'bg-brand/10 text-brand-muted border-brand/50'
+                                                                }`}>
+                                                                    {c.estado}
+                                                                </span>
+                                                            </td>
+                                                        </motion.tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* Tabla de Movimientos de Pagos y Mora */}
+                                    <div className="bg-card-fap border border-brand rounded-3xl shadow-sm overflow-hidden flex flex-col relative h-[500px]">
+                                        <div className="p-6 border-b border-brand bg-card-fap/80 flex items-center justify-between">
+                                            <h3 className="text-xs font-black uppercase text-brand-main tracking-widest flex items-center gap-2">
+                                                <HistoryIcon className="w-4 h-4 text-primary" /> Historial de Amortización
+                                            </h3>
+                                            <span className="text-[10px] font-black text-brand-muted bg-brand/5 px-2.5 py-1 rounded-lg border border-brand/50 uppercase tracking-tighter shadow-sm">
+                                                {historial_pagos.length} Registros
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-main text-brand-muted sticky top-0 font-black uppercase border-b border-brand z-10 shadow-sm">
+                                                    <tr>
+                                                        <th className="p-4 pl-6 text-[10px] tracking-wider w-36">Vencimiento</th>
+                                                        <th className="p-4 text-[10px] tracking-wider">Concepto Cuota</th>
+                                                        <th className="p-4 text-[10px] tracking-wider text-right border-l border-brand">Monto Total</th>
+                                                        <th className="p-4 pr-6 text-[10px] tracking-wider text-center border-l border-brand">Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-brand/10">
+                                                    {historial_pagos.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="4" className="py-24 text-center opacity-40">
+                                                                <div className="flex flex-col items-center gap-3">
+                                                                    <Clock className="w-10 h-10" />
+                                                                    <p className="text-[10px] font-black uppercase tracking-widest">Sin pagos registrados</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ) : historial_pagos.map((p, index) => (
+                                                        <motion.tr 
+                                                            key={p.id} 
+                                                            initial={{ opacity: 0, x: 5 }}
+                                                            whileInView={{ opacity: 1, x: 0 }}
+                                                            viewport={{ once: true }}
+                                                            transition={{ delay: index * 0.02 }}
+                                                            className="hover:bg-brand/5 transition-colors group"
+                                                        >
+                                                            <td className="p-4 pl-6">
+                                                                <div className="font-black text-[11px] text-brand-main leading-none mb-1 font-mono uppercase">{p.vencimiento}</div>
+                                                                {p.fecha_pago && (
+                                                                    <div className="text-[8px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/20 inline-block tracking-tighter shadow-sm">
+                                                                        ABONADO: {p.fecha_pago}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-4">
+                                                                <div className="font-black text-[12px] text-brand-main mb-1 leading-none uppercase truncate max-w-[140px] tracking-tight">{p.credito}</div>
+                                                                <div className="text-[9px] text-brand-muted font-bold uppercase tracking-[0.1em] opacity-60">CUOTA NO. {p.cuota.toString().padStart(2, '0')}</div>
+                                                            </td>
+                                                            <td className="p-4 text-right border-l border-brand/50 font-black font-mono text-[11px] text-brand-main">
+                                                                <div className="leading-none mb-1">Bs {parseFloat(p.total).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</div>
+                                                                {p.mora > 0 && <div className="text-[9px] text-red-600 font-extrabold uppercase tracking-tighter">+ Bs {parseFloat(p.mora).toLocaleString('es-BO', { minimumFractionDigits: 2 })} MORA</div>}
+                                                            </td>
+                                                            <td className="p-4 pr-6 text-center border-l border-brand/50">
+                                                                <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                                                                    p.estado === 'Pagada' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                                                                    p.estado === 'Retrasada' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                                                    'bg-brand/10 text-brand-muted border-brand/50'
+                                                                }`}>
+                                                                    {p.estado}
+                                                                </span>
+                                                            </td>
+                                                        </motion.tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
                 </div>

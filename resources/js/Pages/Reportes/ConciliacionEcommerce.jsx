@@ -1,6 +1,6 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { 
     BarChart3, 
     Package, 
@@ -17,7 +17,10 @@ import {
     Truck,
     ArrowUpRight,
     AlertTriangle,
-    Boxes
+    Boxes,
+    Activity,
+    Filter,
+    RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,7 +40,34 @@ function StatCard({ label, value, color = 'text-primary', icon: Icon, sublabel }
     );
 }
 
-export default function ConciliacionEcommerce({ pendientes, resumen, productos, auth }) {
+export default function ConciliacionEcommerce({ pendientes, resumen, productos, auth, filtros }) {
+    const { data, setData, get, processing, reset } = useForm({
+        desde: filtros.desde || '',
+        hasta: filtros.hasta || '',
+        estado_entrega: filtros.estado_entrega || 'por_recoger',
+    });
+
+    const handleFilter = (e) => {
+        e.preventDefault();
+        get(route('reportes.conciliacion-ecommerce'), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleReset = () => {
+        reset();
+        get(route('reportes.conciliacion-ecommerce'), {
+            data: {
+                desde: '',
+                hasta: '',
+                estado_entrega: 'por_recoger'
+            },
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -73,31 +103,95 @@ export default function ConciliacionEcommerce({ pendientes, resumen, productos, 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                     
                     {/* Alerta de Auditoría Premium */}
-                    <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-card-fap border border-brand border-l-4 border-l-amber-500 p-6 rounded-2xl shadow-sm relative overflow-hidden group"
-                    >
-                        <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform">
-                            <AlertTriangle className="w-24 h-24 text-amber-500" />
-                        </div>
-                        <div className="flex items-start gap-5 relative z-10">
-                            <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
-                                <AlertCircle className="h-6 w-6 text-amber-600" />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="lg:col-span-8 bg-card-fap border border-brand border-l-4 border-l-amber-500 p-6 rounded-2xl shadow-sm relative overflow-hidden group h-full"
+                        >
+                            <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform">
+                                <AlertTriangle className="w-24 h-24 text-amber-500" />
                             </div>
-                            <div className="flex-1">
-                                <p className="text-xs font-black text-amber-700 uppercase tracking-[0.2em] mb-1">
-                                    Protocolo de Control Transaccional Activo
-                                </p>
-                                <p className="text-[11px] text-brand-muted font-bold tracking-tight max-w-3xl leading-relaxed uppercase opacity-80">
-                                    Este tablero sistematiza la brecha entre los ingresos validados en <span className="text-brand-main">Caja General</span> y los compromisos de entrega pendientes en el <span className="text-brand-main">Kardex de Almacén</span>. El sistema garantiza que no existan fugas de capital ni discrepancias físicas.
-                                </p>
+                            <div className="flex items-start gap-5 relative z-10">
+                                <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                                    <AlertCircle className="h-6 w-6 text-amber-600" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-black text-amber-700 uppercase tracking-[0.2em] mb-1">
+                                        Protocolo de Control Transaccional Activo
+                                    </p>
+                                    <p className="text-[11px] text-brand-muted font-bold tracking-tight max-w-3xl leading-relaxed uppercase opacity-80">
+                                        Este tablero sistematiza la brecha entre los ingresos validados en <span className="text-brand-main">Caja General</span> y los compromisos de entrega pendientes en el <span className="text-brand-main">Kardex de Almacén</span>. El sistema garantiza que no existan fugas de capital ni discrepancias físicas.
+                                    </p>
+                                </div>
                             </div>
-                            <div className="hidden lg:block text-right">
-                                <span className="text-[10px] font-black text-amber-600 bg-amber-500/5 px-3 py-1 rounded-lg border border-amber-500/20 uppercase tracking-widest">Estado: Auditando</span>
-                            </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+
+                        {/* PANEL DE FILTROS GLASSMORPHISM */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="lg:col-span-4 bg-card-fap border border-brand p-5 rounded-2xl shadow-sm h-full"
+                        >
+                            <form onSubmit={handleFilter} className="space-y-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Filter className="w-3.5 h-3.5 text-primary" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-main">Filtros de Auditoría</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase text-brand-muted tracking-tighter">Desde</label>
+                                        <input 
+                                            type="date"
+                                            value={data.desde}
+                                            onChange={e => setData('desde', e.target.value)}
+                                            className="w-full bg-main border-brand rounded-xl text-[11px] font-black uppercase px-3 py-1.5 focus:ring-1 focus:ring-primary/50 text-brand-main"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase text-brand-muted tracking-tighter">Hasta</label>
+                                        <input 
+                                            type="date"
+                                            value={data.hasta}
+                                            onChange={e => setData('hasta', e.target.value)}
+                                            className="w-full bg-main border-brand rounded-xl text-[11px] font-black uppercase px-3 py-1.5 focus:ring-1 focus:ring-primary/50 text-brand-main"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black uppercase text-brand-muted tracking-tighter">Estado de Entrega</label>
+                                    <select 
+                                        value={data.estado_entrega}
+                                        onChange={e => setData('estado_entrega', e.target.value)}
+                                        className="w-full bg-main border-brand rounded-xl text-[11px] font-black uppercase px-3 py-1.5 focus:ring-1 focus:ring-primary/50 text-brand-main cursor-pointer"
+                                    >
+                                        <option value="todos">Auditando Todos (Global)</option>
+                                        <option value="por_recoger">Pendiente de Entrega (En Almacén)</option>
+                                        <option value="en_ruta">En Tránsito (Logística)</option>
+                                        <option value="entregado">Conciliado (Entregado)</option>
+                                        <option value="cancelado">Bajas / Cancelados</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2 pt-1">
+                                    <button 
+                                        type="submit"
+                                        disabled={processing}
+                                        className="flex-1 bg-brand-main hover:bg-brand-hover text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
+                                    >
+                                        {processing ? 'Procesando...' : 'Aplicar Auditoría'}
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={handleReset}
+                                        className="p-2 bg-main border border-brand text-brand-muted hover:text-red-500 rounded-xl transition-all shadow-sm active:scale-95"
+                                        title="Reiniciar Filtros"
+                                    >
+                                        <RotateCcw className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
 
                     {/* KPI CARDS */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -106,25 +200,25 @@ export default function ConciliacionEcommerce({ pendientes, resumen, productos, 
                             value={`Bs ${parseFloat(resumen.monto_total_retenido).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
                             icon={Wallet} 
                             color="text-emerald-600"
-                            sublabel="TOTAL EN CUSTODIA"
+                            sublabel={data.estado_entrega === 'entregado' ? 'TOTAL DESCARGADO' : 'TOTAL EN CUSTODIA'}
                         />
                         <StatCard 
-                            label="Órdenes Pendientes" 
+                            label="Órdenes Analizadas" 
                             value={resumen.total_pedidos_retenidos} 
                             icon={Clock} 
                             color="text-blue-600"
-                            sublabel="PICK-UP ESPERA"
+                            sublabel="VOLUMEN TRANSACCIONAL"
                         />
                         <StatCard 
-                            label="Items en Tránsito" 
+                            label="Items Comprometidos" 
                             value={resumen.unidades_totales_pendientes} 
                             icon={Boxes} 
                             color="text-amber-600"
-                            sublabel="STOCK COMPROMETIDO"
+                            sublabel="STOCK FILTRADO"
                         />
                         <StatCard 
-                            label="Último Sincronizado" 
-                            value={resumen.fecha_corte.toUpperCase()} 
+                            label="Fecha del Reporte" 
+                            value={resumen.fecha_corte?.toUpperCase() || ''} 
                             icon={Activity} 
                             color="text-primary"
                             sublabel="CORTE DE AUDITORÍA"
@@ -237,7 +331,7 @@ export default function ConciliacionEcommerce({ pendientes, resumen, productos, 
                                                         <td className="px-6 py-5 border-l border-brand/50">
                                                             <div className="flex flex-col">
                                                                 <span className="font-black text-brand-main uppercase tracking-tighter text-[11px] truncate w-40 leading-none mb-1.5">{pedido.nombre_cliente}</span>
-                                                                <span className="text-[9px] text-brand-muted font-black uppercase tracking-widest bg-brand/5 px-1.5 py-0.5 rounded border border-brand/50 inline-block leading-none">{pedido.tipo_pago.replace('_', ' ')}</span>
+                                                                <span className="text-[9px] text-brand-muted font-black uppercase tracking-widest bg-brand/5 px-1.5 py-0.5 rounded border border-brand/50 inline-block leading-none">{pedido.tipo_pago?.replace('_', ' ') || 'N/A'}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-5 text-right font-black border-l border-brand/50 text-brand-main font-mono text-[12px]">

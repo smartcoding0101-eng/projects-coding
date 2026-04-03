@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { 
     Wallet, 
     DownloadCloud, 
@@ -11,9 +11,16 @@ import {
     AlertCircle, 
     CheckCircle2,
     Calendar,
-    BadgeDollarSign
+    BadgeDollarSign,
+    Search,
+    Filter,
+    X,
+    Loader2,
+    FileSpreadsheet,
+    CalendarDays,
+    UserSearch
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function StatCard({ label, value, color = 'text-primary', prefix = '', icon: Icon }) {
     return (
@@ -30,33 +37,46 @@ function StatCard({ label, value, color = 'text-primary', prefix = '', icon: Ico
     );
 }
 
-function ExportBar({ baseRoute, extraParams = '' }) {
-    return (
-        <div className="flex items-center gap-3">
-            <a 
-                href={`${route(baseRoute)}?formato=xlsx${extraParams}`} 
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:-translate-y-0.5 flex items-center gap-2"
-            >
-                <DownloadCloud className="w-3.5 h-3.5" /> Planilla Excel
-            </a>
-            <a 
-                href={`${route(baseRoute)}?formato=pdf${extraParams}`} 
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:-translate-y-0.5 flex items-center gap-2" 
-                target="_blank"
-            >
-                <FileText className="w-3.5 h-3.5" /> Informe PDF
-            </a>
-            <Link 
-                href={route('reportes.index')} 
-                className="px-4 py-2 bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2"
-            >
-                <ChevronLeft className="w-3.5 h-3.5" /> Volver
-            </Link>
-        </div>
-    );
-}
+export default function Cartera({ auth, fecha_generacion, resumen, creditos, tipos_credito, filtros }) {
+    const { data, setData, get, processing } = useForm({
+        search: filtros?.search || '',
+        tipo_id: filtros?.tipo_id || '',
+        estado: filtros?.estado || '',
+        desde: filtros?.desde || '',
+        hasta: filtros?.hasta || '',
+    });
 
-export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportStatus, setExportStatus] = useState('idle');
+
+    const handleFilter = (e) => {
+        if (e) e.preventDefault();
+        get(route('reportes.cartera'), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleExport = (formato) => {
+        setExportStatus('processing');
+        setShowExportModal(true);
+
+        const queryParams = new URLSearchParams({
+            formato,
+            ...data
+        }).toString();
+
+        window.location.href = `${route('reportes.cartera')}?${queryParams}`;
+
+        setTimeout(() => {
+            setExportStatus('success');
+            setTimeout(() => {
+                setShowExportModal(false);
+                setExportStatus('idle');
+            }, 2500);
+        }, 1500);
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -75,25 +95,163 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
                             </span>
                         </div>
                     </div>
-                    <div className="hidden md:block">
+                    <div className="hidden md:flex items-center gap-4">
                         <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest bg-brand/5 px-3 py-1 rounded-full border border-brand/50 flex items-center gap-2">
                              <Calendar className="w-3 h-3" /> Generado: {fecha_generacion}
                         </p>
+                        <Link 
+                            href={route('reportes.index')} 
+                            className="px-4 py-2 bg-card-fap border border-brand text-brand-muted hover:text-brand-main text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-sm"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Volver
+                        </Link>
                     </div>
                 </div>
             }
         >
             <Head title="Cartera de Créditos" />
 
+            {/* Modal de Confirmación de Exportación */}
+            <AnimatePresence>
+                {showExportModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-main/80 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-card-fap border border-brand p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-6"
+                        >
+                            <div className="relative mx-auto w-20 h-20">
+                                {exportStatus === 'processing' ? (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                                    </div>
+                                ) : (
+                                    <motion.div 
+                                        initial={{ scale: 0.5 }} 
+                                        animate={{ scale: 1 }} 
+                                        className="absolute inset-0 flex items-center justify-center bg-emerald-500/10 rounded-full border border-emerald-500/20"
+                                    >
+                                        <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+                                    </motion.div>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-lg font-black text-brand-main uppercase tracking-tight">
+                                    {exportStatus === 'processing' ? 'Generando Reporte' : 'Descarga Iniciada'}
+                                </h3>
+                                <p className="text-[11px] text-brand-muted font-bold tracking-wider leading-relaxed uppercase opacity-70">
+                                    {exportStatus === 'processing' 
+                                        ? 'Analizando la cartera de colocación activa. El documento estará listo en breve.' 
+                                        : 'El reporte de cartera filtrado ha sido generado exitosamente.'}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <div className="py-8 bg-main min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card-fap border border-brand p-4 px-6 rounded-2xl shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <p className="text-[11px] font-black text-brand-main uppercase tracking-widest leading-none">Datos en Tiempo Real</p>
+                    {/* PANEL DE FILTROS AVANZADOS */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                        
+                        {/* Buscador de Socio */}
+                        <div className="lg:col-span-3 self-stretch">
+                            <div className="bg-card-fap border border-brand p-5 rounded-2xl shadow-sm h-full flex flex-col justify-center">
+                                <label className="text-[10px] font-black uppercase text-brand-muted mb-2 block tracking-widest flex items-center gap-2">
+                                    <UserSearch className="w-3 h-3 text-primary" /> Identificar Socio
+                                </label>
+                                <div className="relative group">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="CI O NOMBRE..."
+                                        value={data.search}
+                                        onChange={e => setData('search', e.target.value)}
+                                        className="w-full bg-main border-brand rounded-xl pl-9 text-[11px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all uppercase placeholder:opacity-50"
+                                    />
+                                    {data.search && (
+                                        <button onClick={() => setData('search', '')} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-red-500">
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <ExportBar baseRoute="reportes.cartera" />
+
+                        {/* Producto y Estado */}
+                        <div className="lg:col-span-4 bg-card-fap border border-brand p-5 rounded-2xl shadow-sm flex flex-col gap-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-brand-muted block tracking-widest">Producto</label>
+                                    <select 
+                                        value={data.tipo_id} 
+                                        onChange={e => setData('tipo_id', e.target.value)}
+                                        className="w-full bg-main border-brand rounded-xl text-[10px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all uppercase"
+                                    >
+                                        <option value="">— TODOS —</option>
+                                        {tipos_credito?.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-brand-muted block tracking-widest">Estado</label>
+                                    <select 
+                                        value={data.estado} 
+                                        onChange={e => setData('estado', e.target.value)}
+                                        className="w-full bg-main border-brand rounded-xl text-[10px] font-black text-brand-main focus:ring-primary focus:border-primary transition-all uppercase"
+                                    >
+                                        <option value="">— TODOS —</option>
+                                        <option value="Desembolsado">Vigentes</option>
+                                        <option value="En Mora">En Mora</option>
+                                        <option value="Pagado">Pagados</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rango de Fechas */}
+                        <div className="lg:col-span-3 bg-card-fap border border-brand p-5 rounded-2xl shadow-sm flex flex-col gap-3">
+                             <label className="text-[10px] font-black uppercase text-brand-muted block tracking-widest flex items-center gap-2">
+                                <CalendarDays className="w-3 h-3 text-primary" /> Periodo Desembolso
+                             </label>
+                             <div className="grid grid-cols-2 gap-2">
+                                <input 
+                                    type="date" 
+                                    value={data.desde}
+                                    onChange={e => setData('desde', e.target.value)}
+                                    className="w-full bg-main border-brand rounded-xl text-[10px] font-black text-brand-main focus:ring-primary py-1.5"
+                                />
+                                <input 
+                                    type="date" 
+                                    value={data.hasta}
+                                    onChange={e => setData('hasta', e.target.value)}
+                                    className="w-full bg-main border-brand rounded-xl text-[10px] font-black text-brand-main focus:ring-primary py-1.5"
+                                />
+                             </div>
+                        </div>
+
+                        {/* Botones de Acción */}
+                        <div className="lg:col-span-2 bg-card-fap border border-brand p-5 rounded-2xl shadow-sm flex flex-col justify-center gap-2">
+                            <button 
+                                onClick={handleFilter}
+                                disabled={processing}
+                                className="w-full bg-primary hover:bg-primary-dark text-white text-[11px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Filter className="w-3.5 h-3.5" />} 
+                                Filtrar
+                            </button>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button onClick={() => handleExport('xlsx')} className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center" title="Excel">
+                                    <FileSpreadsheet className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleExport('pdf')} className="py-2 bg-red-700 hover:bg-black text-white rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center" title="PDF">
+                                    <FileText className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
@@ -131,12 +289,19 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {creditos.length === 0 && (
+                                        <tr>
+                                            <td colSpan={9} className="px-6 py-20 text-center">
+                                                <p className="text-[11px] font-black text-brand-muted uppercase tracking-[0.2em]">No se encontraron créditos con los criterios seleccionados</p>
+                                            </td>
+                                        </tr>
+                                    )}
                                     {creditos.map((c, index) => (
                                         <motion.tr 
                                             key={c.id} 
                                             initial={{ opacity: 0, y: 5 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.02 }}
+                                            transition={{ delay: index * 0.01 }}
                                             className="hover:bg-brand/5 transition-colors border-b border-brand/50 last:border-0"
                                         >
                                             <td className="px-4 pl-6 py-3 text-[11px] font-black text-brand-muted font-mono">{c.id}</td>
@@ -170,3 +335,4 @@ export default function Cartera({ auth, fecha_generacion, resumen, creditos }) {
         </AuthenticatedLayout>
     );
 }
+
