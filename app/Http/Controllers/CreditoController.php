@@ -20,7 +20,7 @@ class CreditoController extends Controller
         $user = $request->user();
         $isAdmin = $user->hasRole('SuperAdmin') || $user->hasRole('Oficial Crédito');
         
-        $query = Credito::with(['user', 'tipoCredito'])->orderBy('created_at', 'desc');
+        $query = Credito::with(['user.persona', 'tipoCredito'])->orderBy('created_at', 'desc');
         $statsQuery = Credito::query();
 
         if (!$isAdmin) {
@@ -57,7 +57,7 @@ class CreditoController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        $credito->load(['user', 'tipoCredito', 'planPagos' => function ($q) {
+        $credito->load(['user.persona', 'tipoCredito', 'planPagos' => function ($q) {
             $q->orderBy('nro_cuota');
         }, 'aprobadoPor']);
 
@@ -92,9 +92,17 @@ class CreditoController extends Controller
 
         // Admin puede originar créditos a nombre de cualquier socio
         if ($isAdmin) {
-            $props['socios'] = \App\Models\User::select('id', 'name', 'ci', 'grado', 'destino')
+            $props['socios'] = \App\Models\User::with('persona:id,ci,grado,destino')
+                ->select('id', 'name', 'persona_id')
                 ->orderBy('name')
-                ->get();
+                ->get()
+                ->map(fn($u) => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'ci' => $u->ci,
+                    'grado' => $u->grado,
+                    'destino' => $u->destino,
+                ]);
         }
 
         return Inertia::render('Creditos/Solicitar', $props);

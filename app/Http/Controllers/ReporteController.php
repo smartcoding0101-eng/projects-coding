@@ -39,7 +39,7 @@ class ReporteController extends Controller
     {
         Gate::authorize('gestionar usuarios');
 
-        $creditos = Credito::with('user', 'tipoCredito')
+        $creditos = Credito::with('user.persona', 'tipoCredito')
             ->whereIn('estado', [
                 Credito::ESTADO_DESEMBOLSADO,
                 Credito::ESTADO_EN_MORA,
@@ -102,7 +102,7 @@ class ReporteController extends Controller
         Gate::authorize('gestionar usuarios');
 
         $cuotasAtrasadas = PlanPago::where('estado', PlanPago::ESTADO_RETRASADA)
-            ->with('credito.user', 'credito.tipoCredito')
+            ->with('credito.user.persona', 'credito.tipoCredito')
             ->orderBy('fecha_vencimiento')
             ->get();
 
@@ -204,7 +204,8 @@ class ReporteController extends Controller
                 'egreso' => $m->egreso,
                 'saldo' => $m->saldo_acumulado,
             ])->values(),
-            'socios' => $isAdmin ? User::select('id', 'name', 'ci', 'grado')->orderBy('name')->get() : [],
+            'socios' => $isAdmin ? User::with('persona:id,ci,grado')->select('id', 'name', 'persona_id')->orderBy('name')->get()
+                ->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'ci' => $u->ci, 'grado' => $u->grado]) : [],
         ];
 
         if ($request->query('formato') === 'pdf') {
@@ -273,7 +274,8 @@ class ReporteController extends Controller
         }
 
         $data = [
-            'socios_catalogo' => User::select('id', 'name', 'ci', 'grado')->orderBy('name')->get(),
+            'socios_catalogo' => User::with('persona:id,ci,grado')->select('id', 'name', 'persona_id')->orderBy('name')->get()
+                ->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'ci' => $u->ci, 'grado' => $u->grado]),
             'socio_seleccionado' => $socio,
             'metricas' => $socio ? [
                 'creditos_totales' => $creditos->count(),
@@ -368,8 +370,8 @@ class ReporteController extends Controller
             $meses[] = ucfirst($date->translatedFormat('M'));
             $ventas_mensuales[] = DB::table('pedidos')
                 ->where('estado_pago', 'pagado')
-                ->whereYear('fecha_pedido', $date->year)
-                ->whereMonth('fecha_pedido', $date->month)
+                ->whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
                 ->sum('total');
         }
 
@@ -409,7 +411,7 @@ class ReporteController extends Controller
         $saldoInicial = $saldoInicialQuery->sum(DB::raw('ingreso - egreso'));
 
         // 2. Obtener movimientos del periodo
-        $query = LibroDiario::with(['user:id,name,ci,grado', 'cajero:id,name'])
+        $query = LibroDiario::with(['user:id,name,persona_id', 'user.persona:id,ci,grado', 'cajero:id,name'])
             ->whereBetween('fecha', [$desde, $hasta])
             ->orderBy('fecha', 'asc')
             ->orderBy('id', 'asc');

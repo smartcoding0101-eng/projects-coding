@@ -4,7 +4,7 @@ import Footer from '../Components/Footer';
 import FloatingWhatsApp from '../Components/FloatingWhatsApp';
 import BlockRenderer from '../Components/CMS/BlockRenderer';
 
-// Secciones estáticas (fallback)
+// Secciones estáticas (fallback canónico de Producción)
 import HeroSection from '../Components/HeroSection';
 import ProductCards from '../Components/ProductCards';
 import CreditSimulator from '../Components/CreditSimulator';
@@ -15,7 +15,10 @@ import VideoSection from '../Components/VideoSection';
 import TestimonialsSection from '../Components/TestimonialsSection';
 import FAQSection from '../Components/FAQSection';
 
-export default function Welcome({ page, isDynamic, siteSettings = {} }) {
+// Extra: Módulo de noticias dinámicas importado para la Home
+import LatestNewsBlock from '../Components/CMS/Blocks/LatestNewsBlock';
+
+export default function Welcome({ page, isDynamic, siteSettings = {}, latest_noticias = [] }) {
     const { header = {}, footer = {}, whatsapp = {} } = siteSettings;
 
     return (
@@ -25,6 +28,10 @@ export default function Welcome({ page, isDynamic, siteSettings = {} }) {
                 <Header settings={header} />
 
                 <main className="pt-20">
+                    {/* 
+                     Siempre usamos la estructura de producción para /inicio. 
+                     isDynamic solo será false en la home forzadamente por el PageController.
+                    */}
                     {isDynamic ? (
                         <BlockRenderer blocks={page.content} />
                     ) : (
@@ -48,6 +55,12 @@ export default function Welcome({ page, isDynamic, siteSettings = {} }) {
                             <GallerySection />
                             <VideoSection />
                             <TestimonialsSection />
+                            
+                            {/* Inyectamos dinámicamente las noticias conservando la arquitectura estática */}
+                            {latest_noticias && latest_noticias.length > 0 && (
+                                <LatestNewsBlock data={{ title: 'Últimas Novedades', noticias: latest_noticias }} />
+                            )}
+
                             <FAQSection />
                         </>
                     )}

@@ -14,8 +14,21 @@ class PedidoController extends Controller
     public function index()
     {
         $pedidos = Pedido::with('user')->orderBy('created_at', 'desc')->get();
+
+        // Calcular KPIs (Fiori)
+        $stats = [
+            'ingresos_mes' => Pedido::whereIn('estado_pago', ['pagado']) // El estado final de pago es "pagado" (entregado es otro campo)
+                                ->whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
+                                ->sum('total'),
+            'pendientes_validacion' => Pedido::where('estado_pago', 'pendiente_validacion')->count(),
+            'entregas_pendientes' => Pedido::where('estado_pago', 'pagado')->where('estado_entrega', 'pendiente')->count(),
+            'total_pedidos' => Pedido::count(),
+        ];
+
         return inertia('Admin/Pedidos/Index', [
-            'pedidos' => $pedidos
+            'pedidos' => $pedidos,
+            'stats' => $stats
         ]);
     }
 
@@ -42,7 +55,7 @@ class PedidoController extends Controller
         }
 
         // 1. Verificar si se exige caja abierta según configuración global
-        $exigeCaja = \DB::table('configuraciones')->where('key', 'ecommerce_pago_exige_caja')->first();
+        $exigeCaja = \App\Models\Configuracion::where('key', 'ecommerce_pago_exige_caja')->first();
         $cajaActiva = \App\Models\Caja::cajaAbiertaDe(auth()->id());
 
         if ($exigeCaja && ($exigeCaja->value === '1' || $exigeCaja->value === 'true') && !$cajaActiva) {

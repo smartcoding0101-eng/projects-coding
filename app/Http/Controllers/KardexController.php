@@ -56,12 +56,20 @@ class KardexController extends Controller
         ];
 
         // Lista de socios para admin
-        $socios = $isAdmin ? User::select('id', 'name', 'ci', 'grado')->orderBy('name')->get() : [];
+        $socios = $isAdmin ? User::with('persona:id,ci,grado')->select('id', 'name', 'persona_id')->orderBy('name')->get()
+            ->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'ci' => $u->ci, 'grado' => $u->grado]) : [];
 
         return Inertia::render('Kardex/Index', [
             'movimientos' => $movimientos,
             'resumen' => $resumen,
-            'socio' => $socio->only('id', 'name', 'ci', 'grado', 'destino', 'escalafon'),
+            'socio' => [
+                'id' => $socio->id,
+                'name' => $socio->name,
+                'ci' => $socio->ci,
+                'grado' => $socio->grado,
+                'destino' => $socio->destino,
+                'escalafon' => $socio->escalafon,
+            ],
             'socios' => $socios,
             'filtros' => $request->only('tipo', 'fecha_desde', 'fecha_hasta', 'socio_id'),
             'tiposMovimiento' => Kardex::etiquetasTipo(),

@@ -12,6 +12,7 @@ import CreditSimulatorBlock from './Blocks/CreditSimulatorBlock';
 import BenefitsBlock from './Blocks/BenefitsBlock';
 import NormativasBlock from './Blocks/NormativasBlock';
 import InstitutionalTextBlock from './Blocks/InstitutionalTextBlock';
+import LatestNewsBlock from './Blocks/LatestNewsBlock';
 
 const BlockRenderer = ({ blocks }) => {
     if (!blocks || !Array.isArray(blocks)) return null;
@@ -48,6 +49,8 @@ const BlockRenderer = ({ blocks }) => {
                         return <NormativasBlock key={index} data={data} />;
                     case 'institutional_text':
                         return <InstitutionalTextBlock key={index} data={data} />;
+                    case 'latest_news':
+                        return <LatestNewsBlock key={index} data={data} />;
                     default:
                         console.warn(`Unknown block type: ${type}`);
                         return null;

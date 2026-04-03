@@ -324,6 +324,19 @@ class PageForm
                                 Toggle::make('image_left')->label('Imagen a la Izquierda')->default(false),
                                 TextInput::make('badge')->label('Badge Superior'),
                             ]),
+
+                        // ========================================
+                        // LATEST NEWS — Últimas Noticias del Blog
+                        // ========================================
+                        Block::make('latest_news')
+                            ->label('Últimas Noticias')
+                            ->icon('heroicon-o-newspaper')
+                            ->schema([
+                                TextInput::make('title')->default('Últimas Noticias')->required()->label('Título de Sección'),
+                                TextInput::make('subtitle')->label('Subtítulo')->default('Mantente informado sobre las novedades de FAPCLAS.'),
+                                TextInput::make('count')->numeric()->default(4)->label('Número de noticias a mostrar'),
+                            ]),
+
                     ])
                     ->collapsible()
                     ->collapsed(false)

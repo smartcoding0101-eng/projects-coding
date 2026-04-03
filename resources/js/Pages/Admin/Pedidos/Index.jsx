@@ -1,12 +1,40 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import { ShoppingBag, Eye, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
+import { ShoppingBag, Eye, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, TrendingUp, AlertCircle, Package } from 'lucide-react';
+
+// ═══════════════════════════════════════════════════════
+//  KPI CARD — ERP Fiori Style con top border
+// ═══════════════════════════════════════════════════════
+function KpiCard({ label, value, icon, iconColorClass = 'text-primary', borderColorClass = 'border-t-primary' }) {
+    return (
+        <div className={`bg-card-fap border border-brand border-t-4 ${borderColorClass} rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group`}>
+            <div className="flex items-start justify-between">
+                <div>
+                    <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-1">{label}</p>
+                    <h3 className="text-2xl font-black text-brand-main tabular-nums tracking-tight">{value}</h3>
+                </div>
+                <div className={`p-2.5 rounded-lg bg-brand/5 border border-brand/10 group-hover:scale-110 transition-transform ${iconColorClass}`}>
+                    {icon}
+                </div>
+            </div>
+            <div className="absolute -bottom-4 -right-4 opacity-[0.03] transform group-hover:scale-150 group-hover:-rotate-12 transition-transform duration-500">
+                {icon}
+            </div>
+        </div>
+    );
+}
 
 const PER_PAGE = 40;
 
-export default function Index({ pedidos }) {
+export default function Index({ pedidos, stats }) {
     const [page, setPage] = useState(1);
+    const kpis = [
+        { label: 'Ingresos (Mes en Curso)', value: `Bs. ${Number(stats?.ingresos_mes || 0).toLocaleString('es-BO')}`, icon: <TrendingUp className="w-6 h-6" />, borderColorClass: 'border-t-emerald-500', iconColorClass: 'text-emerald-500' },
+        { label: 'Validaciones Ptes.', value: stats?.pendientes_validacion || 0, icon: <AlertCircle className="w-6 h-6" />, borderColorClass: 'border-t-amber-500', iconColorClass: 'text-amber-500' },
+        { label: 'Pick / Envíos Ptes.', value: stats?.entregas_pendientes || 0, icon: <Package className="w-6 h-6" />, borderColorClass: 'border-t-blue-500', iconColorClass: 'text-blue-500' },
+        { label: 'Histórico Órdenes', value: stats?.total_pedidos || 0, icon: <ShoppingBag className="w-6 h-6" />, borderColorClass: 'border-t-indigo-500', iconColorClass: 'text-indigo-500' },
+    ];
     const totalPages = Math.max(1, Math.ceil(pedidos.length / PER_PAGE));
     const paged = pedidos.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
@@ -40,6 +68,11 @@ export default function Index({ pedidos }) {
                                 {pedidos.length} Registro{pedidos.length !== 1 ? 's' : ''}
                             </span>
                         </div>
+                    </div>
+
+                    {/* ─── KPIs ─── */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {kpis.map((k, i) => <KpiCard key={i} {...k} />)}
                     </div>
 
                     {/* DATAGRID PEDIDOS */}

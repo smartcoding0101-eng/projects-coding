@@ -15,27 +15,45 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Crear Roles
-        $roleAdmin = Role::create(['name' => 'SuperAdmin']);
-        $roleSocio = Role::create(['name' => 'Socio Base']);
+        $roleAdmin = Role::firstOrCreate(['name' => 'SuperAdmin']);
+        $roleOficial = Role::firstOrCreate(['name' => 'Oficial Crédito']);
+        $roleCajero = Role::firstOrCreate(['name' => 'Cajero']);
+        $roleSocio = Role::firstOrCreate(['name' => 'Socio Base']);
 
         // Crear Permisos
-        Permission::create(['name' => 'gestionar usuarios']);
-        Permission::create(['name' => 'aprobar creditos']);
-        Permission::create(['name' => 'ver estado cuenta']);
+        Permission::firstOrCreate(['name' => 'gestionar usuarios']);
+        Permission::firstOrCreate(['name' => 'gestionar creditos']);
+        Permission::firstOrCreate(['name' => 'aprobar creditos']);
+        Permission::firstOrCreate(['name' => 'ver reportes']);
+        Permission::firstOrCreate(['name' => 'ver estado cuenta']);
+        Permission::firstOrCreate(['name' => 'gestionar caja']);
+        Permission::firstOrCreate(['name' => 'gestionar ecommerce']);
 
         // Asignar permisos
-        $roleAdmin->givePermissionTo(['gestionar usuarios', 'aprobar creditos', 'ver estado cuenta']);
+        $roleAdmin->givePermissionTo(Permission::all());
+        $roleOficial->givePermissionTo(['gestionar creditos', 'aprobar creditos', 'ver reportes', 'ver estado cuenta']);
+        $roleCajero->givePermissionTo(['gestionar caja', 'ver reportes', 'ver estado cuenta', 'gestionar ecommerce']);
         $roleSocio->givePermissionTo('ver estado cuenta');
+
+        $personaAdmin = \App\Models\Persona::firstOrCreate([
+            'ci' => '1234567'
+        ], [
+            'nombres' => 'Comandante',
+            'apellidos' => 'Root',
+            'escalafon' => 'ADMIN-001',
+            'grado' => 'Cnl. DESP.',
+            'institucion' => 'Policía Boliviana',
+            'destino' => 'Central FAPCLAS',
+            'garantia_tipo' => 'Ninguna',
+            'email' => 'admin@fapclas.com',
+        ]);
 
         // Crear un usuario Administrador por defecto
         $admin = User::firstOrCreate([
             'email' => 'admin@fapclas.com'
         ], [
             'name' => 'Comandante Root',
-            'ci' => '1234567',
-            'escalafon' => 'ADMIN-001',
-            'grado' => 'Cnl. DESP.',
-            'destino' => 'Central FAPCLAS',
+            'persona_id' => $personaAdmin->id,
             'password' => bcrypt('Admin123!'),
         ]);
 

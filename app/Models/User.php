@@ -78,4 +78,27 @@ class User extends Authenticatable
     {
         return $this->hasMany(LibroDiario::class)->orderBy('id', 'desc');
     }
+
+    // ─── Accessors delegados a Persona ───
+    // Permiten usar $user->ci, $user->grado, etc. de forma transparente
+
+    public function getCiAttribute()
+    {
+        return $this->persona?->ci;
+    }
+
+    public function getGradoAttribute()
+    {
+        return $this->persona?->grado;
+    }
+
+    public function getDestinoAttribute()
+    {
+        return $this->persona?->destino;
+    }
+
+    public function getEscalafonAttribute()
+    {
+        return $this->persona?->escalafon;
+    }
 }

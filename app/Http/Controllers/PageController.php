@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Page;
+use App\Models\Noticia;
 use App\Models\SiteSetting;
 use Inertia\Inertia;
 
@@ -23,11 +24,16 @@ class PageController extends Controller
 
     public function welcome()
     {
-        $page = Page::where('slug', 'inicio')->where('is_active', true)->first();
+        $noticias = Noticia::where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get(['id', 'titulo', 'slug', 'resumen', 'imagen_path', 'categoria', 'fecha', 'created_at'])
+            ->toArray();
 
         return Inertia::render('Welcome', [
-            'page' => $page ? $page->only(['title', 'content', 'metadata']) : null,
-            'isDynamic' => (bool) $page,
+            'page' => ['title' => 'FAPCLAS R.L. - Tu Futuro Seguro', 'content' => []],
+            'isDynamic' => false,
+            'latest_noticias' => $noticias,
             'siteSettings' => $this->getSiteSettings(),
         ]);
     }

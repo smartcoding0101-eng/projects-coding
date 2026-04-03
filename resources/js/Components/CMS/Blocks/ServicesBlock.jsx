@@ -73,9 +73,9 @@ function ServiceCard({ item, index }) {
                 {item.description}
             </p>
 
-            {item.link && (
+            {item.route && (
                 <Link 
-                    href={item.link}
+                    href={item.route}
                     className="flex items-center gap-2 text-primary font-bold hover:gap-4 transition-all"
                 >
                     <span>Saber más</span>

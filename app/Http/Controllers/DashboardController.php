@@ -27,7 +27,7 @@ class DashboardController extends Controller
             $montoPrestado = Credito::where('estado', 'Desembolsado')->sum('monto_aprobado');
             $usuariosActivos = User::count();
             
-            $ultimosMovimientos = LibroDiario::with('user:id,name')->orderBy('id', 'desc')->take(5)->get();
+            $ultimosMovimientos = LibroDiario::with('user:id,name,persona_id', 'user.persona:id,ci,grado')->orderBy('id', 'desc')->take(5)->get();
 
             return Inertia::render('Dashboard', [
                 'metrics' => [

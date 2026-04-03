@@ -75,9 +75,9 @@ class BoletaService
 
         // Cuotas del mes que se pagan por planilla
         $cuotas = PlanPago::whereHas('credito', function ($q) {
-                $q->where('metodo_descuento', 'Planilla')
-                  ->whereIn('estado', [Credito::ESTADO_DESEMBOLSADO, Credito::ESTADO_EN_MORA]);
-            })
+            $q->where('metodo_descuento', 'Planilla')
+                ->whereIn('estado', [Credito::ESTADO_DESEMBOLSADO, Credito::ESTADO_EN_MORA]);
+        })
             ->where('fecha_vencimiento', '>=', $mesInicio)
             ->where('fecha_vencimiento', '<=', $mesFin)
             ->whereIn('estado', [PlanPago::ESTADO_PENDIENTE, PlanPago::ESTADO_RETRASADA])

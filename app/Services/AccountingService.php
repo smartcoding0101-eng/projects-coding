@@ -197,7 +197,7 @@ class AccountingService
         return (float) PlanPago::whereHas('credito', function($q) use ($socio) {
             $q->where('user_id', $socio->id);
         })
-        ->where('pagada', false)
+        ->whereIn('estado', [PlanPago::ESTADO_PENDIENTE, PlanPago::ESTADO_RETRASADA])
         ->sum('cuota_total');
     }
 }

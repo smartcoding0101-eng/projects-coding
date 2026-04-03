@@ -5,9 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SiteSettingResource\Pages;
 use App\Models\SiteSetting;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -45,6 +45,7 @@ class SiteSettingResource extends Resource
                 ->dehydrated(),
 
             Section::make('Contenido')
+                ->statePath('value')
                 ->schema(static::getValueFields())
                 ->visible(fn ($record) => $record !== null),
         ]);
@@ -57,22 +58,22 @@ class SiteSettingResource extends Resource
             Section::make('Configuración del Header')
                 ->schema([
                     Group::make([
-                        TextInput::make('value.phone')->label('Teléfono de Soporte')->placeholder('800-10-FAPCLAS'),
-                        TextInput::make('value.phone_link')->label('Link Teléfono')->placeholder('tel:80010XXXX'),
+                        TextInput::make('phone')->label('Teléfono de Soporte')->placeholder('800-10-FAPCLAS'),
+                        TextInput::make('phone_link')->label('Link Teléfono')->placeholder('tel:80010XXXX'),
                     ])->columns(2),
                     Group::make([
-                        TextInput::make('value.whatsapp_link')->label('Link WhatsApp Header')->placeholder('http://wa.link/...'),
-                        TextInput::make('value.whatsapp_label')->label('Etiqueta WhatsApp'),
+                        TextInput::make('whatsapp_link')->label('Link WhatsApp Header')->placeholder('http://wa.link/...'),
+                        TextInput::make('whatsapp_label')->label('Etiqueta WhatsApp'),
                     ])->columns(2),
                     Group::make([
-                        TextInput::make('value.logo_text')->label('Texto del Logo')->default('FAPCLAS'),
-                        TextInput::make('value.logo_suffix')->label('Sufijo del Logo')->default('R.L.'),
+                        TextInput::make('logo_text')->label('Texto del Logo')->default('FAPCLAS'),
+                        TextInput::make('logo_suffix')->label('Sufijo del Logo')->default('R.L.'),
                     ])->columns(2),
                     Group::make([
-                        TextInput::make('value.cta_portal_text')->label('Texto Botón Portal')->default('Acceso al Portal'),
-                        TextInput::make('value.cta_tienda_text')->label('Texto Botón Tienda')->default('Tienda Virtual'),
+                        TextInput::make('cta_portal_text')->label('Texto Botón Portal')->default('Acceso al Portal'),
+                        TextInput::make('cta_tienda_text')->label('Texto Botón Tienda')->default('Tienda Virtual'),
                     ])->columns(2),
-                    Repeater::make('value.top_links')
+                    Repeater::make('top_links')
                         ->label('Links de la Barra Superior')
                         ->schema([
                             TextInput::make('label')->required()->label('Texto'),
@@ -81,7 +82,7 @@ class SiteSettingResource extends Resource
                         ->columns(2)
                         ->collapsible()
                         ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Link'),
-                    Repeater::make('value.menu')
+                    Repeater::make('menu')
                         ->label('Menú Principal')
                         ->schema([
                             TextInput::make('label')->required()->label('Nombre del Menú'),
@@ -111,12 +112,12 @@ class SiteSettingResource extends Resource
             // --- FOOTER ---
             Section::make('Configuración del Footer')
                 ->schema([
-                    Textarea::make('value.description')->label('Descripción Institucional')->rows(3),
+                    Textarea::make('description')->label('Descripción Institucional')->rows(3),
                     Group::make([
-                        TextInput::make('value.copyright')->label('Copyright Principal'),
-                        TextInput::make('value.copyright_dev')->label('Copyright Desarrollador'),
+                        TextInput::make('copyright')->label('Copyright Principal'),
+                        TextInput::make('copyright_dev')->label('Copyright Desarrollador'),
                     ])->columns(2),
-                    Repeater::make('value.badges')
+                    Repeater::make('badges')
                         ->label('Badges Regulatorios')
                         ->schema([
                             TextInput::make('top_label')->required()->label('Etiqueta Superior'),
@@ -125,7 +126,7 @@ class SiteSettingResource extends Resource
                         ->columns(2)
                         ->collapsible()
                         ->itemLabel(fn (array $state): ?string => $state['top_label'] ?? 'Badge'),
-                    Repeater::make('value.quick_links')
+                    Repeater::make('quick_links')
                         ->label('Accesos Rápidos')
                         ->schema([
                             TextInput::make('label')->required()->label('Texto'),
@@ -134,7 +135,7 @@ class SiteSettingResource extends Resource
                         ->columns(2)
                         ->collapsible()
                         ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Link'),
-                    Repeater::make('value.contact_links')
+                    Repeater::make('contact_links')
                         ->label('Links de Contacto')
                         ->schema([
                             TextInput::make('label')->required()->label('Texto'),
@@ -143,7 +144,7 @@ class SiteSettingResource extends Resource
                         ->columns(2)
                         ->collapsible()
                         ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Contacto'),
-                    Repeater::make('value.social_links')
+                    Repeater::make('social_links')
                         ->label('Redes Sociales')
                         ->schema([
                             TextInput::make('platform')->required()->label('Plataforma (facebook, instagram, tiktok, linkedin)'),
@@ -159,9 +160,9 @@ class SiteSettingResource extends Resource
             // --- WHATSAPP ---
             Section::make('WhatsApp Flotante')
                 ->schema([
-                    Toggle::make('value.enabled')->label('Habilitado')->default(true),
-                    TextInput::make('value.url')->label('URL de WhatsApp')->placeholder('https://wa.link/...'),
-                    TextInput::make('value.tooltip')->label('Texto del Tooltip')->default('Oficial de Negocios (En línea)'),
+                    Toggle::make('enabled')->label('Habilitado')->default(true),
+                    TextInput::make('url')->label('URL de WhatsApp')->placeholder('https://wa.link/...'),
+                    TextInput::make('tooltip')->label('Texto del Tooltip')->default('Oficial de Negocios (En línea)'),
                 ])
                 ->visible(fn ($record) => $record?->key === 'whatsapp')
                 ->collapsed(),
