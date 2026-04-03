@@ -39,14 +39,18 @@ class DashboardController extends Controller
             
             // Recuperación en el periodo (Pagos registrados)
             $qRecuperado = PlanPago::where('estado', 'Pagada');
-            $qRecuperado->when($desde, fn($q) => $q->where('fecha_pago', '>=', $desde))
-                        ->when($hasta, fn($q) => $q->where('fecha_pago', '<=', $hasta));
-            $capitalRecuperado = $qRecuperado->sum('monto_amortizacion');
+            $qRecuperado->when($desde, fn($q) => $q->where('fecha_pago_real', '>=', $desde))
+                        ->when($hasta, fn($q) => $q->where('fecha_pago_real', '<=', $hasta));
+            $capitalRecuperado = $qRecuperado->sum('capital_amortizado');
 
-            // Morosidad Estricta (Cuotas Vencidas / Retrasadas en mora sin pagar aún)
+            // Morosidad Estricta (Solo cuotas puras vencidas)
             $capitalEnMora = PlanPago::where('estado', 'Retrasada')
                                      ->where('fecha_vencimiento', '<', Carbon::today())
-                                     ->sum(DB::raw('monto_amortizacion + interes'));
+                                     ->sum(DB::raw('capital_amortizado + interes_pagado'));
+
+            // Exposición de Riesgo Global (Todo el saldo pendiente de créditos que tienen mora)
+            $creditosEnMoraIds = PlanPago::where('estado', 'Retrasada')->where('fecha_vencimiento', '<', Carbon::today())->pluck('credito_id');
+            $exposicionGlobalMora = Credito::whereIn('id', $creditosEnMoraIds)->sum('saldo_capital');
 
             // Resumen de la última Caja reportada (Caja Central)
             $ultimaCaja = Caja::latest('id')->first();
@@ -61,16 +65,51 @@ class DashboardController extends Controller
                 ->pluck('count', 'estado')
                 ->toArray();
 
+            // Volumen Convenios
+            $qConvenios = CompraConvenio::query();
+            $qConvenios->when($desde, fn($q) => $q->where('created_at', '>=', $desde))
+                       ->when($hasta, fn($q) => $q->where('created_at', '<=', $hasta));
+            $volumenConvenios = $qConvenios->sum('monto_total');
+
             // ==========================================
             // 2. ECOMMERCE Y BENEFICIOS
             // ==========================================
             
             // Ventas Netas del eCommerce
-            $qVentas = Pedido::whereIn('estado', ['pagado', 'entregado', 'despachado']);
+            $qVentas = Pedido::where('estado_pago', 'pagado');
             $qVentas->when($desde, fn($q) => $q->where('created_at', '>=', $desde))
                     ->when($hasta, fn($q) => $q->where('created_at', '<=', $hasta));
             $ingresosEcommerce = $qVentas->sum('total');
             $totalPedidos = $qVentas->count();
+
+            // Flujo Ventas Diarias
+            $ventasPorDia = DB::table('pedidos')
+                ->where('estado_pago', 'pagado')
+                ->when($desde, fn($q) => $q->where('created_at', '>=', $desde))
+                ->when($hasta, fn($q) => $q->where('created_at', '<=', $hasta))
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total) as sum'))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->take(15) // max 15 days view for cleanliness
+                ->get()
+                ->pluck('sum', 'date')
+                ->toArray();
+
+            // Top Productos
+            $topProductosObj = DB::table('pedido_detalles')
+                ->join('productos', 'pedido_detalles.producto_id', '=', 'productos.id')
+                ->select('productos.nombre', DB::raw('SUM(pedido_detalles.cantidad) as total_qty'))
+                ->when($desde, fn($q) => $q->where('pedido_detalles.created_at', '>=', $desde))
+                ->when($hasta, fn($q) => $q->where('pedido_detalles.created_at', '<=', $hasta))
+                ->groupBy('productos.id', 'productos.nombre')
+                ->orderByDesc('total_qty')
+                ->take(5)
+                ->get();
+            
+            $topProductos = [];
+            foreach ($topProductosObj as $tp) {
+                $topProductos[$tp->nombre] = $tp->total_qty;
+            }
 
             // Alerta Stock
             $productosSinStock = Producto::whereColumn('stock_actual', '<=', 'stock_minimo')->count();
@@ -95,7 +134,7 @@ class DashboardController extends Controller
             
             $usuariosPorGrado = [];
             foreach ($usuariosPorGradoObj as $g) {
-                $gt = $g->grado ?: 'Sin Grado';
+                $gt = $g->grado ?: 'Afiliaciones Base';
                 $usuariosPorGrado[$gt] = $g->count;
             }
 
@@ -110,6 +149,8 @@ class DashboardController extends Controller
                         'montoPrestado' => $montoPrestado,
                         'capitalRecuperado' => $capitalRecuperado,
                         'capitalEnMora' => $capitalEnMora,
+                        'exposicionGlobalMora' => $exposicionGlobalMora,
+                        'volumenConvenios' => $volumenConvenios,
                         'saldoCaja' => $saldoCaja,
                     ],
                     'ecommerce' => [
@@ -125,7 +166,9 @@ class DashboardController extends Controller
                 ],
                 'charts' => [
                     'creditosEstados' => $creditosEstados,
-                    'usuariosPorGrado' => $usuariosPorGrado
+                    'usuariosPorGrado' => $usuariosPorGrado,
+                    'flujoVentas' => $ventasPorDia,
+                    'topProductos' => $topProductos
                 ],
                 'actividadReciente' => $ultimosMovimientos,
                 'filtros' => [

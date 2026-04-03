@@ -5,7 +5,7 @@ import {
     Wallet, TrendingUp, Users, ShieldCheck,
     ArrowRightLeft, CheckCircle2, ShoppingBag, 
     Banknote, PieChart, Activity, AlertCircle, Calendar,
-    Package, Bell, Search, LayoutDashboard
+    Package, Bell, Search, LayoutDashboard, Store
 } from 'lucide-react';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto'; // Registra todos los elementos automáticamente
@@ -60,6 +60,30 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
         }]
     } : null;
 
+    // Preparar Data: Flujo de Ventas Line
+    const flujoVentasData = charts?.flujoVentas ? {
+        labels: Object.keys(charts.flujoVentas),
+        datasets: [{
+            label: 'Ingresos Diarios (Bs.)',
+            data: Object.values(charts.flujoVentas),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+        }]
+    } : null;
+
+    // Preparar Data: Top Productos Doughnut
+    const topProdData = charts?.topProductos ? {
+        labels: Object.keys(charts.topProductos),
+        datasets: [{
+            data: Object.values(charts.topProductos),
+            backgroundColor: ['#f97316', '#a855f7', '#ec4899', '#06b6d4', '#84cc16'],
+            borderWidth: 0,
+        }]
+    } : null;
+
     return (
         <AuthenticatedLayout user={auth.user} header={
             <div className="flex items-center justify-between">
@@ -68,7 +92,7 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                 </h2>
                 {isAdmin && (
                     <span className="text-[10px] bg-primary/20 text-primary border border-primary/50 px-3 py-1 rounded-full font-bold tracking-widest uppercase shadow-sm">
-                        Modo Analista
+                        Modo Analista Avanzado
                     </span>
                 )}
             </div>
@@ -108,7 +132,7 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                                 </div>
                             </form>
                             <div className="text-right border-l border-brand pl-4 hidden md:block">
-                                <p className="text-[10px] uppercase font-black tracking-widest text-brand-muted">Última Actualización</p>
+                                <p className="text-[10px] uppercase font-black tracking-widest text-brand-muted">Análisis Profundo</p>
                                 <p className="text-xs font-bold text-brand-main font-mono">{new Date().toLocaleTimeString()}</p>
                             </div>
                         </div>
@@ -120,17 +144,17 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                         <>
                             {/* NAVEGACIÓN TABS */}
                             <div className="flex space-x-1 bg-card-fap border border-brand p-1 rounded-lg overflow-x-auto scroller-hide">
-                                <TabBtn active={activeTab === 'resumen'} onClick={() => setActiveTab('resumen')} icon={PieChart} label="Resumen Gráfico" />
+                                <TabBtn active={activeTab === 'resumen'} onClick={() => setActiveTab('resumen')} icon={PieChart} label="Visión Global" />
                                 <TabBtn active={activeTab === 'erp'} onClick={() => setActiveTab('erp')} icon={Banknote} label="ERP Financiero" />
-                                <TabBtn active={activeTab === 'ecommerce'} onClick={() => setActiveTab('ecommerce')} icon={ShoppingBag} label="E-Commerce" />
-                                <TabBtn active={activeTab === 'institucional'} onClick={() => setActiveTab('institucional')} icon={Users} label="Institucional" />
+                                <TabBtn active={activeTab === 'ecommerce'} onClick={() => setActiveTab('ecommerce')} icon={ShoppingBag} label="Ventas & E-Commerce" />
+                                <TabBtn active={activeTab === 'institucional'} onClick={() => setActiveTab('institucional')} icon={Users} label="Módulo Institucional" />
                             </div>
 
                             {/* CONTENIDO TAB: RESUMEN GRÁFICO (CHARTJS) */}
                             {activeTab === 'resumen' && (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in zoom-in-95 duration-200">
                                     <div className="bg-card-fap border border-brand rounded-xl p-5 shadow-sm h-80 flex flex-col">
-                                        <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /> Distribución de Créditos</h3>
+                                        <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /> Estados de Cartera de Créditos</h3>
                                         <div className="flex-1 relative">
                                             {creditosData && Object.keys(charts.creditosEstados).length > 0 ? (
                                                 <Doughnut data={creditosData} options={{...chartOptions, maintainAspectRatio: false }} />
@@ -140,7 +164,7 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                                         </div>
                                     </div>
                                     <div className="bg-card-fap border border-brand rounded-xl p-5 shadow-sm h-80 flex flex-col">
-                                        <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> Demografía por Grado</h3>
+                                        <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> Demografía General por Grado</h3>
                                         <div className="flex-1 relative">
                                             {demoData && Object.keys(charts.usuariosPorGrado).length > 0 ? (
                                                 <Bar data={demoData} options={{...chartOptions, maintainAspectRatio: false }} />
@@ -154,29 +178,66 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
 
                             {/* CONTENIDO TAB: ERP FINANCIERO */}
                             {activeTab === 'erp' && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <KpiCard title="Monto Colocado" value={`Bs. ${Number(metrics.erp.montoPrestado).toLocaleString()}`} icon={TrendingUp} color="text-emerald-500" bg="bg-emerald-500/10" border="border-emerald-500/20" />
-                                    <KpiCard title="Capital Recuperado" value={`Bs. ${Number(metrics.erp.capitalRecuperado).toLocaleString()}`} icon={Wallet} color="text-blue-500" bg="bg-blue-500/10" border="border-blue-500/20" />
-                                    <KpiCard title="Capital en Mora Estricta" value={`Bs. ${Number(metrics.erp.capitalEnMora).toLocaleString()}`} icon={AlertCircle} color="text-red-500" bg="bg-red-500/10" border="border-red-500/20" isAlert={metrics.erp.capitalEnMora > 0} />
-                                    <KpiCard title="Saldo en Caja Central" value={`Bs. ${Number(metrics.erp.saldoCaja).toLocaleString()}`} icon={Banknote} color="text-amber-500" bg="bg-amber-500/10" border="border-amber-500/20" />
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <KpiCard title="Monto Total Colocado" value={`Bs. ${Number(metrics.erp.montoPrestado).toLocaleString()}`} icon={TrendingUp} color="text-emerald-500" bg="bg-emerald-500/10" border="border-emerald-500/20" />
+                                        <KpiCard title="Capital Neto Recuperado" value={`Bs. ${Number(metrics.erp.capitalRecuperado).toLocaleString()}`} icon={Wallet} color="text-blue-500" bg="bg-blue-500/10" border="border-blue-500/20" />
+                                        <KpiCard title="Saldo Actual Caja Central" value={`Bs. ${Number(metrics.erp.saldoCaja).toLocaleString()}`} icon={Banknote} color="text-amber-500" bg="bg-amber-500/10" border="border-amber-500/20" />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        {/* Riesgo Extendido */}
+                                        <div className="sm:col-span-2">
+                                           <KpiCard title="Riesgo de Capital Global (Deuda en Mora extendida)" value={`Bs. ${Number(metrics.erp.exposicionGlobalMora).toLocaleString()}`} icon={AlertCircle} color="text-red-500" bg="bg-red-500/10" border="border-red-500/20" isAlert={metrics.erp.exposicionGlobalMora > 0} 
+                                           subtitle={`Incluye Bs. ${Number(metrics.erp.capitalEnMora).toLocaleString()} de cuotas estrictamente vencidas.`} />
+                                        </div>
+                                        <div className="sm:col-span-1">
+                                            <KpiCard title="Convenios Externos Autorizados" value={`Bs. ${Number(metrics.erp.volumenConvenios).toLocaleString()}`} icon={Store} color="text-fapclas-300" bg="bg-fapclas-300/10" border="border-fapclas-300/20" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
                             {/* CONTENIDO TAB: ECOMMERCE */}
                             {activeTab === 'ecommerce' && (
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <KpiCard title="Ventas Netas" value={`Bs. ${Number(metrics.ecommerce.ingresosTotales).toLocaleString()}`} icon={ShoppingBag} color="text-primary" bg="bg-primary/10" border="border-primary/20" />
-                                    <KpiCard title="Pedidos Efectivos" value={metrics.ecommerce.totalPedidos} icon={CheckCircle2} color="text-fapclas-300" bg="bg-fapclas-300/10" border="border-fapclas-300/20" />
-                                    <KpiCard title="Alertas de Inventario" value={`${metrics.ecommerce.alertasStock} Prod.`} icon={Package} color={metrics.ecommerce.alertasStock > 0 ? "text-orange-500" : "text-brand-muted"} bg="bg-main" border={metrics.ecommerce.alertasStock > 0 ? "border-orange-500" : "border-brand"} isAlert={metrics.ecommerce.alertasStock > 0} />
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <KpiCard title="Ventas Netas Cerradas" value={`Bs. ${Number(metrics.ecommerce.ingresosTotales).toLocaleString()}`} icon={ShoppingBag} color="text-primary" bg="bg-primary/10" border="border-primary/20" />
+                                        <KpiCard title="Pedidos Efectivos" value={metrics.ecommerce.totalPedidos} icon={CheckCircle2} color="text-emerald-400" bg="bg-emerald-400/10" border="border-emerald-400/20" />
+                                        <KpiCard title="Productos en Alerta Crítica (Stock)" value={`${metrics.ecommerce.alertasStock} Prod.`} icon={Package} color={metrics.ecommerce.alertasStock > 0 ? "text-orange-500" : "text-brand-muted"} bg="bg-main" border={metrics.ecommerce.alertasStock > 0 ? "border-orange-500" : "border-brand"} isAlert={metrics.ecommerce.alertasStock > 0} />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        <div className="bg-card-fap border border-brand rounded-xl p-5 shadow-sm h-72 flex flex-col lg:col-span-2">
+                                            <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Curva de Ventas Diarias</h3>
+                                            <div className="flex-1 relative">
+                                                {flujoVentasData && Object.keys(charts.flujoVentas).length > 0 ? (
+                                                    <Line data={flujoVentasData} options={{...chartOptions, plugins: { legend: { display: false } }, maintainAspectRatio: false }} />
+                                                ) : (
+                                                    <EmptyChartState />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="bg-card-fap border border-brand rounded-xl p-5 shadow-sm h-72 flex flex-col">
+                                            <h3 className="text-xs font-black uppercase text-brand-muted tracking-widest mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> Top 5 Productos</h3>
+                                            <div className="flex-1 relative">
+                                                {topProdData && Object.keys(charts.topProductos).length > 0 ? (
+                                                    <Doughnut data={topProdData} options={{...chartOptions, maintainAspectRatio: false }} />
+                                                ) : (
+                                                    <EmptyChartState />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
                             {/* CONTENIDO TAB: INSTITUCIONAL */}
                             {activeTab === 'institucional' && (
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <KpiCard title="Total Usuarios" value={metrics.institucional.totalUsuarios} icon={Users} color="text-blue-400" bg="bg-blue-400/10" border="border-blue-400/20" />
-                                    <KpiCard title="Nuevos (En Periodo)" value={`+${metrics.institucional.nuevosUsuarios}`} icon={TrendingUp} color="text-emerald-400" bg="bg-emerald-400/10" border="border-emerald-400/20" />
-                                    <KpiCard title="Noticias / PR" value={metrics.institucional.totalNoticias} icon={Bell} color="text-purple-400" bg="bg-purple-400/10" border="border-purple-400/20" />
+                                    <KpiCard title="Fuerza Societaria (Total)" value={metrics.institucional.totalUsuarios} icon={Users} color="text-blue-400" bg="bg-blue-400/10" border="border-blue-400/20" />
+                                    <KpiCard title="Crecimiento Integración (Nuevos)" value={`+${metrics.institucional.nuevosUsuarios}`} icon={TrendingUp} color="text-emerald-400" bg="bg-emerald-400/10" border="border-emerald-400/20" />
+                                    <KpiCard title="Volumen RRPP / Noticias" value={metrics.institucional.totalNoticias} icon={Bell} color="text-purple-400" bg="bg-purple-400/10" border="border-purple-400/20" />
                                 </div>
                             )}
 
@@ -184,7 +245,7 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                             <div className="bg-card-fap border border-brand shadow-sm rounded-lg overflow-hidden mt-6">
                                 <div className="px-4 py-3 border-b border-brand flex items-center justify-between">
                                     <h3 className="text-xs font-bold text-brand-main uppercase tracking-wider flex items-center gap-2">
-                                        <ArrowRightLeft className="w-4 h-4 text-primary" /> Actividad Transaccional Reciente
+                                        <ArrowRightLeft className="w-4 h-4 text-primary" /> Auditoría Transaccional Relevante
                                     </h3>
                                     <Link href={route('libro-diario.index')} className="text-[10px] font-bold text-primary hover:text-white bg-primary/10 hover:bg-primary px-3 py-1.5 rounded transition-colors uppercase tracking-widest border border-primary/20">
                                         Libro Diario
