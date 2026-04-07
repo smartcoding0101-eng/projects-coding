@@ -30,13 +30,32 @@ class PageController extends Controller
             ->get(['id', 'titulo', 'slug', 'resumen', 'imagen_path', 'categoria', 'fecha', 'created_at'])
             ->toArray();
 
-        // Buscar página "inicio" en el CMS EXCLUSIVAMENTE para extraer su SEO
+        // Buscar página "inicio" en el CMS para extraer SEO + bloques dinámicos
         $page = Page::where('slug', 'inicio')->where('is_active', true)->first();
         $pageData = $page ? $page->only(['title', 'content', 'metadata']) : ['title' => 'FAPCLAS R.L. - Tu Futuro Seguro', 'content' => [], 'metadata' => null];
 
+        // Extraer contenido dinámico desde el CMS para inyectarlo a los componentes premium
+        $heroSlides = [];
+        $galleryData = null;
+        
+        if ($page && is_array($page->content)) {
+            foreach ($page->content as $block) {
+                // Slides del Hero
+                if (($block['type'] ?? '') === 'hero' && !empty($block['data']['slides'])) {
+                    $heroSlides = $block['data']['slides'];
+                }
+                // Galería Institucional
+                if (($block['type'] ?? '') === 'gallery') {
+                    $galleryData = $block['data'];
+                }
+            }
+        }
+
         return Inertia::render('Welcome', [
             'page' => $pageData,
-            'isDynamic' => false, // MUY IMPORTANTE: Forzamos false para que dibuje el diseño "Hardcoded" gigante
+            'isDynamic' => false,
+            'heroSlides' => $heroSlides,
+            'galleryData' => $galleryData,
             'latest_noticias' => $noticias,
             'siteSettings' => $this->getSiteSettings(),
         ]);

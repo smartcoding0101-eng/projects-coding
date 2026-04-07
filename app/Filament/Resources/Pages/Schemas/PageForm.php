@@ -59,6 +59,7 @@ class PageForm
                                             ->label('Imagen o Video FDC (Max 25MB)')
                                             ->acceptedFileTypes(['image/*', 'video/mp4', 'video/webm'])
                                             ->maxSize(25600)
+                                            ->disk('public')
                                             ->directory('pages/heros'),
                                     ])
                                     ->defaultItems(3)
@@ -87,6 +88,7 @@ class PageForm
                                     ->multiple()
                                     ->maxFiles(3)
                                     ->image()
+                                    ->disk('public')
                                     ->directory('pages/identity'),
                             ]),
 
@@ -109,6 +111,7 @@ class PageForm
                                         FileUpload::make('image')
                                             ->label('Imagen del Servicio')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('pages/services'),
                                         Toggle::make('is_featured')->label('Destacado (★ Principal)')->default(false),
                                     ])
@@ -199,6 +202,7 @@ class PageForm
                                         TextInput::make('caption')->label('Título/Caption')->required(),
                                         FileUpload::make('image')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('pages/galleries')
                                             ->required(),
                                     ])
@@ -224,11 +228,13 @@ class PageForm
                                         ->label('O Subir Video Local (.mp4) -> MAX: 25MB')
                                         ->acceptedFileTypes(['video/mp4', 'video/webm'])
                                         ->maxSize(25600)
+                                        ->disk('public')
                                         ->directory('pages/videos_locales')
                                         ->hint('Si subes un archivo, sobrescribirá al URL de YouTube.'),
                                     FileUpload::make('main_thumbnail')
                                         ->label('Thumbnail Principal')
                                         ->image()
+                                        ->disk('public')
                                         ->directory('pages/videos'),
                                 ]),
                                 Repeater::make('gallery')
@@ -240,6 +246,7 @@ class PageForm
                                         FileUpload::make('thumbnail')
                                             ->label('Thumbnail')
                                             ->image()
+                                            ->disk('public')
                                             ->directory('pages/videos'),
                                     ])
                                     ->columns(2)
@@ -262,7 +269,7 @@ class PageForm
                                         TextInput::make('role')->label('Cargo/Ubicación'),
                                         Textarea::make('content')->required()->label('Testimonio'),
                                         TextInput::make('rating')->numeric()->default(5)->label('Estrellas (1-5)'),
-                                        FileUpload::make('image')->image()->avatar()->directory('pages/testimonials'),
+                                        FileUpload::make('image')->image()->avatar()->disk('public')->directory('pages/testimonials'),
                                     ])
                                     ->collapsible()
                                     ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Testimonio'),
@@ -306,6 +313,7 @@ class PageForm
                                         FileUpload::make('file')
                                             ->label('Archivo PDF')
                                             ->acceptedFileTypes(['application/pdf'])
+                                            ->disk('public')
                                             ->directory('pages/normativas')
                                             ->required(),
                                         TextInput::make('button_text')->label('Texto del Botón')->default('Descargar PDF'),
@@ -327,6 +335,7 @@ class PageForm
                                 Textarea::make('content')->required()->label('Contenido / Párrafos')->rows(6),
                                 FileUpload::make('image')
                                     ->image()
+                                    ->disk('public')
                                     ->directory('pages/institutional')
                                     ->label('Imagen Lateral'),
                                 Toggle::make('image_left')->label('Imagen a la Izquierda')->default(false),
@@ -367,6 +376,7 @@ class PageForm
                         FileUpload::make('og_image')
                             ->label('Imagen OpenGraph (WhatsApp / Facebook)')
                             ->image()
+                            ->disk('public')
                             ->directory('pages/seo')
                             ->hint('Resolución recomendada: 1200x630px')
                             ->imageResizeMode('cover')

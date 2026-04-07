@@ -18,7 +18,7 @@ import FAQSection from '../Components/FAQSection';
 // Extra: Módulo de noticias dinámicas importado para la Home
 import LatestNewsBlock from '../Components/CMS/Blocks/LatestNewsBlock';
 
-export default function Welcome({ page, isDynamic, siteSettings = {}, latest_noticias = [] }) {
+export default function Welcome({ page, isDynamic, siteSettings = {}, latest_noticias = [], heroSlides = [], galleryData = null }) {
     const { header = {}, footer = {}, whatsapp = {} } = siteSettings;
 
     return (
@@ -27,7 +27,7 @@ export default function Welcome({ page, isDynamic, siteSettings = {}, latest_not
                 <title>{page?.metadata?.seo_title || page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"}</title>
                 {page?.metadata?.seo_description && <meta name="description" content={page.metadata.seo_description} />}
                 {page?.metadata?.og_image && <meta property="og:image" content={`/storage/${page.metadata.og_image}`} />}
-                {page?.metadata?.seo_title && <meta property="og:title" content={page.metadata.seo_title} />}
+                {page?.metadata?.seo_title && <meta property="og:tile" content={page.metadata.seo_title} />}
             </Head>
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface selection:bg-primary/20">
                 <Header settings={header} />
@@ -41,7 +41,7 @@ export default function Welcome({ page, isDynamic, siteSettings = {}, latest_not
                         <BlockRenderer blocks={page.content} />
                     ) : (
                         <>
-                            <HeroSection />
+                            <HeroSection cmsSlides={heroSlides} />
                             <InstitutionalSection />
                             <ProductCards />
                             
@@ -57,7 +57,7 @@ export default function Welcome({ page, isDynamic, siteSettings = {}, latest_not
                                 </div>
                             </section>
 
-                            <GallerySection />
+                            <GallerySection cmsGallery={galleryData} />
                             <VideoSection />
                             <TestimonialsSection />
                             

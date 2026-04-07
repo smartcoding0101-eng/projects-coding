@@ -1,47 +1,97 @@
-export default function GallerySection() {
+export default function GallerySection({ cmsGallery = null }) {
+    // ─── Configuración de Títulos ───
+    const title = cmsGallery?.title || "Transparencia y Acción";
+    const subtitle = cmsGallery?.subtitle || "Nuestra Familia en Imágenes";
+    const description = "Resultados tangibles, infraestructura moderna y los momentos que definen nuestra vocación de servicio.";
+
+    /**
+     * ─── Dimensiones Recomendadas (Nano Banana Optimization) ───
+     * Para una nitidez cristalina y carga ultrarrápida:
+     * - Imagen Destacada (Main): 1200x1200px (1:1) o 1200x800px (3:2)
+     * - Imágenes Secundarias: 600x600px (1:1)
+     * Formato ideal: WebP o AVIF (Calidad 75-80%)
+     */
+
+    // ─── Imágenes de la Galería (Re-ajustadas a 4 items) ───
+    const defaultItems = [
+        {
+            caption: "Nuestra Identidad y Valores",
+            image: "/storage/pages/galleries/gallery-3.jpg", // Promoted to featured
+            className: "md:col-span-2 md:row-span-2"
+        },
+        {
+            caption: "Compromiso con la Comunidad",
+            image: "/storage/pages/galleries/gallery-2.jpg",
+            className: "md:col-span-1 md:row-span-1"
+        },
+        {
+            caption: "Atención y Vocación",
+            image: "/storage/pages/galleries/gallery-4.jpg",
+            className: "md:col-span-1 md:row-span-2"
+        },
+        {
+            caption: "Familia y Unidad",
+            image: "/storage/pages/galleries/gallery-5.jpg",
+            className: "md:col-span-1 md:row-span-1"
+        }
+    ];
+
+    // Clases CSS dinámicas para el diseño Masonry (4 items)
+    const gridClasses = [
+        "md:col-span-2 md:row-span-2", // Destacada
+        "md:col-span-1 md:row-span-1",
+        "md:col-span-1 md:row-span-2",
+        "md:col-span-1 md:row-span-1"
+    ];
+
+    const items = (cmsGallery?.items && cmsGallery.items.length > 0)
+        ? cmsGallery.items.map((item, index) => ({
+            caption: item.caption || "Imagen",
+            image: item.image ? (item.image.startsWith('http') ? item.image : `/storage/${item.image}`) : null,
+            className: gridClasses[index % gridClasses.length]
+        }))
+        : defaultItems;
+
     return (
-        <section className="py-12 bg-white" id="galeria">
+        <section className="py-16 bg-surface border-y border-zinc-100" id="galeria">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-8">
-                    <h2 className="text-sm font-bold tracking-widest text-primary uppercase mb-3">Transparencia y Acción</h2>
-                    <h3 className="font-display text-4xl font-bold text-on-surface">Nuestra Familia en Imágenes</h3>
-                    <p className="mt-4 text-gray-500 max-w-2xl mx-auto text-lg">Resultados tangibles, infraestructura moderna y los momentos que definen nuestra vocación de servicio.</p>
+                <div className="text-center mb-16">
+                    <h2 className="text-sm font-black tracking-[0.3em] text-primary uppercase mb-4">{title}</h2>
+                    <h3 className="font-display text-5xl font-black text-on-surface tracking-tight">{subtitle}</h3>
+                    <div className="w-24 h-1 bg-secondary mx-auto mt-6 rounded-full"></div>
+                    <p className="mt-8 text-zinc-500 max-w-2xl mx-auto text-xl leading-relaxed">{description}</p>
                 </div>
                 
-                {/* CSS Grid for Masonry-like look */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[250px]">
-                    <div className="md:col-span-2 md:row-span-2 rounded-[2rem] overflow-hidden relative group shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/50">
-                        <img src="https://images.unsplash.com/photo-1544928147-79a2dbc1f389?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Asambleas Generales" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
-                            <h4 className="text-white font-display font-bold text-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Asambleas Generales</h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[250px]">
+                    {items.slice(0, 4).map((item, index) => (
+                        <div 
+                            key={index} 
+                            className={`${item.className} rounded-[2.5rem] overflow-hidden relative group shadow-xl shadow-zinc-200/50 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-white`}
+                        >
+                            {item.image ? (
+                                <img 
+                                    src={item.image} 
+                                    alt={item.caption} 
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">Sin imagen</div>
+                            )}
+                            
+                            {/* Overlay de mayor contraste */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
+                                <span className="text-secondary font-bold text-xs uppercase tracking-widest mb-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100 duration-500">Galería FAPCLAS</span>
+                                <h4 className="text-white font-display font-black text-2xl md:text-3xl transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 delay-75">
+                                    {item.caption}
+                                </h4>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div className="md:col-span-1 md:row-span-1 rounded-[2rem] overflow-hidden relative group shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/50">
-                         <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Atención Cooperativa" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                            <h4 className="text-white font-bold text-lg">Atención al Socio</h4>
-                        </div>
-                    </div>
-                    
-                    <div className="md:col-span-1 md:row-span-2 rounded-[2rem] overflow-hidden relative group shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/50">
-                        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Responsabilidad Social" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale hover:grayscale-0" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                            <h4 className="text-white font-display font-bold text-2xl">Responsabilidad Social</h4>
-                        </div>
-                        <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm p-3 rounded-full text-white cursor-pointer hover:bg-white/40 transition-colors">
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        </div>
-                    </div>
-                    
-                    <div className="md:col-span-1 md:row-span-1 rounded-[2rem] overflow-hidden relative group shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/50">
-                         <img src="https://images.unsplash.com/photo-1556740714-a8395b3bf30f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Crecimiento Institucional" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                            <h4 className="text-white font-bold text-lg">Eventos Sociales</h4>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </section>
     );
 }
+
