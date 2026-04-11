@@ -43,19 +43,30 @@ class BackupController extends Controller
 
             $path = $directory . '/' . $filename . '.sql';
 
+            // En Windows/XAMPP ejecutamos exec directo para evadir Bug de Sockets de Spatie
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $user = config('database.connections.mysql.username');
+                $pass = config('database.connections.mysql.password');
+                $db = config('database.connections.mysql.database');
+                
+                $passArg = !empty($pass) ? "-p\"{$pass}\"" : "";
+                $cmd = "C:\\xampp\\mysql\\bin\\mysqldump.exe -u {$user} {$passArg} {$db} > \"{$path}\" 2>&1";
+                exec($cmd, $output, $returnVar);
+
+                if ($returnVar !== 0) {
+                    throw new \Exception("Mysqldump fallback error: " . implode(' | ', $output) . " | CMD: " . str_replace($pass, '***', $cmd));
+                }
+
+                return response()->download($path)->deleteFileAfterSend();
+            }
+
+            // Flujo original (Linux / cPanel)
             $dumper = MySql::create()
                 ->setDbName(config('database.connections.mysql.database'))
                 ->setUserName(config('database.connections.mysql.username'))
                 ->setPassword(config('database.connections.mysql.password'))
                 ->setHost(config('database.connections.mysql.host'))
                 ->setPort(config('database.connections.mysql.port'));
-
-            // Soporte para entornos locales tipo XAMPP en Windows
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                if (file_exists('C:\\xampp\\mysql\\bin\\mysqldump.exe')) {
-                    $dumper->setDumpBinaryPath('C:\\xampp\\mysql\\bin');
-                }
-            }
 
             $dumper->dumpToFile($path);
 

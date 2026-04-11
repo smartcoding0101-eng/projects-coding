@@ -17,13 +17,14 @@ import {
     ShieldCheck
 } from 'lucide-react';
 
-export default function Show({ auth, credito, planPagos }) {
+export default function Show({ auth, credito, stats }) {
+    const planPagos = credito.plan_pagos || credito.planPagos || [];
     const isAdmin = auth.user.roles?.includes('SuperAdmin') || auth.user.roles?.includes('Oficial Crédito');
     
     // Cálculos resumen
-    const pagadoCapital = planPagos.filter(p => p.estado === 'Pagado').reduce((sum, p) => sum + Number(p.amortizacion_capital), 0);
-    const pagadoInteres = planPagos.filter(p => p.estado === 'Pagado').reduce((sum, p) => sum + Number(p.interes), 0);
-    const cuotasPagadas = planPagos.filter(p => p.estado === 'Pagado').length;
+    const pagadoCapital = planPagos.filter(p => p.estado === 'Pagada').reduce((sum, p) => sum + Number(p.capital_amortizado), 0);
+    const pagadoInteres = planPagos.filter(p => p.estado === 'Pagada').reduce((sum, p) => sum + Number(p.interes_pagado), 0);
+    const cuotasPagadas = planPagos.filter(p => p.estado === 'Pagada').length;
     const progreso = credito.monto_aprobado > 0 ? ((pagadoCapital / credito.monto_aprobado) * 100).toFixed(1) : 0;
 
     return (
@@ -143,20 +144,20 @@ export default function Show({ auth, credito, planPagos }) {
                                     </thead>
                                     <tbody>
                                         {planPagos.map((cuota, index) => {
-                                            const isMora = cuota.estado === 'Mora' || cuota.monto_mora > 0;
+                                            const isMora = cuota.estado === 'Retrasada' || cuota.monto_mora > 0;
                                             const totalPagar = Number(cuota.cuota_total) + Number(cuota.monto_mora || 0);
                                             return (
-                                                <tr key={cuota.id} className={`border-b border-brand transition-colors group ${ cuota.estado === 'Pagado' ? 'bg-primary/5 opacity-75' : 'hover:bg-primary/5' }`}>
+                                                <tr key={cuota.id} className={`border-b border-brand transition-colors group ${ cuota.estado === 'Pagada' ? 'bg-primary/5 opacity-75' : 'hover:bg-primary/5' }`}>
                                                     <td className="px-4 py-2 text-center text-xs font-semibold text-brand-muted">{cuota.nro_cuota}</td>
                                                     <td className="px-4 py-2 text-xs font-medium text-brand-main">{new Date(cuota.fecha_vencimiento).toLocaleDateString()}</td>
                                                     <td className="px-4 py-2 text-right text-xs text-brand-muted bg-transparent">
-                                                        {Number(cuota.saldo_inicial).toLocaleString('es-BO', {minimumFractionDigits: 2})}
+                                                        {Number(cuota.saldo_inicial || 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                                     </td>
                                                     <td className="px-4 py-2 text-right text-xs font-medium text-brand-muted">
-                                                        {Number(cuota.amortizacion_capital).toLocaleString('es-BO', {minimumFractionDigits: 2})}
+                                                        {Number(cuota.capital_amortizado).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                                     </td>
                                                     <td className="px-4 py-2 text-right text-xs font-medium text-brand-muted">
-                                                        {Number(cuota.interes).toLocaleString('es-BO', {minimumFractionDigits: 2})}
+                                                        {Number(cuota.interes_pagado).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                                     </td>
                                                     <td className="px-4 py-2 text-right text-xs font-semibold text-brand-main bg-primary/5">
                                                         {Number(cuota.cuota_total).toLocaleString('es-BO', {minimumFractionDigits: 2})}
@@ -172,10 +173,10 @@ export default function Show({ auth, credito, planPagos }) {
                                                     </td>
                                                     {isAdmin && (
                                                         <td className="px-4 py-2 text-right">
-                                                            {cuota.estado !== 'Pagado' ? (
+                                                            {cuota.estado !== 'Pagada' ? (
                                                                 <BotonPagar cuota={cuota} credito={credito} plan={planPagos} index={index} />
                                                             ) : (
-                                                                <span className="text-[10px] text-primary font-bold uppercase transition-colors" title={`Pagado el ${new Date(cuota.fecha_pago).toLocaleDateString()}`}>
+                                                                <span className="text-[10px] text-primary font-bold uppercase transition-colors" title={`Pagado el ${new Date(cuota.fecha_pago_real).toLocaleDateString()}`}>
                                                                     ✓ Pagado
                                                                 </span>
                                                             )}
@@ -192,7 +193,7 @@ export default function Show({ auth, credito, planPagos }) {
                                                 {Number(credito.monto_aprobado).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
                                             <td className="px-4 py-3 text-right text-sm font-bold text-brand-main font-mono">
-                                                {planPagos.reduce((sum, p) => sum + Number(p.interes), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
+                                                {planPagos.reduce((sum, p) => sum + Number(p.interes_pagado), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
                                             </td>
                                             <td className="px-4 py-3 text-right text-sm font-bold text-brand-main bg-card-fap/[0.02] font-mono">
                                                 {planPagos.reduce((sum, p) => sum + Number(p.cuota_total), 0).toLocaleString('es-BO', {minimumFractionDigits: 2})}
@@ -263,8 +264,8 @@ function StatusTag({ estado }) {
 
 function TagEstadoCuota({ estado }) {
     const cfg = {
-        'Pagado':   'bg-emerald-500/10 text-emerald-500 ring-emerald-500/20',
-        'Mora':     'bg-red-500/10 text-red-500 ring-red-500/20',
+        'Pagada':   'bg-emerald-500/10 text-emerald-500 ring-emerald-500/20',
+        'Retrasada': 'bg-red-500/10 text-red-500 ring-red-500/20',
         'Pendiente':'bg-primary/10 text-primary ring-primary/20',
     };
     return (
@@ -347,7 +348,7 @@ function BotonPagar({ cuota, credito, plan, index }) {
     let puedePagar = true;
     if (index > 0) {
         const cuotaAnterior = plan[index - 1];
-        if (cuotaAnterior.estado !== 'Pagado') puedePagar = false;
+        if (cuotaAnterior.estado !== 'Pagada') puedePagar = false;
     }
     if (!puedePagar) {
         return <span className="text-[10px] text-brand-muted font-semibold" title="Debe cancelar cuotas anteriores primero">Pendiente previo</span>;

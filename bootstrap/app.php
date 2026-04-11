@@ -19,5 +19,16 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Database\QueryException $e, \Illuminate\Http\Request $request) {
+            // Error 1146 = Base table or view not found (Fallo de infraestructura)
+            if ($e->errorInfo[1] === 1146) {
+                if ($request->expectsJson() || $request->hasHeader('X-Inertia')) {
+                    // Si es llamada Inertia o JSON, devueve array vacio suavemente o alerta
+                    // Pero como necesitamos que Inertia renderice algo y no explote, forzaremos 
+                    // a que devuelva un Toast de sistema o redirija al dashboard de forma segura
+                    return back()->with('error', 'El sistema está en mantenimiento. Hubo un problema sincronizando las bases de datos (Tabla faltante).');
+                }
+                return response()->view('errors.500', ['error' => 'Mantenimiento del Sistema en proceso. (DB Sync Pending)'], 503);
+            }
+        });
     })->create();

@@ -90,11 +90,6 @@ export default function Dashboard({ auth, metrics, charts, actividadReciente, fi
                 <h2 className="font-semibold text-xl text-brand-main leading-tight flex items-center gap-2">
                     <LayoutDashboard className="w-5 h-5 text-primary" /> Cockpit / Inteligencia de Negocios
                 </h2>
-                {isAdmin && (
-                    <span className="text-[10px] bg-primary/20 text-primary border border-primary/50 px-3 py-1 rounded-full font-bold tracking-widest uppercase shadow-sm">
-                        Modo Analista Avanzado
-                    </span>
-                )}
             </div>
         }>
             <Head title="Panel de Control BI" />
@@ -371,7 +366,11 @@ function TransactionTable({ records, isAdmin }) {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-brand">
-                    {records.map((mov) => (
+                    {records.map((mov) => {
+                        const esIngreso = Number(mov.ingreso) > 0;
+                        const montoValor = esIngreso ? Number(mov.ingreso) : Number(mov.egreso);
+                        
+                        return (
                         <tr key={mov.id} className="hover:bg-primary/5 transition-colors">
                             <td className="px-4 py-3 text-xs text-brand-muted whitespace-nowrap font-medium">
                                 {new Date(mov.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -387,12 +386,12 @@ function TransactionTable({ records, isAdmin }) {
                                 <div className="text-[9px] text-fapclas-300 font-bold uppercase tracking-widest mt-0.5">{mov.tipo_transaccion}</div>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-right">
-                                <span className={`text-[13px] font-black ${mov.monto > 0 ? 'text-emerald-500' : 'text-red-400'}`}>
-                                    {mov.monto > 0 ? '+' : ''}{Number(mov.monto).toLocaleString()}
+                                <span className={`text-[13px] font-black ${esIngreso ? 'text-emerald-500' : 'text-red-400'}`}>
+                                    {esIngreso ? '+' : '-'}{montoValor.toLocaleString()}
                                 </span>
                             </td>
                         </tr>
-                    ))}
+                    )})}
                 </tbody>
             </table>
         </div>

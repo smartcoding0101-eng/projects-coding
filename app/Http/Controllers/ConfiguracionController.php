@@ -20,6 +20,7 @@ class ConfiguracionController extends Controller
             'backup_time_start' => ['value' => '08:00', 'desc' => 'Hora límite inicial'],
             'backup_time_end' => ['value' => '18:00', 'desc' => 'Hora límite final'],
             'backup_interval' => ['value' => 'daily', 'desc' => 'Frecuencia (daily, hourly, etc)'],
+            'ecommerce_hero_slides' => ['value' => '[]', 'desc' => 'Diapositivas del carrusel Hero de Beneficios (JSON)'],
         ];
 
         foreach ($keys as $k => $v) {
