@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import TextType from '../../TextType';
 
 const CreditSimulatorBlock = ({ data }) => {
@@ -21,19 +20,12 @@ const CreditSimulatorBlock = ({ data }) => {
     const [months, setMonths] = useState(parseInt(default_months) || 12);
     const [saved, setSaved] = useState(false);
 
-    const { auth } = usePage().props;
-    const isAuthenticated = !!auth?.user;
-
     const handleRequestCredit = () => {
         localStorage.setItem('simulated_amount', amount);
         localStorage.setItem('simulated_months', months);
         setSaved(true);
         setTimeout(() => {
-            if (isAuthenticated) {
-                window.location.href = '/creditos/solicitar';
-            } else {
-                window.location.href = '/login?redirect=creditos.create';
-            }
+            window.location.href = '/creditos/solicitar';
         }, 350);
     };
 

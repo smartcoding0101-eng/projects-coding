@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
 import TextType from './TextType';
 
 export default function CreditSimulator() {
@@ -8,19 +7,12 @@ export default function CreditSimulator() {
     const [saved, setSaved] = useState(false);
     const monthlyRateValue = 10; // Tasa referencial del 10% mensual
 
-    const { auth } = usePage().props;
-    const isAuthenticated = !!auth?.user;
-
     const handleRequestCredit = () => {
         localStorage.setItem('simulated_amount', amount);
         localStorage.setItem('simulated_months', months);
         setSaved(true);
         setTimeout(() => {
-            if (isAuthenticated) {
-                window.location.href = '/creditos/solicitar';
-            } else {
-                window.location.href = '/login?redirect=creditos.create';
-            }
+            window.location.href = '/creditos/solicitar';
         }, 350);
     };
 
