@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Filament\Resources\Roles\Schemas;
+
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class RoleForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Definición de Rol')->schema([
+                    TextInput::make('name')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->label('Nombre del Rol'),
+                    Select::make('permissions')
+                        ->multiple()
+                        ->relationship('permissions', 'name')
+                        ->preload()
+                        ->label('Permisos Asignados'),
+                ])->columns(1)
+            ]);
+    }
+}

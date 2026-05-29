@@ -31,7 +31,7 @@ class SiteSettingResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Configuraciones del Sitio';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'CMS';
+    protected static string|\UnitEnum|null $navigationGroup = 'Landing Page';
 
     protected static ?int $navigationSort = 0;
 
@@ -47,7 +47,7 @@ class SiteSettingResource extends Resource
             Section::make('Contenido')
                 ->statePath('value')
                 ->schema(static::getValueFields())
-                ->visible(fn ($record) => $record !== null),
+                ->visible(fn($record) => $record !== null),
         ]);
     }
 
@@ -81,7 +81,7 @@ class SiteSettingResource extends Resource
                         ])
                         ->columns(2)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Link'),
+                        ->itemLabel(fn(array $state): ?string => $state['label'] ?? 'Link'),
                     Repeater::make('menu')
                         ->label('Menú Principal')
                         ->schema([
@@ -97,16 +97,26 @@ class SiteSettingResource extends Resource
                                 ])
                                 ->columns(2)
                                 ->collapsible()
-                                ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Enlace'),
+                                ->itemLabel(fn(array $state): ?string => $state['label'] ?? 'Enlace'),
                             TextInput::make('featured_title')->label('Título Destacado (opcional)'),
                             TextInput::make('featured_subtitle')->label('Subtítulo Destacado'),
                             TextInput::make('featured_badge')->label('Badge Destacado'),
-                            FileUpload::make('featured_image')->label('Imagen Destacada')->image()->directory('site/menu'),
+                            FileUpload::make('featured_image')
+                                ->label('Imagen Destacada del Menú')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site/menu')
+                                ->helperText('📐 Dimensiones: 400 × 300 px · Relación 4:3 · Formatos: JPG, PNG, WEBP')
+                                ->hint('Imagen decorativa que aparece en el mega-menú desplegable del Header.')
+                                ->imageResizeMode('cover')
+                                ->imageCropAspectRatio('4:3')
+                                ->imageResizeTargetWidth('400')
+                                ->imageResizeTargetHeight('300'),
                         ])
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Menú'),
+                        ->itemLabel(fn(array $state): ?string => $state['label'] ?? 'Menú'),
                 ])
-                ->visible(fn ($record) => $record?->key === 'header')
+                ->visible(fn($record) => $record?->key === 'header')
                 ->collapsed(),
 
             // --- FOOTER ---
@@ -125,7 +135,7 @@ class SiteSettingResource extends Resource
                         ])
                         ->columns(2)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['top_label'] ?? 'Badge'),
+                        ->itemLabel(fn(array $state): ?string => $state['top_label'] ?? 'Badge'),
                     Repeater::make('quick_links')
                         ->label('Accesos Rápidos')
                         ->schema([
@@ -134,7 +144,7 @@ class SiteSettingResource extends Resource
                         ])
                         ->columns(2)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Link'),
+                        ->itemLabel(fn(array $state): ?string => $state['label'] ?? 'Link'),
                     Repeater::make('contact_links')
                         ->label('Links de Contacto')
                         ->schema([
@@ -143,7 +153,7 @@ class SiteSettingResource extends Resource
                         ])
                         ->columns(2)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'Contacto'),
+                        ->itemLabel(fn(array $state): ?string => $state['label'] ?? 'Contacto'),
                     Repeater::make('social_links')
                         ->label('Redes Sociales')
                         ->schema([
@@ -152,9 +162,9 @@ class SiteSettingResource extends Resource
                         ])
                         ->columns(2)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['platform'] ?? 'Red Social'),
+                        ->itemLabel(fn(array $state): ?string => $state['platform'] ?? 'Red Social'),
                 ])
-                ->visible(fn ($record) => $record?->key === 'footer')
+                ->visible(fn($record) => $record?->key === 'footer')
                 ->collapsed(),
 
             // --- WHATSAPP ---
@@ -164,7 +174,7 @@ class SiteSettingResource extends Resource
                     TextInput::make('url')->label('URL de WhatsApp')->placeholder('https://wa.link/...'),
                     TextInput::make('tooltip')->label('Texto del Tooltip')->default('Oficial de Negocios (En línea)'),
                 ])
-                ->visible(fn ($record) => $record?->key === 'whatsapp')
+                ->visible(fn($record) => $record?->key === 'whatsapp')
                 ->collapsed(),
         ];
     }
@@ -176,13 +186,13 @@ class SiteSettingResource extends Resource
                 TextColumn::make('key')
                     ->label('Configuración')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'header' => 'info',
                         'footer' => 'success',
                         'whatsapp' => 'warning',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'header' => '🏠 Header / Navegación',
                         'footer' => '📋 Footer / Pie de Página',
                         'whatsapp' => '💬 WhatsApp Flotante',

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff } from 'lucide-react';
+import BlurText from '../../Components/BlurText';
 
 export default function Login({ status, canResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -45,9 +46,15 @@ export default function Login({ status, canResetPassword }) {
                             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]"></span>
                             Plataforma Cifrada Activa
                         </div>
-                        <h3 className="font-display font-bold text-3xl text-white mb-6 leading-tight drop-shadow-lg">
-                            Tu futuro asegurado en el ecosistema más sólido.
-                        </h3>
+                        <BlurText
+                            as="h3"
+                            text="Tu futuro asegurado en el ecosistema más sólido."
+                            delay={0.12}
+                            animateBy="words"
+                            direction="top"
+                            align="left"
+                            className="font-display font-bold text-3xl text-white mb-6 leading-tight drop-shadow-lg"
+                        />
                         <p className="text-gray-200 text-sm leading-relaxed font-sans pr-6 opacity-90 border-l-2 border-primary/40 pl-4">
                             Gestiona tus aportaciones y créditos al instante. Entorno avalado y regulado por la institución para garantizar la máxima transparencia en tus finanzas.
                         </p>

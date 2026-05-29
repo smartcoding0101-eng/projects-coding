@@ -58,7 +58,7 @@ class TriangulacionAuditTest extends TestCase
     public function auditoria_kyc_automatizado_para_invitados(): void
     {
         $checkoutService = app(EcommerceCheckoutService::class);
-        
+
         $datosCliente = [
             'nombre' => 'Auditor Invitado',
             'ci' => '9999999',
@@ -100,7 +100,9 @@ class TriangulacionAuditTest extends TestCase
         $stockInicial = $this->producto->stock_actual;
 
         // Simular Validación de Pago por el Administrador
-        $this->actingAs($this->admin)->post(route('admin.pedidos.validar', $pedido));
+        $this->actingAs($this->admin);
+        \Livewire\Livewire::test(\App\Filament\Resources\Pedidos\Pages\ListPedidos::class)
+            ->callTableAction('validarPago', $pedido);
 
         $pedido->refresh();
         $this->producto->refresh();
@@ -143,7 +145,9 @@ class TriangulacionAuditTest extends TestCase
         $stockAnteEntrega = $this->producto->stock_actual;
 
         // Simular Entrega Física
-        $this->actingAs($this->admin)->post(route('admin.pedidos.entregar', $pedido));
+        $this->actingAs($this->admin);
+        \Livewire\Livewire::test(\App\Filament\Resources\Pedidos\Pages\ListPedidos::class)
+            ->callTableAction('entregarPedido', $pedido);
 
         $this->producto->refresh();
 
@@ -164,11 +168,11 @@ class TriangulacionAuditTest extends TestCase
     {
         // Simulamos 5 despachos de 10 unidades cada uno
         // El stock inicial es 100. Resultado final debe ser 50.
-        
-        for ($i=0; $i < 5; $i++) { 
+
+        for ($i = 0; $i < 5; $i++) {
             $pedido = Pedido::create([
                 'user_id' => $this->admin->id,
-                'numero_orden' => 'ORD-BURST-'.$i,
+                'numero_orden' => 'ORD-BURST-' . $i,
                 'total' => 100,
                 'tipo_pago' => 'qr',
                 'estado_pago' => 'pagado',
@@ -185,7 +189,9 @@ class TriangulacionAuditTest extends TestCase
                 'subtotal' => 100
             ]);
 
-            $this->actingAs($this->admin)->post(route('admin.pedidos.entregar', $pedido));
+            $this->actingAs($this->admin);
+            \Livewire\Livewire::test(\App\Filament\Resources\Pedidos\Pages\ListPedidos::class)
+                ->callTableAction('entregarPedido', $pedido);
         }
 
         $this->producto->refresh();

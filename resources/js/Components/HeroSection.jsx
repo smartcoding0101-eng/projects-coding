@@ -87,36 +87,37 @@ export default function HeroSection({ cmsSlides = [] }) {
     const current = slides[currentSlide];
 
     return (
-        <section className="relative h-[700px] flex items-center justify-center bg-zinc-900 overflow-hidden">
-            {/* Background Images */}
-            {slides.map((slide, index) => (
-                <div
-                    key={slide.id}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                        index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                >
-                    {slide.image ? (
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
-                            style={{ 
-                                backgroundImage: `url(${slide.image})`,
-                                transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
-                            }}
-                        ></div>
-                    ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black"></div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40"></div>
-                </div>
-            ))}
+        <section className="relative h-[380px] sm:h-[500px] md:h-[650px] lg:h-[750px] flex items-center justify-center bg-zinc-900 overflow-hidden">
+            {/* Background container — overflow-hidden ONLY here */}
+            <div className="absolute inset-0 overflow-hidden">
+                {slides.map((slide, index) => (
+                    <div
+                        key={slide.id}
+                        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+                            }`}
+                    >
+                        {slide.image ? (
+                            <div
+                                className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
+                                style={{
+                                    backgroundImage: `url(${slide.image})`,
+                                    transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
+                                }}
+                            ></div>
+                        ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black"></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40"></div>
+                    </div>
+                ))}
+            </div>
 
             {/* Content */}
-            <div className={`relative z-20 text-center max-w-5xl px-6 text-white transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+            <div className={`relative z-20 text-left w-full max-w-5xl px-4 sm:px-6 text-white transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-2 mb-8">
-                    <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                    <span className="text-xs font-bold uppercase tracking-widest text-white/90">Cooperativa FAPCLAS R.L.</span>
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1 sm:px-5 sm:py-2 mb-3 sm:mb-8 self-start text-left">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-secondary animate-pulse"></span>
+                    <span className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-white/90">Cooperativa FAPCLAS R.L.</span>
                 </div>
 
                 {/* ─── Title con BlurText ─── */}
@@ -124,11 +125,11 @@ export default function HeroSection({ cmsSlides = [] }) {
                     <BlurText
                         key={`title-${currentSlide}`}
                         text={current.title}
-                        delay={120}
+                        delay={0.12}
                         animateBy="words"
                         direction="top"
-                        className="text-6xl md:text-8xl font-black tracking-tighter mb-2 font-display leading-[0.9] drop-shadow-xl text-white"
-                        stepDuration={0.3}
+                        align="left"
+                        className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-0.5 sm:mb-2 font-display leading-tight text-white [text-shadow:_0_10px_20px_rgba(0,0,0,0.4)]"
                     />
                 )}
 
@@ -137,11 +138,11 @@ export default function HeroSection({ cmsSlides = [] }) {
                     <BlurText
                         key={`subtitle-${currentSlide}`}
                         text={current.subtitle}
-                        delay={150}
+                        delay={0.15}
                         animateBy="words"
                         direction="top"
-                        className="text-6xl md:text-8xl font-black tracking-tighter mb-8 font-display leading-[0.9] text-secondary drop-shadow-xl"
-                        stepDuration={0.3}
+                        align="left"
+                        className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-2 sm:mb-6 font-display leading-tight text-secondary [text-shadow:_0_10px_20px_rgba(0,0,0,0.4)]"
                     />
                 )}
 
@@ -150,34 +151,34 @@ export default function HeroSection({ cmsSlides = [] }) {
                     <BlurText
                         key={`desc-${currentSlide}`}
                         text={current.description}
-                        delay={40}
+                        delay={0.04}
                         animateBy="words"
                         direction="top"
-                        className="text-lg md:text-xl mb-12 max-w-2xl mx-auto text-white/90 font-medium drop-shadow-md"
-                        stepDuration={0.25}
+                        align="left"
+                        className="text-[10px] sm:text-base md:text-lg lg:text-xl mb-4 sm:mb-12 max-w-2xl text-left text-white/90 font-medium [text-shadow:_0_2px_4px_rgba(0,0,0,0.5)]"
                     />
                 )}
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="flex flex-row items-center justify-start gap-2 sm:gap-4 w-full sm:w-auto">
                     {current.cta_text && (
-                        <a 
+                        <a
                             href={current.cta_link || '#'}
-                            className="bg-primary hover:bg-primary-dark text-white px-10 py-5 rounded-2xl font-black text-lg transition-all shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 flex items-center gap-3"
+                            className="bg-primary hover:bg-primary-dark text-white px-3.5 py-2 sm:px-8 sm:py-4.5 lg:px-10 lg:py-5 rounded-xl sm:rounded-2xl font-bold sm:font-black text-[10px] sm:text-lg transition-all shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 flex items-center justify-center gap-1.5 sm:gap-3 flex-1 sm:flex-initial"
                         >
                             {current.cta_text}
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                         </a>
                     )}
-                    <Link 
+                    <Link
                         href="/login"
-                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all hover:bg-white/20 flex items-center gap-3"
+                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-3.5 py-2 sm:px-8 sm:py-4.5 lg:px-10 lg:py-5 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-lg transition-all hover:bg-white/20 flex items-center justify-center gap-1.5 sm:gap-3 flex-1 sm:flex-initial"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                        Acceso al Portal
+                        <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                        Acceso Portal
                     </Link>
                 </div>
             </div>
-            
+
             {/* Slide Indicators */}
             {slides.length > 1 && (
                 <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-3">
@@ -185,9 +186,8 @@ export default function HeroSection({ cmsSlides = [] }) {
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}
-                            className={`h-1.5 rounded-full transition-all duration-500 ${
-                                index === currentSlide ? "bg-secondary w-12" : "bg-white/30 hover:bg-white/60 w-6"
-                            }`}
+                            className={`h-1.5 rounded-full transition-all duration-500 ${index === currentSlide ? "bg-secondary w-12" : "bg-white/30 hover:bg-white/60 w-6"
+                                }`}
                             aria-label={`Ir al slide ${index + 1}`}
                         />
                     ))}

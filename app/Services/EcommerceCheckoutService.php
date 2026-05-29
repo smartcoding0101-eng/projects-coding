@@ -27,20 +27,29 @@ class EcommerceCheckoutService
             // Verify items and calculate total based on User Role config
             $total = 0;
             $detalles = [];
-            
+
             // Get config for explicit associated prices
             $descuentoGlobal = (float) Configuracion::getValor('ecommerce_descuento_socios_global', '0');
-            $isAsociado = $user && $user->roles()->where('name', 'Socio')->exists(); 
+            $isAsociado = $user && $user->roles()->where('name', 'Socio')->exists();
 
             foreach ($carrito as $item) {
                 $producto = Producto::lockForUpdate()->find($item['id']);
-                
+
                 if (!$producto || !$producto->activo) {
                     throw new \Exception("Producto no disponible.");
                 }
 
-                if ($producto->stock_actual < $item['cantidad']) {
-                    throw new \Exception("Stock insuficiente para: {$producto->nombre}.");
+                // Calculate reserved stock from pending orders (por_recoger)
+                $reservado = \App\Models\PedidoDetalle::where('producto_id', $producto->id)
+                    ->whereHas('pedido', function ($q) {
+                        $q->where('estado_entrega', 'por_recoger')
+                            ->where('estado_pago', '!=', 'rechazado');
+                    })->sum('cantidad');
+
+                $disponible = $producto->stock_actual - $reservado;
+
+                if ($disponible < $item['cantidad']) {
+                    throw new \Exception("Stock insuficiente para: {$producto->nombre}. Disponible: {$disponible}");
                 }
 
                 // Lógica de precio:
@@ -87,10 +96,10 @@ class EcommerceCheckoutService
                 if (!$isAsociado) {
                     throw new \Exception("Las ventas a crédito son exclusivas para socios registrados.");
                 }
-                
+
                 // Check credit limit
                 $limite = $this->accountingService->getLimiteCreditoGlobal($user);
-                
+
                 // Si el servicio no tiene límite, usar el default de la config
                 if (!$limite || $limite <= 0) {
                     $limite = (float) Configuracion::getValor('ecommerce_limite_credito_default', '5000');
@@ -100,14 +109,14 @@ class EcommerceCheckoutService
                 $disponible = $limite - $deudaActual;
 
                 if ($total > $disponible) {
-                    throw new \Exception("Límite de crédito insuficiente. Disponible: Bs. " . number_format((float)$disponible, 2));
+                    throw new \Exception("Límite de crédito insuficiente. Disponible: Bs. " . number_format((float) $disponible, 2));
                 }
             }
 
             // Create Order
-            $estadoPago = $tipoPago === 'qr' ? 'pendiente_validacion' : 'pagado'; 
+            $estadoPago = $tipoPago === 'qr' ? 'pendiente_validacion' : 'pagado';
             if ($tipoPago === 'credito_asociado') {
-                $estadoPago = 'pagado'; 
+                $estadoPago = 'pagado';
             }
 
             // [KYC AUTOMATION] If guest, ensure they have a record in the 'personas' table

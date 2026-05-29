@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import TextType from './TextType';
 
 export default function FAQSection() {
     const faqs = [
@@ -29,10 +30,12 @@ export default function FAQSection() {
     return (
         <section className="py-12 bg-surface relative" id="faqs">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                
+
                 <div className="text-center mb-10">
                     <span className="uppercase font-bold text-xs tracking-widest text-primary block mb-3">Atención Inmediata</span>
-                    <h2 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-6">Preguntas Frecuentes</h2>
+                    <h2 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-6 md:min-h-[60px]">
+                        <TextType text="Preguntas Frecuentes" as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
+                    </h2>
                     <p className="text-xl text-gray-500 max-w-2xl mx-auto">Aclaremos tus dudas operativas antes de que tomes una decisión. Transparencia de clase mundial.</p>
                 </div>
 
@@ -40,11 +43,11 @@ export default function FAQSection() {
                     {faqs.map((faq, index) => {
                         const isOpen = openIndex === index;
                         return (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 className={`group rounded-3xl overflow-hidden transition-all duration-300 border ${isOpen ? 'bg-white border-primary/20 shadow-xl shadow-primary/5' : 'bg-transparent border-gray-200 hover:border-gray-300'}`}
                             >
-                                <button 
+                                <button
                                     onClick={() => toggleFaq(index)}
                                     className="w-full text-left px-6 py-5 md:px-8 md:py-6 flex justify-between items-center focus:outline-none"
                                 >
@@ -55,8 +58,8 @@ export default function FAQSection() {
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                                     </div>
                                 </button>
-                                
-                                <div 
+
+                                <div
                                     className={`px-6 md:px-8 overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 pb-6 lg:pb-8 opacity-100' : 'max-h-0 opacity-0'}`}
                                 >
                                     <p className="text-gray-600 leading-relaxed text-sm md:text-base border-t border-gray-100 pt-5">

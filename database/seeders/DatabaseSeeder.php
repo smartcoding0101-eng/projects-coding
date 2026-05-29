@@ -28,8 +28,9 @@ class DatabaseSeeder extends Seeder
             EcommerceSettingsSeeder::class,
             EcommerceCatalogoSeeder::class,
             HistoricalDataSeeder::class,
+            ServicioSeeder::class,
         ]);
-        
+
         // Crear un usuario local de desarrollo adicional
         User::factory()->create([
             'name' => 'Oficial de Pruebas',

@@ -1,10 +1,10 @@
 import Header from '@/Components/Header';
 import Footer from '@/Components/Footer';
 import FloatingWhatsApp from '@/Components/FloatingWhatsApp';
+import ScrollToTop from '@/Components/ScrollToTop';
 import { useCart } from '@/Contexts/CartContext';
 import { Link, usePage } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 
 import FloatingAssistant from '@/Components/FloatingAssistant';
@@ -28,8 +28,18 @@ export default function StoreLayout({ children }) {
     // Check if we are on immersive benefits routes (Index or Checkout)
     const isImmersiveRoute = url.startsWith('/beneficios') && (url === '/beneficios' || url.startsWith('/beneficios?') || url.startsWith('/beneficios/checkout'));
 
+    // Inject custom colors from CMS if settings are passed via page props
+    const settings = usePage().props.settings || {};
+    const customStyles = {};
+    if (settings.ecommerce_color_primary) {
+        customStyles['--color-primary'] = settings.ecommerce_color_primary;
+    }
+    if (settings.ecommerce_color_primary_dark) {
+        customStyles['--color-primary-dark'] = settings.ecommerce_color_primary_dark;
+    }
+
     return (
-        <div className={`min-h-screen font-sans antialiased text-brand-main bg-main flex flex-col transition-colors duration-300 ${theme}`}>
+        <div style={customStyles} className={`min-h-screen font-sans antialiased text-brand-main bg-main flex flex-col transition-colors duration-300 ${theme}`}>
             {!isImmersiveRoute && <Header />}
 
             {/* Floating Cart Button */}
@@ -45,22 +55,14 @@ export default function StoreLayout({ children }) {
                 </Link>
             )}
 
-            <AnimatePresence mode="wait" initial={false}>
-                <motion.main
-                    key={url}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className={`flex-1 ${!isImmersiveRoute ? 'pt-20' : ''}`}
-                >
-                    {children}
-                </motion.main>
-            </AnimatePresence>
+            <main className={`flex-1 ${!isImmersiveRoute ? 'pt-20' : ''}`}>
+                {children}
+            </main>
 
-            <Footer />
+            <Footer settings={usePage().props.site_settings || {}} ecommerceSettings={settings} />
             <FloatingAssistant />
-            <FloatingWhatsApp />
+            <FloatingWhatsApp settings={settings} />
+            <ScrollToTop />
         </div>
     );
 }

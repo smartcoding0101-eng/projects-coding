@@ -34,7 +34,7 @@ export default function AuthenticatedLayout({ header, children }) {
         const root = window.document.documentElement;
         // Limpiar clases de temas anteriores para evitar conflictos
         root.classList.remove('premium-olive', 'corporate-blue', 'dark-night', 'classic-light', 'dark');
-        
+
         // Aplicar el tema actual
         root.classList.add(theme);
 
@@ -56,21 +56,11 @@ export default function AuthenticatedLayout({ header, children }) {
         { label: 'Caja general', href: route('admin.caja.index'), active: route().current('admin.caja.*'), permissions: ['gestionar usuarios'], icon: <MonitorPlay className="w-4 h-4 text-rose-500" /> },
     ];
 
-    const ecommerceItems = [
-        { label: 'Admin Dashboard', href: route('admin.ecommerce.dashboard'), active: route().current('admin.ecommerce.dashboard'), permissions: ['ver dashboard tienda'], icon: <LayoutDashboard className="w-4 h-4 text-indigo-500" /> },
-        { label: 'Tienda Web', href: route('beneficios.index'), active: route().current('beneficios.*'), icon: <Store className="w-4 h-4 text-emerald-500" /> }, // Público a roles básicos
-        { label: 'Inventario', href: route('admin.inventario.index'), active: route().current('admin.inventario.*'), permissions: ['gestionar inventario tienda'], icon: <Package className="w-4 h-4 text-amber-500" /> },
-        { label: 'Pedidos', href: route('admin.pedidos.index'), active: route().current('admin.pedidos.*'), permissions: ['evaluar pedidos ecommerce'], icon: <ShoppingCart className="w-4 h-4 text-blue-500" /> },
-        { label: 'Movimientos', href: route('admin.ecommerce.reporte.movimientos'), active: route().current('admin.ecommerce.reporte.movimientos'), permissions: ['ver dashboard tienda'], icon: <Activity className="w-4 h-4 text-rose-500" /> },
-        { label: 'Configuración', href: route('admin.ecommerce.config.index'), active: route().current('admin.ecommerce.config.*'), permissions: ['configurar parametros globales'], icon: <Settings className="w-4 h-4 text-gray-500" /> },
-    ];
+    const ecommerceItems = [];
 
     const adjustmentsItems = [
         { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['ver personas'], icon: <Users className="w-4 h-4 text-blue-500" /> },
-        { label: 'Usuarios ERP', href: route('admin.users.index'), active: route().current('admin.users.*'), permissions: ['gestionar usuarios'], icon: <UserCog className="w-4 h-4 text-emerald-500" /> },
-        { label: 'Roles y Acceso', href: route('admin.roles.index'), active: route().current('admin.roles.*'), permissions: ['gestionar roles y permisos'], icon: <ShieldAlert className="w-4 h-4 text-amber-500" /> },
-        { label: 'Ajustes Globales', href: route('admin.configuraciones.index'), active: route().current('admin.configuraciones.*'), permissions: ['configurar parametros globales'], icon: <Sliders className="w-4 h-4 text-indigo-500" /> },
-        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> }, 
+        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> },
     ];
 
     const ayudaItems = [
@@ -104,11 +94,10 @@ export default function AuthenticatedLayout({ header, children }) {
                                 {/* Administración Dropdown */}
                                 <Dropdown>
                                     <Dropdown.Trigger>
-                                        <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${
-                                            route().current('creditos.*') || route().current('libro-diario.*') || route().current('kardex.*') || route().current('reportes.*') || route().current('admin.caja.*')
-                                                ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
-                                                : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
-                                        }`}>
+                                        <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${route().current('creditos.*') || route().current('libro-diario.*') || route().current('kardex.*') || route().current('reportes.*') || route().current('admin.caja.*')
+                                            ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
+                                            : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
+                                            }`}>
                                             Administración
                                             <ChevronDown className="ml-2 h-4 w-4" />
                                         </button>
@@ -130,42 +119,16 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Dropdown>
 
                                 {/* Ecommerce Dropdown */}
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${
-                                            route().current('admin.ecommerce.*') || route().current('admin.inventario.*') || route().current('admin.pedidos.*') || route().current('beneficios.*')
-                                                ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
-                                                : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
-                                        }`}>
-                                            Ecommerce
-                                            <ChevronDown className="ml-2 h-4 w-4" />
-                                        </button>
-                                    </Dropdown.Trigger>
-                                    <Dropdown.Content align="left" width="auto" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5 overflow-hidden">
-                                        <div className="flex divide-x divide-brand/20">
-                                            {chunkArray(ecommerceItems.filter(canView), 3).map((chunk, cIdx) => (
-                                                <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
-                                                    {chunk.map((item) => (
-                                                        <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
-                                                            <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
-                                                            <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
-                                                        </Dropdown.Link>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </Dropdown.Content>
-                                </Dropdown>
+
 
                                 {/* Ajustes Dropdown (Visible si hay algún item disponible) */}
                                 {adjustmentsItems.some(canView) && (
                                     <Dropdown>
                                         <Dropdown.Trigger>
-                                            <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${
-                                                route().current('admin.users.*') || route().current('admin.roles.*') || route().current('admin.configuraciones.*') || route().current('admin.personas.*')
-                                                    ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
-                                                    : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
-                                            }`}>
+                                            <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${route().current('admin.personas.*')
+                                                ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
+                                                : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
+                                                }`}>
                                                 Ajustes y Core
                                                 <ChevronDown className="ml-2 h-4 w-4" />
                                             </button>
@@ -191,9 +154,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <button className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-bold leading-4 transition-all duration-200 focus:outline-none ${false
-                                                ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
-                                                : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
-                                        }`}>
+                                            ? 'bg-header-hover text-header-text shadow-inner border border-header-hover'
+                                            : 'text-header-muted hover:text-header-text hover:bg-header-hover border border-transparent'
+                                            }`}>
                                             Ayuda
                                             <ChevronDown className="ml-2 h-4 w-4" />
                                         </button>
@@ -255,7 +218,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Trigger>
                                     <Dropdown.Content align="right" width="56" contentClasses="py-2 bg-card-fap border border-brand/50 shadow-xl rounded-xl ring-1 ring-black/5">
                                         <div className="px-4 py-2 text-[10px] font-black text-brand-muted uppercase tracking-widest border-b border-brand/50 mb-2">Mi Cuenta</div>
-                                        
+
                                         <Dropdown.Link href={route('profile.edit')} className="flex items-center gap-3 px-4 mx-1 rounded-md transition-colors hover:bg-brand/10 mb-1">
                                             <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm text-primary">
                                                 <User className="w-4 h-4" />
@@ -303,17 +266,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             ))}
                         </div>
 
-                        {/* Ecommerce Móvil */}
-                        <div className="border-t border-brand pt-2 pb-1">
-                            <div className="px-4 text-xs font-semibold text-brand-muted uppercase tracking-wider">
-                                Ecommerce
-                            </div>
-                            {ecommerceItems.filter(canView).map((item, idx) => (
-                                <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
-                                    {idx + 1}. {item.label}
-                                </ResponsiveNavLink>
-                            ))}
-                        </div>
+
 
                         {/* Ajustes Móvil */}
                         {adjustmentsItems.some(canView) && (

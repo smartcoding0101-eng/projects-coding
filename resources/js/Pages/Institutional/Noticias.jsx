@@ -3,6 +3,7 @@ import Header from '../../Components/Header';
 import NewsSection from '../../Components/NewsSection';
 import Footer from '../../Components/Footer';
 import FloatingWhatsApp from '../../Components/FloatingWhatsApp';
+import ScrollToTop from '../../Components/ScrollToTop';
 
 export default function Noticias({ noticias = [] }) {
     return (
@@ -15,6 +16,7 @@ export default function Noticias({ noticias = [] }) {
                 </main>
                 <Footer />
                 <FloatingWhatsApp />
+                <ScrollToTop />
             </div>
         </>
     );

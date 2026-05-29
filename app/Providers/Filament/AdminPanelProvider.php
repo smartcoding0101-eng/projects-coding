@@ -31,6 +31,21 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups([
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('E-commerce')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->collapsed(),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Administración')
+                    ->icon('heroicon-o-cog-8-tooth')
+                    ->collapsed(),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Landing Page')
+                    ->icon('heroicon-o-globe-alt')
+                    ->collapsed(),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

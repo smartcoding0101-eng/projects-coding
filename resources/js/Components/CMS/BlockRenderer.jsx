@@ -1,24 +1,29 @@
-import React from 'react';
-import HeroBlock from './Blocks/HeroBlock';
-import StatsBlock from './Blocks/StatsBlock';
-import GalleryBlock from './Blocks/GalleryBlock';
-import VideoBlock from './Blocks/VideoBlock';
-import ServicesBlock from './Blocks/ServicesBlock';
-import IdentityBlock from './Blocks/IdentityBlock';
-import FAQBlock from './Blocks/FAQBlock';
-import TestimonialsBlock from './Blocks/TestimonialsBlock';
-import ProductCardsBlock from './Blocks/ProductCardsBlock';
-import CreditSimulatorBlock from './Blocks/CreditSimulatorBlock';
-import BenefitsBlock from './Blocks/BenefitsBlock';
-import NormativasBlock from './Blocks/NormativasBlock';
-import InstitutionalTextBlock from './Blocks/InstitutionalTextBlock';
-import LatestNewsBlock from './Blocks/LatestNewsBlock';
+import React, { Suspense, lazy } from 'react';
+import HeroBlock from './Blocks/HeroBlock'; // Keep Hero static for LCP priorities
+
+const StatsBlock = lazy(() => import('./Blocks/StatsBlock'));
+const GalleryBlock = lazy(() => import('./Blocks/GalleryBlock'));
+const VideoBlock = lazy(() => import('./Blocks/VideoBlock'));
+const ServicesBlock = lazy(() => import('./Blocks/ServicesBlock'));
+const IdentityBlock = lazy(() => import('./Blocks/IdentityBlock'));
+const FAQBlock = lazy(() => import('./Blocks/FAQBlock'));
+const TestimonialsBlock = lazy(() => import('./Blocks/TestimonialsBlock'));
+const ProductCardsBlock = lazy(() => import('./Blocks/ProductCardsBlock'));
+const CreditSimulatorBlock = lazy(() => import('./Blocks/CreditSimulatorBlock'));
+const BenefitsBlock = lazy(() => import('./Blocks/BenefitsBlock'));
+const NormativasBlock = lazy(() => import('./Blocks/NormativasBlock'));
+const InstitutionalTextBlock = lazy(() => import('./Blocks/InstitutionalTextBlock'));
+const LatestNewsBlock = lazy(() => import('./Blocks/LatestNewsBlock'));
 
 const BlockRenderer = ({ blocks }) => {
     if (!blocks || !Array.isArray(blocks)) return null;
 
     return (
-        <>
+        <Suspense fallback={
+            <div className="w-full flex justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
             {blocks.map((block, index) => {
                 const { type, data } = block;
 
@@ -56,7 +61,7 @@ const BlockRenderer = ({ blocks }) => {
                         return null;
                 }
             })}
-        </>
+        </Suspense>
     );
 };
 

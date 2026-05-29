@@ -56,11 +56,13 @@ class PageForm
                                             TextInput::make('cta_link')->label('Link Botón'),
                                         ])->columns(2),
                                         FileUpload::make('image')
-                                            ->label('Imagen o Video FDC (Max 25MB)')
+                                            ->label('Imagen o Video FDC')
                                             ->acceptedFileTypes(['image/*', 'video/mp4', 'video/webm'])
                                             ->maxSize(25600)
                                             ->disk('public')
-                                            ->directory('pages/heros'),
+                                            ->directory('pages/heros')
+                                            ->helperText('📐 Imagen: 1920 × 1080 px · Relación 16:9 | 🎥 Video .mp4/.webm · Máx: 25MB')
+                                            ->hint('Fondo del slide del Hero. Las imágenes se muestran a pantalla completa.'),
                                     ])
                                     ->defaultItems(3)
                                     ->reorderable()
@@ -89,7 +91,10 @@ class PageForm
                                     ->maxFiles(3)
                                     ->image()
                                     ->disk('public')
-                                    ->directory('pages/identity'),
+                                    ->directory('pages/identity')
+                                    ->helperText('📐 Dimensiones: 600 × 800 px · Relación 3:4 (Vertical) · Máx 3 imágenes · Formatos: JPG, PNG')
+                                    ->hint('Se despliegan en un mosaico asimétrico al lado de la sección de Misión/Visión.'),
+
                             ]),
 
                         // ========================================
@@ -112,7 +117,13 @@ class PageForm
                                             ->label('Imagen del Servicio')
                                             ->image()
                                             ->disk('public')
-                                            ->directory('pages/services'),
+                                            ->directory('pages/services')
+                                            ->helperText('📐 Dimensiones: 800 × 480 px · Relación 5:3 · Formatos: JPG, PNG, WEBP')
+                                            ->hint('Imagen de la tarjeta de servicio en la Landing Page.')
+                                            ->imageResizeMode('cover')
+                                            ->imageCropAspectRatio('5:3')
+                                            ->imageResizeTargetWidth('800')
+                                            ->imageResizeTargetHeight('480'),
                                         Toggle::make('is_featured')->label('Destacado (★ Principal)')->default(false),
                                     ])
                                     ->columns(2)
@@ -204,7 +215,13 @@ class PageForm
                                             ->image()
                                             ->disk('public')
                                             ->directory('pages/galleries')
-                                            ->required(),
+                                            ->required()
+                                            ->helperText('📐 Dimensiones: 1200 × 800 px · Relación 3:2 · Formatos: JPG, PNG, WEBP · Peso máx: 5MB')
+                                            ->hint('Imágenes del mosaico institucional. Se recortan y adaptan automáticamente.')
+                                            ->imageResizeMode('cover')
+                                            ->imageCropAspectRatio('3:2')
+                                            ->imageResizeTargetWidth('1200')
+                                            ->imageResizeTargetHeight('800'),
                                     ])
                                     ->reorderable()
                                     ->collapsible()
@@ -235,7 +252,13 @@ class PageForm
                                         ->label('Thumbnail Principal')
                                         ->image()
                                         ->disk('public')
-                                        ->directory('pages/videos'),
+                                        ->directory('pages/videos')
+                                        ->helperText('📐 Dimensiones: 1280 × 720 px · Relación 16:9 · Formatos: JPG, PNG')
+                                        ->hint('Imagen de vista previa antes de reproducir el video principal.')
+                                        ->imageResizeMode('cover')
+                                        ->imageCropAspectRatio('16:9')
+                                        ->imageResizeTargetWidth('1280')
+                                        ->imageResizeTargetHeight('720'),
                                 ]),
                                 Repeater::make('gallery')
                                     ->label('Videos de la Galería')
@@ -244,10 +267,16 @@ class PageForm
                                         TextInput::make('subtitle'),
                                         TextInput::make('url')->label('URL del Video')->url()->required(),
                                         FileUpload::make('thumbnail')
-                                            ->label('Thumbnail')
+                                            ->label('Thumbnail del Video')
                                             ->image()
                                             ->disk('public')
-                                            ->directory('pages/videos'),
+                                            ->directory('pages/videos')
+                                            ->helperText('📐 Dimensiones: 1280 × 720 px · Relación 16:9 · Formatos: JPG, PNG')
+                                            ->hint('Vista previa del video en la galería.')
+                                            ->imageResizeMode('cover')
+                                            ->imageCropAspectRatio('16:9')
+                                            ->imageResizeTargetWidth('1280')
+                                            ->imageResizeTargetHeight('720'),
                                     ])
                                     ->columns(2)
                                     ->collapsible()
@@ -269,7 +298,18 @@ class PageForm
                                         TextInput::make('role')->label('Cargo/Ubicación'),
                                         Textarea::make('content')->required()->label('Testimonio'),
                                         TextInput::make('rating')->numeric()->default(5)->label('Estrellas (1-5)'),
-                                        FileUpload::make('image')->image()->avatar()->disk('public')->directory('pages/testimonials'),
+                                        FileUpload::make('image')
+                                            ->label('Foto del Autor')
+                                            ->image()
+                                            ->avatar()
+                                            ->disk('public')
+                                            ->directory('pages/testimonials')
+                                            ->helperText('📐 Dimensiones: 200 × 200 px · Relación 1:1 (Circular) · Formatos: JPG, PNG')
+                                            ->hint('Se muestra como avatar circular en la tarjeta de testimonio.')
+                                            ->imageResizeMode('cover')
+                                            ->imageCropAspectRatio('1:1')
+                                            ->imageResizeTargetWidth('200')
+                                            ->imageResizeTargetHeight('200'),
                                     ])
                                     ->collapsible()
                                     ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Testimonio'),
@@ -337,7 +377,13 @@ class PageForm
                                     ->image()
                                     ->disk('public')
                                     ->directory('pages/institutional')
-                                    ->label('Imagen Lateral'),
+                                    ->label('Imagen Lateral')
+                                    ->helperText('📐 Dimensiones: 800 × 600 px · Relación 4:3 · Formatos: JPG, PNG, WEBP')
+                                    ->hint('Imagen decorativa lateral al texto institucional (Misión, Visión, Historia, etc.).')
+                                    ->imageResizeMode('cover')
+                                    ->imageCropAspectRatio('4:3')
+                                    ->imageResizeTargetWidth('800')
+                                    ->imageResizeTargetHeight('600'),
                                 Toggle::make('image_left')->label('Imagen a la Izquierda')->default(false),
                                 TextInput::make('badge')->label('Badge Superior'),
                             ]),
@@ -374,11 +420,12 @@ class PageForm
                             ->hint('Máximo 160 caracteres (Recomendado)'),
                             
                         FileUpload::make('og_image')
-                            ->label('Imagen OpenGraph (WhatsApp / Facebook)')
+                            ->label('Imagen OpenGraph (WhatsApp / Facebook / Google)')
                             ->image()
                             ->disk('public')
                             ->directory('pages/seo')
-                            ->hint('Resolución recomendada: 1200x630px')
+                            ->helperText('📐 Dimensiones EXACTAS: 1200 × 630 px · Relación 1.91:1 · Formatos: JPG, PNG · Peso máx: 8MB')
+                            ->hint('⚠️ Esta imagen aparece en previsualizaciones de WhatsApp, Facebook y Google. Tamaño exacto requerido.')
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('1200:630')
                             ->imageResizeTargetWidth('1200')

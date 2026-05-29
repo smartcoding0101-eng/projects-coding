@@ -39,7 +39,7 @@ export default function Header({ settings = {} }) {
                         </a>
                         <span className="hidden sm:inline w-[1px] h-3 bg-white/20"></span>
                         <a href={whatsappLink} target="_blank" className="hidden sm:flex items-center gap-1.5 hover:text-green-400 transition-colors">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z"/></svg>
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z" /></svg>
                             {whatsappLabel}
                         </a>
                     </div>
@@ -64,7 +64,7 @@ export default function Header({ settings = {} }) {
             <header className={`fixed w-full z-40 transition-all duration-500 ${scrolled ? 'top-3' : 'top-8'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className={`flex justify-between items-center transition-all duration-500 border origin-top ${scrolled ? 'bg-white/95 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-full border-white/50 px-6 h-16' : 'bg-transparent border-transparent px-2 h-20'}`}>
-                        
+
                         {/* Logo */}
                         <div className="flex items-center gap-2.5 shrink-0">
                             <Link href="/" className="flex items-center gap-2.5 group">
@@ -82,14 +82,14 @@ export default function Header({ settings = {} }) {
                             <Link href="/" className="text-gray-600 hover:text-primary font-semibold text-[13px] tracking-wide transition-colors">
                                 Inicio
                             </Link>
-                            
+
                             {menuItems.map((item, idx) => (
                                 <div key={idx} className="relative group/dropdown h-full flex items-center shrink-0">
                                     <button className="flex items-center gap-1.5 text-gray-600 hover:text-primary font-semibold text-[13px] tracking-wide transition-colors cursor-default">
                                         {item.label}
                                         <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover/dropdown:rotate-180 text-gray-400 group-hover/dropdown:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
                                     </button>
-                                    
+
                                     <div className={`absolute left-1/2 -translate-x-1/2 mt-1.5 ${item.featured_title ? 'w-[500px]' : 'w-72'} bg-white rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-300 transform translate-y-3 group-hover/dropdown:translate-y-0 before:absolute before:inset-0 before:-top-6 before:h-6 before:bg-transparent overflow-hidden ${item.featured_title ? 'flex' : ''} ${scrolled ? 'top-full' : 'top-14'}`}>
                                         {/* Links Column */}
                                         <div className={`${item.featured_title ? 'w-[55%]' : 'w-full'} p-5 space-y-1.5 bg-white relative z-10`}>
@@ -121,7 +121,11 @@ export default function Header({ settings = {} }) {
                                         {item.featured_title && (
                                             <div className="w-[45%] relative bg-primary p-5 flex flex-col justify-end text-white overflow-hidden group/card shadow-inner">
                                                 {item.featured_image && (
-                                                    <img src={`/storage/${item.featured_image}`} alt="" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 group-hover/card:scale-105 transition-all duration-700" />
+                                                    <img
+                                                        src={item.featured_image.startsWith('http') ? item.featured_image : `/storage/${item.featured_image}`}
+                                                        alt=""
+                                                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/card:scale-105 transition-all duration-700"
+                                                    />
                                                 )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary/60 to-transparent"></div>
                                                 <div className="relative z-10 transform group-hover/card:translate-y-[-3px] transition-transform duration-500">
@@ -133,6 +137,7 @@ export default function Header({ settings = {} }) {
                                                 </div>
                                             </div>
                                         )}
+
                                     </div>
                                 </div>
                             ))}
@@ -155,9 +160,9 @@ export default function Header({ settings = {} }) {
                                 <ShoppingBag className="w-4 h-4" />
                                 {ctaTienda}
                             </Link>
-                            
+
                             {/* Mobile Menu Toggle */}
-                            <button 
+                            <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
                             >
@@ -182,7 +187,7 @@ export default function Header({ settings = {} }) {
 
                         <nav className="space-y-6 flex-1">
                             <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block text-xl font-bold text-gray-900 border-b border-gray-100 pb-4">Inicio</Link>
-                            
+
                             {menuItems.map((item, idx) => (
                                 <div key={idx} className="space-y-4">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.label}</p>
@@ -194,15 +199,15 @@ export default function Header({ settings = {} }) {
                         </nav>
 
                         <div className="space-y-4 pt-8 border-t border-gray-100">
-                            <Link 
-                                href={route('login')} 
+                            <Link
+                                href={route('login')}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="w-full flex items-center justify-center gap-2 bg-[#F7BD16] text-zinc-900 font-bold py-4 rounded-2xl shadow-lg shadow-[#F7BD16]/20 transition-all active:scale-95"
                             >
                                 <LogIn className="w-5 h-5" /> {ctaPortal}
                             </Link>
-                            <Link 
-                                href="/beneficios" 
+                            <Link
+                                href="/beneficios"
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="w-full flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20"
                             >

@@ -52,12 +52,12 @@ export default function FloatingAssistant() {
                                         ¡Hola! 👋 Soy tu asistente virtual. Selecciona una categoría para resolver tus dudas frecuentes sobre la tienda B2C y B2B.
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <button onClick={() => setActiveTab('pagos')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-[#618541] hover:bg-[#618541]/5 transition-colors group">
-                                            <CreditCard className="w-6 h-6 text-gray-400 group-hover:text-[#618541]" />
+                                        <button onClick={() => setActiveTab('pagos')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-[#F7BD16] hover:bg-[#F7BD16]/5 transition-colors group">
+                                            <CreditCard className="w-6 h-6 text-gray-400 group-hover:text-[#F7BD16]" />
                                             <span className="text-xs font-bold text-gray-700">Pagos y Crédito</span>
                                         </button>
-                                        <button onClick={() => setActiveTab('envios')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-[#618541] hover:bg-[#618541]/5 transition-colors group">
-                                            <Truck className="w-6 h-6 text-gray-400 group-hover:text-[#618541]" />
+                                        <button onClick={() => setActiveTab('envios')} className="flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-xl border border-gray-200 hover:border-[#F7BD16] hover:bg-[#F7BD16]/5 transition-colors group">
+                                            <Truck className="w-6 h-6 text-gray-400 group-hover:text-[#F7BD16]" />
                                             <span className="text-xs font-bold text-gray-700">Envíos y Entregas</span>
                                         </button>
                                     </div>
@@ -70,10 +70,10 @@ export default function FloatingAssistant() {
 
                             {activeTab !== 'inicio' && (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                                    <button onClick={() => setActiveTab('inicio')} className="text-xs text-[#618541] font-bold hover:underline inline-flex items-center">
+                                    <button onClick={() => setActiveTab('inicio')} className="text-xs text-[#F7BD16] font-bold hover:underline inline-flex items-center">
                                         &larr; Volver a categorías
                                     </button>
-                                    
+
                                     <h4 className="font-bold text-gray-900 border-b pb-2 flex items-center gap-2">
                                         {activeTab === 'pagos' ? <CreditCard className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
                                         {activeTab === 'pagos' ? 'Pagos y Crédito' : 'Envíos y Entregas'}
@@ -83,7 +83,7 @@ export default function FloatingAssistant() {
                                         {faqs[activeTab].map((item, idx) => (
                                             <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
                                                 <div className="font-bold text-sm text-gray-800 mb-1 flex items-start gap-2">
-                                                    <HelpCircle className="w-4 h-4 text-[#618541] flex-shrink-0 mt-0.5" />
+                                                    <HelpCircle className="w-4 h-4 text-[#F7BD16] flex-shrink-0 mt-0.5" />
                                                     {item.q}
                                                 </div>
                                                 <div className="text-xs text-gray-600 ml-6 leading-relaxed">
@@ -99,9 +99,9 @@ export default function FloatingAssistant() {
                 )}
             </AnimatePresence>
 
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${isOpen ? 'bg-gray-800 text-white' : 'bg-[#618541] text-white'}`}
+                className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${isOpen ? 'bg-gray-800 text-white' : 'bg-[#F7BD16] text-white'}`}
             >
                 {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
             </button>

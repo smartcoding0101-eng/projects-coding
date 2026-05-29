@@ -39,7 +39,7 @@
             margin: 0;
         }
         .logo-text-sub {
-            color: #618541;
+            color: #F7BD16;
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 2px;
@@ -55,7 +55,7 @@
         
         .title-box {
             background-color: #f7fbfa;
-            border-left: 5px solid #618541;
+            border-left: 5px solid #F7BD16;
             padding: 15px 20px;
             margin-bottom: 25px;
         }
@@ -189,7 +189,7 @@
             border-left: 1px solid #e2e8f0;
         }
         .total-final-row {
-            background-color: #618541;
+            background-color: #F7BD16;
             color: white;
             font-weight: 900;
         }

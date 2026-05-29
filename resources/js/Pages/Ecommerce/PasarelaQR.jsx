@@ -5,7 +5,7 @@ import { ShieldCheck, QrCode, Lock, CheckCircle2, ZoomIn, X } from 'lucide-react
 export default function PasarelaQR({ pedido, settings }) {
     const [simulando, setSimulando] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
-    
+
     const qrImage = settings?.ecommerce_qr_pago;
     const resolvedQrImage = qrImage ? (qrImage.startsWith('/') || qrImage.startsWith('http') ? qrImage : `/storage/${qrImage}`) : null;
 
@@ -48,13 +48,13 @@ export default function PasarelaQR({ pedido, settings }) {
 
                         <div className="mb-8 p-6 bg-brand/5 rounded-2xl border border-brand flex flex-col items-center justify-center relative">
                             {resolvedQrImage ? (
-                                <div 
-                                    className="relative group cursor-pointer" 
+                                <div
+                                    className="relative group cursor-pointer"
                                     onClick={() => setIsZoomed(true)}
                                     title="Haz clic para ampliar la imagen"
                                 >
                                     <img src={resolvedQrImage} alt="QR de Pago" className="w-48 h-48 object-contain mix-blend-multiply transition-transform group-hover:scale-105" />
-                                    
+
                                     <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl backdrop-blur-[2px]">
                                         <div className="bg-white/90 p-3 rounded-full shadow-lg border border-brand/20">
                                             <ZoomIn className="w-6 h-6 text-brand-main" />
@@ -66,9 +66,9 @@ export default function PasarelaQR({ pedido, settings }) {
                                     <QrCode className="w-16 h-16 text-gray-300" />
                                 </div>
                             )}
-                            
+
                             {/* Escáner visual effect */}
-                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#618541]/50 shadow-[0_0_8px_2px_rgba(97,133,65,0.4)] animate-pulse"></div>
+                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#F7BD16]/50 shadow-[0_0_8px_2px_rgba(247,189,22,0.4)] animate-pulse"></div>
                         </div>
 
                         <div className="space-y-4">
@@ -86,7 +86,7 @@ export default function PasarelaQR({ pedido, settings }) {
                             <div className="text-xs text-center text-orange-500 font-bold mb-3">
                                 ⚠️ Entorno de Desarrollo (Simulación API Webhook)
                             </div>
-                            <button 
+                            <button
                                 onClick={simularPago}
                                 disabled={simulando}
                                 className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all ${simulando ? 'opacity-75 cursor-not-allowed' : ''}`}
@@ -116,33 +116,33 @@ export default function PasarelaQR({ pedido, settings }) {
 
             {/* Modal de Zoom QR */}
             {isZoomed && resolvedQrImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-300"
                     onClick={() => setIsZoomed(false)}
                 >
-                    <div 
+                    <div
                         className="relative max-w-sm w-full flex flex-col items-center animate-in zoom-in-95 duration-300"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button 
+                        <button
                             onClick={() => setIsZoomed(false)}
                             className="absolute -top-14 right-0 md:-right-12 p-2.5 text-white hover:text-red-400 bg-white/10 hover:bg-white/20 rounded-full transition-all hover:scale-110 active:scale-95"
                             title="Cerrar Zoom"
                         >
                             <X className="w-6 h-6" />
                         </button>
-                        
+
                         <div className="bg-white p-6 rounded-[2rem] shadow-[0_0_50px_rgba(40,54,29,0.3)] w-full overflow-hidden relative group">
-                            <img 
-                                src={resolvedQrImage} 
-                                alt="QR de Pago Ampliado" 
-                                className="w-full h-auto aspect-square object-contain mx-auto mix-blend-multiply relative z-10" 
+                            <img
+                                src={resolvedQrImage}
+                                alt="QR de Pago Ampliado"
+                                className="w-full h-auto aspect-square object-contain mx-auto mix-blend-multiply relative z-10"
                             />
-                            
+
                             {/* Láser de Escaneo Estético en el Zoom */}
                             <div className="absolute top-1/2 left-0 right-0 h-1 bg-green-500/80 shadow-[0_0_20px_5px_rgba(34,197,94,0.4)] animate-pulse z-20"></div>
                         </div>
-                        
+
                         <div className="mt-6 flex flex-col items-center">
                             <h3 className="text-white font-black text-xl tracking-wider uppercase mb-1 drop-shadow-md">Escanea para Pagar</h3>
                             <p className="text-white/80 text-sm font-medium tracking-wide">Bs. {Number(pedido.total).toFixed(2)}</p>

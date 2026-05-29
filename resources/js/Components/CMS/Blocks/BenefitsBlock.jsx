@@ -1,4 +1,5 @@
 import React from 'react';
+import TextType from '../../TextType';
 import * as LucideIcons from 'lucide-react';
 
 const DynamicIcon = ({ name, className }) => {
@@ -22,8 +23,8 @@ const BenefitsBlock = ({ data }) => {
                     <span className="w-2 h-2 bg-secondary rounded-full"></span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-secondary-dark">Ecosistema Institucional</span>
                 </div>
-                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2">
-                    {title.split(' ').slice(0, -1).join(' ')} <span className="text-secondary italic">{title.split(' ').pop()}</span>
+                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2 md:min-h-[40px]">
+                    <TextType text={title} as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                 </h2>
                 <p className="text-gray-400 text-xs font-medium">{subtitle}</p>
             </div>

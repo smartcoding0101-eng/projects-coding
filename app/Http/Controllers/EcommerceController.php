@@ -25,22 +25,30 @@ class EcommerceController extends Controller
             ->pluck('value', 'key');
     }
 
+    private function checkMaintenance($settings)
+    {
+        if (isset($settings['ecommerce_modo_mantenimiento']) && $settings['ecommerce_modo_mantenimiento'] === 'si') {
+            return inertia('Ecommerce/Maintenance', ['settings' => $settings]);
+        }
+        return null;
+    }
+
     public function index(Request $request)
     {
         $query = Producto::with('categoria')->where('activo', true);
 
         if ($request->filled('categoria')) {
-            $query->whereHas('categoria', function($q) use ($request) {
+            $query->whereHas('categoria', function ($q) use ($request) {
                 $q->where('slug', $request->categoria);
             });
         }
 
         if ($request->filled('q')) {
             $searchTerm = '%' . $request->q . '%';
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('nombre', 'like', $searchTerm)
-                  ->orWhere('codigo_sku', 'like', $searchTerm)
-                  ->orWhere('descripcion', 'like', $searchTerm);
+                    ->orWhere('codigo_sku', 'like', $searchTerm)
+                    ->orWhere('descripcion', 'like', $searchTerm);
             });
         }
 
@@ -56,6 +64,10 @@ class EcommerceController extends Controller
         $categorias = Categoria::where('activa', true)->get();
         $settings = $this->getSettings();
 
+        if ($maintenanceResponse = $this->checkMaintenance($settings)) {
+            return $maintenanceResponse;
+        }
+
         return inertia('Ecommerce/Store', [
             'productos' => $productos,
             'categorias' => $categorias,
@@ -66,11 +78,16 @@ class EcommerceController extends Controller
 
     public function show(Producto $producto)
     {
-        if (!$producto->activo) abort(404);
-        
+        if (!$producto->activo)
+            abort(404);
+
         $producto->load('categoria');
         $settings = $this->getSettings();
-        
+
+        if ($maintenanceResponse = $this->checkMaintenance($settings)) {
+            return $maintenanceResponse;
+        }
+
         // F1.2: Productos relacionados (misma categoría)
         $relacionados = Producto::with('categoria')
             ->where('categoria_id', $producto->categoria_id)
@@ -78,7 +95,7 @@ class EcommerceController extends Controller
             ->where('activo', true)
             ->take(4)
             ->get();
-        
+
         return inertia('Ecommerce/Show', [
             'producto' => $producto,
             'settings' => $settings,
@@ -89,7 +106,11 @@ class EcommerceController extends Controller
     public function checkout()
     {
         $settings = $this->getSettings();
-        
+
+        if ($maintenanceResponse = $this->checkMaintenance($settings)) {
+            return $maintenanceResponse;
+        }
+
         // Requerir login si invitados están deshabilitados
         if ($settings['ecommerce_habilitar_invitados'] === 'no' && !auth()->check()) {
             return redirect()->route('login')->with('error', 'Debe iniciar sesión para realizar una compra.');
@@ -121,6 +142,10 @@ class EcommerceController extends Controller
 
         $settings = $this->getSettings();
 
+        if ($maintenanceResponse = $this->checkMaintenance($settings)) {
+            return redirect()->route('beneficios.index');
+        }
+
         // Validar invitados en el procesamiento también
         if ($settings['ecommerce_habilitar_invitados'] === 'no' && !auth()->check()) {
             return redirect()->route('login');
@@ -149,7 +174,7 @@ class EcommerceController extends Controller
     public function pasarela($numero_orden)
     {
         $pedido = Pedido::where('numero_orden', $numero_orden)->firstOrFail();
-        
+
         if ($pedido->estado_pago !== 'pendiente_validacion') {
             return redirect()->route('beneficios.success', $pedido->numero_orden)->with('info', 'Este pedido ya fue procesado o pagado.');
         }
@@ -195,7 +220,7 @@ class EcommerceController extends Controller
     public function success($numero_orden)
     {
         $pedido = Pedido::where('numero_orden', $numero_orden)->firstOrFail();
-        
+
         return inertia('Ecommerce/Success', [
             'pedido' => $pedido
         ]);

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate, useInView } from 'framer-motion';
+import TextType from '../../TextType';
 
 function Counter({ from, to, duration = 5 }) {
     const count = useMotionValue(from);
@@ -37,8 +38,16 @@ const IdentityBlock = ({ data }) => {
                             <span className="w-8 h-1 bg-primary rounded-full"></span>
                             Nuestra Identidad
                         </h2>
-                        <h3 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-8">
-                            {title || 'Nacimos para Crecer, Servir y Transformar'}
+                        <h3 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-8 md:min-h-[140px] lg:min-h-[100px]">
+                            <TextType
+                                text={title ? [title] : ["Nacimos para Crecer,", "Servir,", "y Transformar.", "Nacimos para Crecer, Servir y Transformar"]}
+                                typingSpeed={75}
+                                pauseDuration={1500}
+                                showCursor
+                                cursorCharacter="_"
+                                deletingSpeed={50}
+                                cursorBlinkDuration={0.5}
+                            />
                         </h3>
                         {description && (
                             <p className="text-gray-600 mb-8 font-sans leading-relaxed text-lg text-justify">

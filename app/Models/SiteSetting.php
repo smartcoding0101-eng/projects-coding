@@ -56,5 +56,6 @@ class SiteSetting extends Model
             Cache::forget("site_setting.{$key}");
         }
         Cache::forget('site_settings.all');
+        Cache::forget('site_settings_payload');
     }
 }

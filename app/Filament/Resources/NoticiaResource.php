@@ -32,6 +32,8 @@ class NoticiaResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Landing Page';
+
     protected static ?string $recordTitleAttribute = 'titulo';
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
@@ -43,7 +45,7 @@ class NoticiaResource extends Resource
                         TextInput::make('titulo')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('slug', Str::slug($state))),
 
                         TextInput::make('slug')
                             ->required()
@@ -73,7 +75,7 @@ class NoticiaResource extends Resource
                                 'gold' => 'Dorado',
                             ])
                             ->default('primary'),
-                        
+
                         Toggle::make('is_active')
                             ->label('Publicado')
                             ->default(true),
@@ -84,7 +86,14 @@ class NoticiaResource extends Resource
                         FileUpload::make('imagen_path')
                             ->label('Imagen de Portada')
                             ->image()
-                            ->directory('noticias'),
+                            ->disk('public')
+                            ->directory('noticias')
+                            ->helperText('📐 Dimensiones: 1200 × 630 px · Relación 16:9 · Formatos: JPG, PNG, WEBP · Peso máximo: 3MB')
+                            ->hint('Se muestra como miniatura en el listado de noticias y como portada en la vista de detalle.')
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('16:9')
+                            ->imageResizeTargetWidth('1200')
+                            ->imageResizeTargetHeight('630'),
 
                         Textarea::make('resumen')
                             ->label('Resumen (Extracto)')
@@ -102,13 +111,14 @@ class NoticiaResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('imagen_path')
-                    ->label('Imagen'),
+                    ->label('Imagen')
+                    ->disk('public'),
                 TextColumn::make('titulo')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('categoria')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Créditos' => 'info',
                         'Institucional' => 'primary',
                         'Beneficios' => 'success',

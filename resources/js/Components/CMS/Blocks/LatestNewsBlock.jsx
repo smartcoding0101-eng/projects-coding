@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Calendar, Tag } from 'lucide-react';
+import BlurText from '../../BlurText';
 
 const LatestNewsBlock = ({ data }) => {
     const { title = 'Últimas Noticias', subtitle, noticias = [] } = data;
@@ -30,9 +31,11 @@ const LatestNewsBlock = ({ data }) => {
                         <span className="bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-4 py-1.5 rounded-full inline-block mb-4">
                             Noticias
                         </span>
-                        <h2 className="font-display text-4xl md:text-5xl font-black text-on-surface tracking-tight">
-                            {title}
-                        </h2>
+                        <BlurText
+                            as="h2"
+                            text={title}
+                            className="font-display text-4xl md:text-5xl font-black text-on-surface tracking-tight"
+                        />
                         {subtitle && (
                             <p className="mt-3 text-gray-500 text-lg max-w-xl">{subtitle}</p>
                         )}
@@ -53,7 +56,7 @@ const LatestNewsBlock = ({ data }) => {
                             href={`/noticias/${featured.slug}`}
                             className="lg:col-span-3 group block bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
                         >
-                            {featured.imagen && (
+                            {featured.imagen_path && (
                                 <div className="h-64 overflow-hidden">
                                     <img
                                         src={`/storage/${featured.imagen_path}`}
@@ -62,7 +65,7 @@ const LatestNewsBlock = ({ data }) => {
                                     />
                                 </div>
                             )}
-                            {!featured.imagen && (
+                            {!featured.imagen_path && (
                                 <div className="h-64 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
                                     <span className="text-6xl">📰</span>
                                 </div>

@@ -31,7 +31,7 @@ export default function Dashboard({ kpis, stockouts, ranking_abc, auth }) {
         datasets: [
             {
                 data: [kpis.ventas_qr, kpis.ventas_credito],
-                backgroundColor: ['#28361d', '#618541'],
+                backgroundColor: ['#28361d', '#F7BD16'],
                 borderWidth: 0,
             },
         ],
@@ -77,37 +77,37 @@ export default function Dashboard({ kpis, stockouts, ranking_abc, auth }) {
 
                     {/* ─── KPIs FIORI TILES (Estilo Créditos) ─── */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <KpiCard 
-                            label="Ventas Brutas" 
-                            value={`Bs. ${kpis.ventas_totales.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                        <KpiCard
+                            label="Ventas Brutas"
+                            value={`Bs. ${kpis.ventas_totales.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`}
                             icon={<TrendingUp className="w-6 h-6" />}
                             borderColorClass="border-t-red-500"
                             iconColorClass="text-red-500"
                         />
-                        <KpiCard 
-                            label="Liquidez QR" 
-                            value={`Bs. ${kpis.ventas_qr.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                        <KpiCard
+                            label="Liquidez QR"
+                            value={`Bs. ${kpis.ventas_qr.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`}
                             icon={<QrCode className="w-6 h-6" />}
                             borderColorClass="border-t-emerald-500"
                             iconColorClass="text-emerald-500"
                         />
-                        <KpiCard 
-                            label="Ventas Crédito" 
-                            value={`Bs. ${kpis.ventas_credito.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                        <KpiCard
+                            label="Ventas Crédito"
+                            value={`Bs. ${kpis.ventas_credito.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`}
                             icon={<CreditCard className="w-6 h-6" />}
                             borderColorClass="border-t-blue-600"
                             iconColorClass="text-blue-600"
                         />
-                        <KpiCard 
-                            label="Valorizado Inventario" 
-                            value={`Bs. ${kpis.valorizado_inventario.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`} 
+                        <KpiCard
+                            label="Valorizado Inventario"
+                            value={`Bs. ${kpis.valorizado_inventario.toLocaleString('es-BO', { minimumFractionDigits: 2 })}`}
                             icon={<Package className="w-6 h-6" />}
                             borderColorClass="border-t-orange-500"
                             iconColorClass="text-orange-500"
                         />
-                        <KpiCard 
-                            label="Nuevos Usuarios" 
-                            value={kpis.nuevos_usuarios_mes} 
+                        <KpiCard
+                            label="Nuevos Usuarios"
+                            value={kpis.nuevos_usuarios_mes}
                             icon={<Users className="w-6 h-6" />}
                             borderColorClass="border-t-purple-500"
                             iconColorClass="text-purple-500"

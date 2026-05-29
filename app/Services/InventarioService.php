@@ -14,14 +14,14 @@ class InventarioService
     public function getQuiebresDeStock()
     {
         return Producto::whereRaw('stock_actual <= stock_minimo')
-                       ->where('activo', true)
-                       ->get();
+            ->where('activo', true)
+            ->get();
     }
 
     /**
      * Ajustar stock manual via Kardex.
      */
-    public function ajustarStock(Producto $producto, int $cantidad, string $tipoMovimiento, string $concepto, $adminId)
+    public function ajustarStock(Producto $producto, int $cantidad, string $tipoMovimiento, string $concepto, $adminId, ?float $costoUnitario = null, ?string $notas = null)
     {
         DB::beginTransaction();
         try {
@@ -32,14 +32,21 @@ class InventarioService
                 throw new \Exception("El saldo no puede ser negativo.");
             }
 
-            $producto->update(['stock_actual' => $nuevoSaldo]);
+            // Actualizar stock y opcionalmente el costo si es un ingreso
+            $updates = ['stock_actual' => $nuevoSaldo];
+            if ($tipoMovimiento === 'ingreso' && $costoUnitario !== null) {
+                $updates['precio_costo'] = $costoUnitario;
+            }
+            $producto->update($updates);
 
             KardexProducto::create([
                 'producto_id' => $producto->id,
                 'tipo_movimiento' => $tipoMovimiento,
                 'cantidad' => $cantidad,
                 'saldo_stock' => $nuevoSaldo,
+                'costo_unitario' => $costoUnitario,
                 'concepto' => $concepto,
+                'notas' => $notas,
                 'usuario_admin_id' => $adminId
             ]);
 

@@ -1,19 +1,21 @@
 export default function FloatingWhatsApp({ settings = {} }) {
-    const url = settings.url || 'https://wa.link/8yl8ow';
+    const phoneNumber = settings.ecommerce_whatsapp_tienda;
+    const resolvedUrl = phoneNumber ? (phoneNumber.startsWith('http') ? phoneNumber : `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}`) : (settings.url || 'https://wa.link/8yl8ow');
+    const url = resolvedUrl;
     const tooltip = settings.tooltip || 'Oficial de Negocios (En línea)';
 
     return (
-        <a 
-            href={url} 
-            target="_blank" 
+        <a
+            href={url}
+            target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 right-6 z-[100] bg-[#25D366] text-white p-3.5 rounded-full shadow-[0_15px_40px_rgba(37,211,102,0.4)] hover:scale-110 hover:-translate-y-1 transition-all duration-300 group flex items-center justify-center cursor-pointer border-4 border-white"
+            className="fixed bottom-[88px] right-6 z-[100] bg-[#25D366] text-white p-3.5 rounded-full shadow-[0_15px_40px_rgba(37,211,102,0.4)] hover:scale-110 hover:-translate-y-1 transition-all duration-300 group flex items-center justify-center cursor-pointer border-4 border-white"
             aria-label="Atención al Socio Fapclas"
         >
             {/* Ping animation dot */}
             <span className="absolute top-0 right-0 flex auto h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-white"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-white"></span>
             </span>
 
             {/* Smart Tooltip */}
@@ -21,9 +23,9 @@ export default function FloatingWhatsApp({ settings = {} }) {
                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
                 {tooltip}
             </span>
-            
+
             {/* SVG WSP Icon */}
-            <svg className="w-8 h-8 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z"/></svg>
+            <svg className="w-8 h-8 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z" /></svg>
         </a>
     )
 }

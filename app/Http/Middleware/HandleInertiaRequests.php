@@ -29,6 +29,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Cargar parámetros públicos del ecommerce (colores, políticas públicas) para inyectarlos en layouts
+        $ecommerceSettings = \App\Models\Configuracion::where('key', 'like', 'ecommerce_%')->pluck('value', 'key')->toArray();
+
+        // Limpiar JSON si existen strings
+        if (isset($ecommerceSettings['ecommerce_hero_slides']) && is_string($ecommerceSettings['ecommerce_hero_slides'])) {
+            $ecommerceSettings['ecommerce_hero_slides'] = json_decode($ecommerceSettings['ecommerce_hero_slides'], true);
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -38,6 +46,7 @@ class HandleInertiaRequests extends Middleware
                     'theme' => $request->user()->theme_preference ?? 'premium-olive',
                 ]) : null,
             ],
+            'settings' => $ecommerceSettings,
         ];
     }
 }

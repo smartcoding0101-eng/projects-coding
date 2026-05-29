@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import TextType from '../../TextType';
 
 const CreditSimulatorBlock = ({ data }) => {
     const {
@@ -41,8 +42,8 @@ const CreditSimulatorBlock = ({ data }) => {
                     <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Simulador Financiero Pro</span>
                 </div>
-                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2">
-                    {title.split(' ').slice(0, -1).join(' ')} <span className="text-primary italic">{title.split(' ').pop()}</span>
+                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2 md:min-h-[40px]">
+                    <TextType text={title} as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                 </h2>
                 <p className="text-black text-xs font-bold">{subtitle}</p>
             </div>

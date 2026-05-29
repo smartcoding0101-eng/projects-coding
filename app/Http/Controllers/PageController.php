@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Page;
 use App\Models\Noticia;
+use App\Models\Servicio;
 use App\Models\SiteSetting;
 use Inertia\Inertia;
 
@@ -16,11 +17,13 @@ class PageController extends Controller
     private function getSiteSettings(): array
     {
         try {
-            return [
-                'header' => SiteSetting::get('header', []),
-                'footer' => SiteSetting::get('footer', []),
-                'whatsapp' => SiteSetting::get('whatsapp', []),
-            ];
+            return \Illuminate\Support\Facades\Cache::remember('site_settings_payload', 3600, function () {
+                return [
+                    'header' => SiteSetting::get('header', []),
+                    'footer' => SiteSetting::get('footer', []),
+                    'whatsapp' => SiteSetting::get('whatsapp', []),
+                ];
+            });
         } catch (\Exception $e) {
             return [
                 'header' => [],
@@ -51,21 +54,61 @@ class PageController extends Controller
             $pageData = ['title' => 'FAPCLAS R.L. - Tu Futuro Seguro', 'content' => [], 'metadata' => null];
         }
 
-        // Extraer contenido dinámico desde el CMS para inyectarlo a los componentes premium
+        // Extraer TODOS los bloques del CMS para inyectarlos a los componentes estáticos
         $heroSlides = [];
         $galleryData = null;
-        
+        $identityData = null;
+        $videoData = null;
+        $testimonialsData = null;
+        $productCardsData = null;
+        $benefitsData = null;
+
         if ($page && is_array($page->content)) {
             foreach ($page->content as $block) {
-                // Slides del Hero
-                if (($block['type'] ?? '') === 'hero' && !empty($block['data']['slides'])) {
-                    $heroSlides = $block['data']['slides'];
-                }
-                // Galería Institucional
-                if (($block['type'] ?? '') === 'gallery') {
-                    $galleryData = $block['data'];
+                $type = $block['type'] ?? '';
+                $data = $block['data'] ?? [];
+
+                switch ($type) {
+                    case 'hero':
+                        if (!empty($data['slides'])) {
+                            $heroSlides = $data['slides'];
+                        }
+                        break;
+                    case 'gallery':
+                        $galleryData = $data;
+                        break;
+                    case 'identity':
+                        $identityData = $data;
+                        break;
+                    case 'video':
+                        $videoData = $data;
+                        break;
+                    case 'testimonials':
+                        $testimonialsData = $data;
+                        break;
+                    case 'product_cards':
+                        $productCardsData = $data;
+                        break;
+                    case 'benefits':
+                        $benefitsData = $data;
+                        break;
                 }
             }
+        }
+
+        // Servicios dinámicos desde BD (Filament CRUD)
+        try {
+            $servicios = Servicio::active()->ordered()->get()->map(fn($s) => [
+                'id' => $s->id,
+                'nombre' => $s->nombre,
+                'slug' => $s->slug,
+                'descripcion' => $s->descripcion,
+                'imagen' => $s->imagen_url ?? $s->imagen,
+                'icono' => $s->icono,
+                'is_featured' => $s->is_featured,
+            ])->toArray();
+        } catch (\Exception $e) {
+            $servicios = [];
         }
 
         return Inertia::render('Welcome', [
@@ -73,6 +116,12 @@ class PageController extends Controller
             'isDynamic' => false,
             'heroSlides' => $heroSlides,
             'galleryData' => $galleryData,
+            'identityData' => $identityData,
+            'videoData' => $videoData,
+            'testimonialsData' => $testimonialsData,
+            'productCardsData' => $productCardsData,
+            'benefitsData' => $benefitsData,
+            'servicios' => $servicios,
             'latest_noticias' => $noticias,
             'siteSettings' => $this->getSiteSettings(),
         ]);

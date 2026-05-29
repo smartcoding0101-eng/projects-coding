@@ -33,7 +33,7 @@ export default function Checkout({ auth, settings }) {
     const submit = (e) => {
         e.preventDefault();
         const currentCart = cart.map(item => ({ id: item.id, cantidad: item.cantidad }));
-        
+
         router.post(route('beneficios.process'), {
             ...data,
             carrito: currentCart
@@ -63,13 +63,13 @@ export default function Checkout({ auth, settings }) {
         <StoreLayout>
             <Head title="Checkout" />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <Link href={route('beneficios.index')} className="inline-flex items-center text-brand-muted hover:text-[#618541] mb-8 transition-colors">
+                <Link href={route('beneficios.index')} className="inline-flex items-center text-brand-muted hover:text-[#F7BD16] mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Seguir Comprando
                 </Link>
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Resumen del Carrito */}
-                    <motion.div 
+                    <motion.div
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.5 }}
@@ -77,7 +77,7 @@ export default function Checkout({ auth, settings }) {
                     >
                         <div className="bg-card-fap rounded-2xl shadow-sm border border-brand p-6 mb-6">
                             <h3 className="text-lg font-bold text-brand-main mb-6 flex items-center">
-                                <ShoppingBag className="w-5 h-5 mr-2 text-[#618541]" /> Resumen de tu pedido
+                                <ShoppingBag className="w-5 h-5 mr-2 text-[#F7BD16]" /> Resumen de tu pedido
                             </h3>
                             <div className="space-y-4">
                                 {cart.map(item => (
@@ -91,7 +91,7 @@ export default function Checkout({ auth, settings }) {
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-brand-main text-sm line-clamp-1">{item.nombre}</h4>
-                                            <div className="text-[#618541] font-bold text-sm mb-2">Bs. {item.precio_final} c/u</div>
+                                            <div className="text-[#F7BD16] font-bold text-sm mb-2">Bs. {item.precio_final} c/u</div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center border border-brand rounded bg-card-fap">
                                                     <button type="button" onClick={() => updateQuantity(item.id, item.cantidad - 1)} className="px-2 py-1 text-brand-muted hover:bg-brand/5">-</button>
@@ -110,7 +110,7 @@ export default function Checkout({ auth, settings }) {
                     </motion.div>
 
                     {/* Formulario de Checkout */}
-                    <motion.div 
+                    <motion.div
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
@@ -118,7 +118,7 @@ export default function Checkout({ auth, settings }) {
                     >
                         <form onSubmit={submit} className="bg-card-fap rounded-2xl shadow-lg shadow-gray-200/50 border border-brand p-6 sticky top-6">
                             <h3 className="text-xl font-extrabold text-brand-main mb-6 pb-4 border-b border-brand">Datos de Pago</h3>
-                            
+
                             {errors.checkout && (
                                 <div className="mb-6 bg-red-50 border border-red-500/50 text-red-700 px-4 py-3 rounded-lg text-sm">
                                     {errors.checkout}
@@ -128,17 +128,17 @@ export default function Checkout({ auth, settings }) {
                             <div className="space-y-4 mb-8">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                    <input type="text" value={data.cliente.nombre} onChange={e => setData('cliente', {...data.cliente, nombre: e.target.value})} className="w-full rounded-lg border-brand shadow-sm focus:border-[#618541] focus:ring-[#618541]" required />
+                                    <input type="text" value={data.cliente.nombre} onChange={e => setData('cliente', { ...data.cliente, nombre: e.target.value })} className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16]" required />
                                     {errors['cliente.nombre'] && <div className="text-red-500 text-xs mt-1">{errors['cliente.nombre']}</div>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">C.I.</label>
-                                        <input type="text" value={data.cliente.ci} onChange={e => setData('cliente', {...data.cliente, ci: e.target.value})} className="w-full rounded-lg border-brand shadow-sm focus:border-[#618541] focus:ring-[#618541]" required />
+                                        <input type="text" value={data.cliente.ci} onChange={e => setData('cliente', { ...data.cliente, ci: e.target.value })} className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16]" required />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                                        <input type="text" value={data.cliente.telefono} onChange={e => setData('cliente', {...data.cliente, telefono: e.target.value})} className="w-full rounded-lg border-brand shadow-sm focus:border-[#618541] focus:ring-[#618541]" required />
+                                        <input type="text" value={data.cliente.telefono} onChange={e => setData('cliente', { ...data.cliente, telefono: e.target.value })} className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16]" required />
                                     </div>
                                 </div>
                             </div>
@@ -146,8 +146,8 @@ export default function Checkout({ auth, settings }) {
                             <div className="mb-8">
                                 <h4 className="text-sm font-bold text-brand-main mb-3 uppercase tracking-wider">Método de Pago</h4>
                                 <div className="space-y-3">
-                                    <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'qr' ? 'border-[#618541] bg-[#618541]/5 ring-1 ring-[#618541]' : 'border-brand hover:border-[#618541]/40'}`}>
-                                        <input type="radio" name="tipo_pago" value="qr" checked={data.tipo_pago === 'qr'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#618541] focus:ring-[#618541]" />
+                                    <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'qr' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
+                                        <input type="radio" name="tipo_pago" value="qr" checked={data.tipo_pago === 'qr'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#F7BD16] focus:ring-[#F7BD16]" />
                                         <div className="ml-3">
                                             <span className="block text-sm font-bold text-brand-main flex items-center"><QrCode className="w-4 h-4 mr-2" /> Transferencia QR</span>
                                             <span className="block text-xs text-brand-muted mt-1">Sube el comprobante de tu banco tras escanear.</span>
@@ -155,11 +155,11 @@ export default function Checkout({ auth, settings }) {
                                     </label>
 
                                     {isSocio && (
-                                        <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'credito_asociado' ? 'border-[#618541] bg-[#618541]/5 ring-1 ring-[#618541]' : 'border-brand hover:border-[#618541]/40'}`}>
-                                            <input type="radio" name="tipo_pago" value="credito_asociado" checked={data.tipo_pago === 'credito_asociado'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#618541] focus:ring-[#618541]" />
+                                        <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'credito_asociado' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
+                                            <input type="radio" name="tipo_pago" value="credito_asociado" checked={data.tipo_pago === 'credito_asociado'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#F7BD16] focus:ring-[#F7BD16]" />
                                             <div className="ml-3">
                                                 <span className="block text-sm font-bold text-brand-main flex items-center"><CreditCard className="w-4 h-4 mr-2" /> Crédito Asociado</span>
-                                                <span className="block text-xs text-[#618541] mt-1 font-medium">Se descontará de tu límite global autorizado.</span>
+                                                <span className="block text-xs text-[#F7BD16] mt-1 font-medium">Se descontará de tu límite global autorizado.</span>
                                             </div>
                                         </label>
                                     )}
@@ -170,15 +170,15 @@ export default function Checkout({ auth, settings }) {
                             <div className="mb-8">
                                 <h4 className="text-sm font-bold text-brand-main mb-3 uppercase tracking-wider">Método de Entrega</h4>
                                 <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'recojo_tienda' ? 'border-[#618541] bg-[#618541]/5 ring-1 ring-[#618541]' : 'border-brand hover:border-[#618541]/40'}`}>
+                                    <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'recojo_tienda' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
                                         <input type="radio" className="hidden" name="tipo_entrega" value="recojo_tienda" checked={data.logistica.tipo_entrega === 'recojo_tienda'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value, direccion_envio: '' })} />
                                         <div className="font-bold text-brand-main text-sm">Recojo en Tienda</div>
                                         <div className="text-xs text-brand-muted mt-1">Gratis</div>
                                     </label>
-                                    <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'envio_domicilio' ? 'border-[#618541] bg-[#618541]/5 ring-1 ring-[#618541]' : 'border-brand hover:border-[#618541]/40'}`}>
+                                    <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'envio_domicilio' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
                                         <input type="radio" className="hidden" name="tipo_entrega" value="envio_domicilio" checked={data.logistica.tipo_entrega === 'envio_domicilio'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value })} />
                                         <div className="font-bold text-brand-main text-sm">Envío a Domicilio</div>
-                                        <div className="text-xs text-[#618541] mt-1 font-bold">+ Bs. 15.00</div>
+                                        <div className="text-xs text-[#F7BD16] mt-1 font-bold">+ Bs. 15.00</div>
                                     </label>
                                 </div>
 
@@ -188,7 +188,7 @@ export default function Checkout({ auth, settings }) {
                                         <textarea
                                             value={data.logistica.direccion_envio}
                                             onChange={e => setData('logistica', { ...data.logistica, direccion_envio: e.target.value })}
-                                            className="w-full rounded-lg border-brand shadow-sm focus:border-[#618541] focus:ring-[#618541] max-h-32"
+                                            className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16] max-h-32"
                                             rows="2"
                                             placeholder="Ej. Av. Blanco Galindo Km 4, Calle B #123"
                                             required
@@ -215,7 +215,7 @@ export default function Checkout({ auth, settings }) {
                                     <span>Costo de Envío</span>
                                     <span>Bs. {costoEnvio.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between items-center bg-[#618541]/10 p-4 rounded-xl mt-2">
+                                <div className="flex justify-between items-center bg-[#F7BD16]/10 p-4 rounded-xl mt-2">
                                     <span className="text-lg font-bold text-gray-700">Total a Pagar</span>
                                     <span className="text-3xl font-black text-[#28361d]">Bs. {finalTotal.toFixed(2)}</span>
                                 </div>
@@ -225,17 +225,26 @@ export default function Checkout({ auth, settings }) {
                                 {processing ? 'Procesando...' : <><ShieldCheck className="w-5 h-5" /> Confirmar Pedido</>}
                             </button>
 
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     setShowConfirmRechazar(true);
                                 }}
-                                disabled={processing} 
+                                disabled={processing}
                                 className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition-all border border-red-500/50 disabled:opacity-50"
                             >
                                 <Trash2 className="w-5 h-5" /> Rechazar Pedido
                             </button>
+
+                            {settings?.ecommerce_nota_legal && (
+                                <div className="mt-6 p-4 bg-brand/5 border border-brand/50 rounded-xl text-center">
+                                    <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                                        <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1 mb-0.5 opacity-60" />
+                                        {settings.ecommerce_nota_legal}
+                                    </p>
+                                </div>
+                            )}
 
                             <p className="text-center text-xs text-brand-muted mt-4">Tus datos están protegidos.</p>
                         </form>
@@ -246,13 +255,13 @@ export default function Checkout({ auth, settings }) {
             {/* Modal de Confirmación Moderno - RECHAZAR PEDIDO */}
             <AnimatePresence>
                 {showConfirmRechazar && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm"
                     >
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -264,23 +273,23 @@ export default function Checkout({ auth, settings }) {
                                 </div>
                                 <h3 className="text-2xl font-black text-brand-main">Rechazar Pedido</h3>
                             </div>
-                            
+
                             <p className="text-gray-600 mb-8 font-medium leading-relaxed">
                                 ¿Estás seguro de que deseas rechazar este pedido? Se vaciará tu carrito por completo y serás redirigido al catálogo.
                             </p>
 
                             <div className="flex flex-col gap-3">
-                                <button 
+                                <button
                                     onClick={() => {
                                         clearCart();
                                         router.get(route('beneficios.index'));
-                                    }} 
+                                    }}
                                     className="w-full bg-red-600 text-white py-4 rounded-xl font-black hover:bg-red-700 transition-all shadow-lg active:scale-95"
                                 >
                                     Sí, Vaciar Carrito
                                 </button>
-                                <button 
-                                    onClick={() => setShowConfirmRechazar(false)} 
+                                <button
+                                    onClick={() => setShowConfirmRechazar(false)}
                                     className="w-full bg-brand/5 text-gray-600 py-3 rounded-xl font-bold hover:bg-brand/10 transition-all"
                                 >
                                     Volver al Checkout

@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import TextType from './TextType';
 
 export default function CreditSimulator() {
     const [amount, setAmount] = useState(20000);
     const [months, setMonths] = useState(12);
     const monthlyRateValue = 10; // Tasa referencial del 10% mensual
-    
+
     const calculateEMI = () => {
         const i = monthlyRateValue / 100;
         if (amount === 0 || months === 0) return 0;
@@ -36,8 +37,8 @@ export default function CreditSimulator() {
                     <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Simulador Financiero Pro</span>
                 </div>
-                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2">
-                    Tu Solución <span className="text-primary italic">Inmediata</span>
+                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2 md:min-h-[40px]">
+                    <TextType text="Tu Solución Inmediata" as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                 </h2>
                 <p className="text-black text-xs font-bold">Calcula con total transparencia institucional.</p>
             </div>
@@ -53,10 +54,10 @@ export default function CreditSimulator() {
                                 {parseInt(amount).toLocaleString('es-BO')}
                             </span>
                         </div>
-                        <input 
-                            type="range" 
-                            min="1000" 
-                            max="150000" 
+                        <input
+                            type="range"
+                            min="1000"
+                            max="150000"
                             step="1000"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
@@ -71,10 +72,10 @@ export default function CreditSimulator() {
                                 {months} <span className="text-xs font-bold text-black uppercase">Meses</span>
                             </span>
                         </div>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="36" 
+                        <input
+                            type="range"
+                            min="1"
+                            max="36"
                             step="1"
                             value={months}
                             onChange={(e) => setMonths(e.target.value)}
@@ -87,7 +88,7 @@ export default function CreditSimulator() {
                 <div className="bg-primary-dark p-8 text-white relative overflow-hidden">
                     {/* Decorative element */}
                     <div className="absolute bottom-0 right-0 w-48 h-48 bg-secondary/10 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
-                    
+
                     <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <div className="text-center md:text-left">
                             <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Cuota Mensual Fija</p>
@@ -112,14 +113,14 @@ export default function CreditSimulator() {
                     <button className="w-full mt-8 bg-secondary text-primary-dark font-black py-4 rounded-2xl text-[11px] uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all shadow-xl shadow-secondary/10">
                         Iniciar Solicitud de Crédito
                     </button>
-                    
+
                     <div className="mt-6 flex items-center justify-center gap-4 text-[9px] font-bold text-white/30 uppercase tracking-widest">
                         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-secondary rounded-full"></span> Tasa fija {monthlyRateValue}%</div>
                         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-secondary rounded-full"></span> Seguro Incluido</div>
                     </div>
                 </div>
             </div>
-            
+
             <p className="text-[9px] text-black font-bold mt-6 leading-relaxed text-left italic max-w-sm">
                 * Valores referenciales determinados por el sistema francés de amortización. Sujeto a evaluación crediticia institucional.
             </p>
