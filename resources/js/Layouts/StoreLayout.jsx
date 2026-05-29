@@ -2,6 +2,7 @@ import Header from '@/Components/Header';
 import Footer from '@/Components/Footer';
 import FloatingWhatsApp from '@/Components/FloatingWhatsApp';
 import ScrollToTop from '@/Components/ScrollToTop';
+import ToastContainer from '@/Components/ToastContainer';
 import { useCart } from '@/Contexts/CartContext';
 import { Link, usePage } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
@@ -63,6 +64,7 @@ export default function StoreLayout({ children }) {
             <FloatingAssistant />
             <FloatingWhatsApp settings={settings} />
             <ScrollToTop />
+            <ToastContainer />
         </div>
     );
 }

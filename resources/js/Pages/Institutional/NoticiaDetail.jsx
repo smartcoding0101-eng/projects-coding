@@ -4,6 +4,7 @@ import Header from '../../Components/Header';
 import Footer from '../../Components/Footer';
 import FloatingWhatsApp from '../../Components/FloatingWhatsApp';
 import ScrollToTop from '../../Components/ScrollToTop';
+import ToastContainer from '../../Components/ToastContainer';
 import { Calendar, Tag, ChevronLeft, Share2 } from 'lucide-react';
 
 export default function NoticiaDetail({ noticia }) {
@@ -89,6 +90,7 @@ export default function NoticiaDetail({ noticia }) {
                 <Footer />
                 <FloatingWhatsApp />
                 <ScrollToTop />
+                <ToastContainer />
             </div>
         </>
     );

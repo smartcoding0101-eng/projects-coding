@@ -47,6 +47,13 @@ class HandleInertiaRequests extends Middleware
                 ]) : null,
             ],
             'settings' => $ecommerceSettings,
+            // ─── Flash messages para el sistema de Toasts global ───────────────
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error'   => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info'    => $request->session()->get('info'),
+            ],
         ];
     }
 }

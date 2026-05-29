@@ -4,6 +4,7 @@ import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import FloatingWhatsApp from '../Components/FloatingWhatsApp';
 import ScrollToTop from '../Components/ScrollToTop';
+import ToastContainer from '../Components/ToastContainer';
 import BlockRenderer from '../Components/CMS/BlockRenderer';
 
 // Secciones estáticas (fallback canónico de Producción)
@@ -90,6 +91,7 @@ export default function Welcome({
                     <FloatingWhatsApp settings={whatsapp} />
                 )}
                 <ScrollToTop />
+                <ToastContainer />
             </div>
         </>
     );

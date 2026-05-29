@@ -5,6 +5,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Menu, X, Bell, ChevronDown, Palette, Banknote, BookOpen, FolderOpen, PieChart, MonitorPlay, LayoutDashboard, Store, Package, ShoppingCart, Activity, Settings, Users, UserCog, ShieldAlert, Sliders, LayoutTemplate, Book, HelpCircle, Headset, FileText, Info, User, LogOut } from 'lucide-react';
+import ToastContainer from '@/Components/ToastContainer';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -315,6 +316,7 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             <main className="py-12">{children}</main>
+            <ToastContainer />
         </div>
     );
 }

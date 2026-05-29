@@ -209,6 +209,41 @@ export default function Solicitar({ auth, socios, tiposCredito, tipos_credito })
         metodo_descuento: 'Planilla',
     });
 
+    React.useEffect(() => {
+        const storedAmount = localStorage.getItem('simulated_amount');
+        const storedMonths = localStorage.getItem('simulated_months');
+
+        if (storedAmount || storedMonths) {
+            const amountVal = storedAmount ? parseFloat(storedAmount) : '';
+            const monthsVal = storedMonths ? parseInt(storedMonths) : '';
+
+            let matchingTipoId = '';
+            if (amountVal && availableTipos.length > 0) {
+                const match = availableTipos.find(t => 
+                    amountVal >= parseFloat(t.monto_min) && 
+                    amountVal <= parseFloat(t.monto_max)
+                );
+                if (match) {
+                    matchingTipoId = match.id.toString();
+                } else {
+                    matchingTipoId = availableTipos[0].id.toString();
+                }
+            } else if (availableTipos.length > 0) {
+                matchingTipoId = availableTipos[0].id.toString();
+            }
+
+            setData(prev => ({
+                ...prev,
+                monto_solicitado: amountVal,
+                plazo_meses: monthsVal,
+                tipo_credito_id: matchingTipoId
+            }));
+
+            localStorage.removeItem('simulated_amount');
+            localStorage.removeItem('simulated_months');
+        }
+    }, [availableTipos]);
+
     const tipoSeleccionado = useMemo(
         () => availableTipos.find(t => t.id === Number(data.tipo_credito_id)) || null,
         [data.tipo_credito_id, availableTipos]

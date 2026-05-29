@@ -4,6 +4,7 @@ import NewsSection from '../../Components/NewsSection';
 import Footer from '../../Components/Footer';
 import FloatingWhatsApp from '../../Components/FloatingWhatsApp';
 import ScrollToTop from '../../Components/ScrollToTop';
+import ToastContainer from '../../Components/ToastContainer';
 
 export default function Noticias({ noticias = [] }) {
     return (
@@ -17,6 +18,7 @@ export default function Noticias({ noticias = [] }) {
                 <Footer />
                 <FloatingWhatsApp />
                 <ScrollToTop />
+                <ToastContainer />
             </div>
         </>
     );

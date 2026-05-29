@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import TextType from '../../TextType';
 
 const CreditSimulatorBlock = ({ data }) => {
@@ -18,6 +19,23 @@ const CreditSimulatorBlock = ({ data }) => {
     const monthlyRate = parseFloat(rate) || 10;
     const [amount, setAmount] = useState(parseInt(default_amount) || 20000);
     const [months, setMonths] = useState(parseInt(default_months) || 12);
+    const [saved, setSaved] = useState(false);
+
+    const { auth } = usePage().props;
+    const isAuthenticated = !!auth?.user;
+
+    const handleRequestCredit = () => {
+        localStorage.setItem('simulated_amount', amount);
+        localStorage.setItem('simulated_months', months);
+        setSaved(true);
+        setTimeout(() => {
+            if (isAuthenticated) {
+                window.location.href = '/creditos/solicitar';
+            } else {
+                window.location.href = '/login?redirect=creditos.create';
+            }
+        }, 350);
+    };
 
     const getTotals = () => {
         const i = monthlyRate / 100;
@@ -110,8 +128,17 @@ const CreditSimulatorBlock = ({ data }) => {
                             </div>
                         </div>
                     </div>
-                    <button className="w-full mt-8 bg-secondary text-primary-dark font-black py-4 rounded-2xl text-[11px] uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all shadow-xl shadow-secondary/10">
-                        {cta_text}
+                    <button
+                        onClick={handleRequestCredit}
+                        disabled={saved}
+                        className="w-full mt-8 bg-secondary text-primary-dark font-black py-4 rounded-2xl text-[11px] uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all shadow-xl shadow-secondary/10 disabled:opacity-70 flex items-center justify-center gap-2"
+                    >
+                        {saved ? (
+                            <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                Redirigiendo...
+                            </>
+                        ) : cta_text}
                     </button>
                     <div className="mt-6 flex items-center justify-center gap-4 text-[9px] font-bold text-white/30 uppercase tracking-widest">
                         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-secondary rounded-full"></span> Tasa fija {monthlyRate}%</div>
