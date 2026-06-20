@@ -82,7 +82,12 @@ class EcommerceCheckoutService
             $direccionEnvio = null;
 
             if ($tipoEntrega === 'envio_domicilio') {
-                $costoEnvio = 15.00; // Fixed delivery cost for now, can be setting
+                $envioActivo = Configuracion::getValor('ecommerce_envio_domicilio_activo', 'si');
+                if (in_array(strtolower($envioActivo), ['no', 'false', '0'])) {
+                    throw new \Exception("Los envíos a domicilio no están habilitados actualmente.");
+                }
+
+                $costoEnvio = (float) Configuracion::getValor('ecommerce_envio_domicilio_precio', '15.00');
                 $direccionEnvio = $logistica['direccion_envio'] ?? null;
                 if (!$direccionEnvio) {
                     throw new \Exception("La dirección de envío es obligatoria para envíos a domicilio.");
@@ -114,10 +119,9 @@ class EcommerceCheckoutService
             }
 
             // Create Order
-            $estadoPago = $tipoPago === 'qr' ? 'pendiente_validacion' : 'pagado';
-            if ($tipoPago === 'credito_asociado') {
-                $estadoPago = 'pagado';
-            }
+            // QR, efectivo y transferencia quedan pendiente_validacion (el admin confirma).
+            // Solo credito_asociado se marca pagado de inmediato.
+            $estadoPago = $tipoPago === 'credito_asociado' ? 'pagado' : 'pendiente_validacion';
 
             // [KYC AUTOMATION] If guest, ensure they have a record in the 'personas' table
             $personaId = null;

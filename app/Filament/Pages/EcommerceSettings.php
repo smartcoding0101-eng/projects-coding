@@ -52,9 +52,10 @@ class EcommerceSettings extends Page implements HasForms
             $settings['ecommerce_hero_slides'] = json_decode($settings['ecommerce_hero_slides'], true) ?? [];
         }
 
-        // Cast booleans
+        // Cast booleans robustly (handling 'si', 'no', 'true', 'false', '1', '0')
         foreach (['ecommerce_mostrar_precios', 'ecommerce_mostrar_precio_venta', 'ecommerce_mostrar_precio_credito', 'ecommerce_mostrar_stock', 'ecommerce_habilitar_invitados', 'ecommerce_modo_mantenimiento', 'ecommerce_pago_exige_caja'] as $boolKey) {
-            $settings[$boolKey] = filter_var($settings[$boolKey] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $val = $settings[$boolKey] ?? null;
+            $settings[$boolKey] = ($val === 'si' || $val === 'true' || $val === '1' || $val === 1 || $val === true);
         }
 
         $this->form->fill($settings);
@@ -350,9 +351,13 @@ class EcommerceSettings extends Page implements HasForms
 
         // ── Persist each key ────────────────────────────────────
         foreach ($data as $key => $value) {
-            // Cast booleans to string
+            // Cast booleans to 'si'/'no' or '1'/'0'
             if (is_bool($value)) {
-                $value = $value ? 'true' : 'false';
+                if ($key === 'ecommerce_pago_exige_caja') {
+                    $value = $value ? '1' : '0';
+                } else {
+                    $value = $value ? 'si' : 'no';
+                }
             }
 
             Configuracion::updateOrCreate(

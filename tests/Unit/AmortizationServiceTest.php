@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Services\AmortizationService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class AmortizationServiceTest extends TestCase
 {
@@ -15,7 +16,7 @@ class AmortizationServiceTest extends TestCase
         $this->service = new AmortizationService();
     }
 
-    /** @test */
+    #[Test]
     public function genera_tabla_con_cantidad_correcta_de_cuotas(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 12, '2026-01-15');
@@ -25,7 +26,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEquals(12, $tabla[11]['nro_cuota']);
     }
 
-    /** @test */
+    #[Test]
     public function saldo_restante_final_es_cero(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 12, '2026-01-15');
@@ -34,7 +35,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEquals(0, $ultimaCuota['saldo_restante']);
     }
 
-    /** @test */
+    #[Test]
     public function capital_amortizado_total_igual_al_prestamo(): void
     {
         $capital = 10000;
@@ -44,7 +45,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEqualsWithDelta($capital, $totalCapital, 0.02);
     }
 
-    /** @test */
+    #[Test]
     public function cuotas_son_fijas_excepto_ultima(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 12, '2026-01-15');
@@ -56,7 +57,7 @@ class AmortizationServiceTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function interes_decrece_y_capital_crece_con_cada_cuota(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 6, '2026-01-15');
@@ -65,7 +66,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertLessThan($tabla[5]['capital_amortizado'], $tabla[0]['capital_amortizado']);
     }
 
-    /** @test */
+    #[Test]
     public function funciona_con_tasa_cero(): void
     {
         $capital = 6000;
@@ -78,7 +79,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEquals(0, $tabla[5]['saldo_restante']);
     }
 
-    /** @test */
+    #[Test]
     public function fechas_incrementan_mensualmente(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 3, '2026-01-15');
@@ -88,7 +89,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEquals('2026-04-15', $tabla[2]['fecha_vencimiento']);
     }
 
-    /** @test */
+    #[Test]
     public function maneja_correctamente_borde_de_mes(): void
     {
         $tabla = $this->service->calcularTablaFrances(10000, 12, 3, '2026-01-31');
@@ -97,7 +98,7 @@ class AmortizationServiceTest extends TestCase
         $this->assertEquals('2026-02-28', $tabla[0]['fecha_vencimiento']);
     }
 
-    /** @test */
+    #[Test]
     public function valores_de_cuota_son_positivos(): void
     {
         $tabla = $this->service->calcularTablaFrances(50000, 18, 48, '2026-01-01');

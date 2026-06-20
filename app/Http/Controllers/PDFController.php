@@ -20,6 +20,25 @@ class PDFController extends Controller
             ->where('numero_orden', $numero_orden)
             ->firstOrFail();
 
+        $user = auth()->user();
+        $isAuthorized = false;
+
+        if ($user && $user->hasAnyRole(['SuperAdmin', 'Administrador', 'Oficial Crédito', 'Cajero'])) {
+            $isAuthorized = true;
+        } elseif ($pedido->user_id !== null) {
+            if ($user && $user->id === $pedido->user_id) {
+                $isAuthorized = true;
+            }
+        } else {
+            if (session()->has('allowed_order_' . $pedido->numero_orden)) {
+                $isAuthorized = true;
+            }
+        }
+
+        if (!$isAuthorized) {
+            abort(403, 'No tiene autorización para descargar este comprobante.');
+        }
+
         // Cargar Configuraciones Globales
         $settings = \App\Models\Configuracion::whereIn('key', ['app_logo_pdf', 'app_terminos_recibo'])
             ->pluck('value', 'key')

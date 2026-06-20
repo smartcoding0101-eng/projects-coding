@@ -15,7 +15,7 @@ class KardexController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $isAdmin = $user->hasRole('SuperAdmin') || $user->hasRole('Oficial Crédito');
+        $isAdmin = $user->hasAnyRole(['SuperAdmin', 'Oficial Crédito', 'Cajero']);
 
         // Determinar de quién es el kardex
         $socioId = $request->input('socio_id');

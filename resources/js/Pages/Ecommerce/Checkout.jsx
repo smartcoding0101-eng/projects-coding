@@ -2,7 +2,7 @@ import React from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useCart } from '@/Contexts/CartContext';
-import { ArrowLeft, ShoppingBag, CreditCard, QrCode, Trash2, ShieldCheck, XCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, CreditCard, QrCode, Trash2, ShieldCheck, XCircle, Banknote, ArrowLeftRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Checkout({ auth, settings }) {
@@ -25,7 +25,9 @@ export default function Checkout({ auth, settings }) {
         }
     });
 
-    const costoEnvio = data.logistica.tipo_entrega === 'envio_domicilio' ? 15.00 : 0.00;
+    const isEnvioActivo = settings?.ecommerce_envio_domicilio_activo !== 'no' && settings?.ecommerce_envio_domicilio_activo !== 'false' && settings?.ecommerce_envio_domicilio_activo !== '0';
+    const precioEnvio = parseFloat(settings?.ecommerce_envio_domicilio_precio || '15.00');
+    const costoEnvio = (data.logistica.tipo_entrega === 'envio_domicilio' && isEnvioActivo) ? precioEnvio : 0.00;
     const finalTotal = cartTotal + costoEnvio;
 
     const qrImage = settings?.ecommerce_qr_pago;
@@ -150,7 +152,23 @@ export default function Checkout({ auth, settings }) {
                                         <input type="radio" name="tipo_pago" value="qr" checked={data.tipo_pago === 'qr'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#F7BD16] focus:ring-[#F7BD16]" />
                                         <div className="ml-3">
                                             <span className="block text-sm font-bold text-brand-main flex items-center"><QrCode className="w-4 h-4 mr-2" /> Transferencia QR</span>
-                                            <span className="block text-xs text-brand-muted mt-1">Sube el comprobante de tu banco tras escanear.</span>
+                                            <span className="block text-xs text-brand-muted mt-1">Escanea el QR y confirma tu pago en la siguiente pantalla.</span>
+                                        </div>
+                                    </label>
+
+                                    <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'efectivo' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
+                                        <input type="radio" name="tipo_pago" value="efectivo" checked={data.tipo_pago === 'efectivo'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#F7BD16] focus:ring-[#F7BD16]" />
+                                        <div className="ml-3">
+                                            <span className="block text-sm font-bold text-brand-main flex items-center"><Banknote className="w-4 h-4 mr-2" /> Efectivo en Tienda</span>
+                                            <span className="block text-xs text-brand-muted mt-1">Paga en efectivo al recoger tu pedido en tienda.</span>
+                                        </div>
+                                    </label>
+
+                                    <label className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${data.tipo_pago === 'transferencia' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
+                                        <input type="radio" name="tipo_pago" value="transferencia" checked={data.tipo_pago === 'transferencia'} onChange={e => setData('tipo_pago', e.target.value)} className="mt-1 text-[#F7BD16] focus:ring-[#F7BD16]" />
+                                        <div className="ml-3">
+                                            <span className="block text-sm font-bold text-brand-main flex items-center"><ArrowLeftRight className="w-4 h-4 mr-2" /> Transferencia Bancaria</span>
+                                            <span className="block text-xs text-brand-muted mt-1">Realiza una transferencia directa y presenta el comprobante.</span>
                                         </div>
                                     </label>
 
@@ -169,17 +187,19 @@ export default function Checkout({ auth, settings }) {
 
                             <div className="mb-8">
                                 <h4 className="text-sm font-bold text-brand-main mb-3 uppercase tracking-wider">Método de Entrega</h4>
-                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div className={`grid ${isEnvioActivo ? 'grid-cols-2' : 'grid-cols-1'} gap-4 mb-4`}>
                                     <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'recojo_tienda' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
                                         <input type="radio" className="hidden" name="tipo_entrega" value="recojo_tienda" checked={data.logistica.tipo_entrega === 'recojo_tienda'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value, direccion_envio: '' })} />
                                         <div className="font-bold text-brand-main text-sm">Recojo en Tienda</div>
                                         <div className="text-xs text-brand-muted mt-1">Gratis</div>
                                     </label>
-                                    <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'envio_domicilio' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
-                                        <input type="radio" className="hidden" name="tipo_entrega" value="envio_domicilio" checked={data.logistica.tipo_entrega === 'envio_domicilio'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value })} />
-                                        <div className="font-bold text-brand-main text-sm">Envío a Domicilio</div>
-                                        <div className="text-xs text-[#F7BD16] mt-1 font-bold">+ Bs. 15.00</div>
-                                    </label>
+                                    {isEnvioActivo && (
+                                        <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'envio_domicilio' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
+                                            <input type="radio" className="hidden" name="tipo_entrega" value="envio_domicilio" checked={data.logistica.tipo_entrega === 'envio_domicilio'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value })} />
+                                            <div className="font-bold text-brand-main text-sm">Envío a Domicilio</div>
+                                            <div className="text-xs text-[#F7BD16] mt-1 font-bold">+ Bs. {precioEnvio.toFixed(2)}</div>
+                                        </label>
+                                    )}
                                 </div>
 
                                 {data.logistica.tipo_entrega === 'envio_domicilio' && (
@@ -203,6 +223,13 @@ export default function Checkout({ auth, settings }) {
                                     <QrCode className="w-8 h-8 mx-auto text-brand-muted mb-2" />
                                     <div className="text-sm text-gray-700 font-bold mb-1">Pasarela QR Segura</div>
                                     <div className="text-xs text-brand-muted">Serás redirigido para escanear y confirmar tu pago al hacer clic en Confirmar Pedido.</div>
+                                </div>
+                            )}
+                            {(data.tipo_pago === 'efectivo' || data.tipo_pago === 'transferencia') && (
+                                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
+                                    <Banknote className="w-8 h-8 mx-auto text-amber-500 mb-2" />
+                                    <div className="text-sm text-amber-800 font-bold mb-1">Pago presencial</div>
+                                    <div className="text-xs text-amber-700">Tu pedido quedará pendiente de validación. Preséntate en tienda con tu C.I. y el número de orden para completar el pago.</div>
                                 </div>
                             )}
 

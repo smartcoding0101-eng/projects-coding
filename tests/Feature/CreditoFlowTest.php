@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class CreditoFlowTest extends TestCase
 {
@@ -51,7 +52,7 @@ class CreditoFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function socio_puede_solicitar_credito(): void
     {
         $response = $this->actingAs($this->socio)->post(route('creditos.store'), [
@@ -69,7 +70,7 @@ class CreditoFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function solicitud_rechaza_monto_fuera_de_rango(): void
     {
         $response = $this->actingAs($this->socio)->post(route('creditos.store'), [
@@ -82,7 +83,7 @@ class CreditoFlowTest extends TestCase
         $response->assertSessionHasErrors('monto_solicitado');
     }
 
-    /** @test */
+    #[Test]
     public function admin_puede_aprobar_credito_y_genera_plan_pagos(): void
     {
         $credito = Credito::create([
@@ -110,7 +111,7 @@ class CreditoFlowTest extends TestCase
         $this->assertEquals(6, $credito->planPagos()->count());
     }
 
-    /** @test */
+    #[Test]
     public function admin_puede_registrar_pago_de_cuota(): void
     {
         $credito = Credito::create([
@@ -162,7 +163,7 @@ class CreditoFlowTest extends TestCase
         $this->assertEquals(Credito::ESTADO_DESEMBOLSADO, $credito->estado);
     }
 
-    /** @test */
+    #[Test]
     public function credito_pasa_a_pagado_cuando_todas_cuotas_pagadas(): void
     {
         $credito = Credito::create([
@@ -210,7 +211,7 @@ class CreditoFlowTest extends TestCase
         $this->assertEquals(0, $credito->saldo_capital);
     }
 
-    /** @test */
+    #[Test]
     public function socio_puede_ver_detalle_de_su_credito(): void
     {
         $credito = Credito::create([
@@ -228,7 +229,7 @@ class CreditoFlowTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function socio_no_puede_ver_credito_ajeno(): void
     {
         $otroSocio = User::factory()->create();

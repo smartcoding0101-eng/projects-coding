@@ -13,8 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
-use Filament\Schemas\Schema;
-
+use Filament\Forms\Form;
 class HistoricoCredito extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -38,6 +37,13 @@ class HistoricoCredito extends Page implements HasForms
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
+    }
+
 
     public ?array $filtros = [];
 
@@ -50,7 +56,7 @@ class HistoricoCredito extends Page implements HasForms
         ]);
     }
 
-    public function filterForm(Schema $form): Schema
+    public function filterForm(Form $form): Form
     {
         return $form
             ->schema([
@@ -68,8 +74,18 @@ class HistoricoCredito extends Page implements HasForms
             ->statePath('filtros');
     }
 
+    protected function getForms(): array
+    {
+        return [
+            'filterForm',
+        ];
+    }
+
     public function filter(): void
     {
+        $this->filtros = $this->filterForm->getState();
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
     }
 
     public function getData(): array
@@ -172,7 +188,7 @@ class HistoricoCredito extends Page implements HasForms
                     $pdf = Pdf::loadView('reportes.historico-pdf', $data)->setPaper('letter');
                     return response()->streamDownload(
                         fn() => print ($pdf->output()),
-                        'historico_credito_' . ($data['socio']->ci ?? $data['socio']->id) . '.pdf'
+                        'historico_credito_' . ($data['socio']['ci'] ?? $data['socio']['id'] ?? 'N-D') . '.pdf'
                     );
                 }),
         ];

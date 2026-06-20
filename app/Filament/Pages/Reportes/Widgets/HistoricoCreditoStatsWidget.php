@@ -7,9 +7,11 @@ use App\Models\PlanPago;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Livewire\Attributes\Reactive;
 
 class HistoricoCreditoStatsWidget extends StatsOverviewWidget
 {
+    #[Reactive]
     public ?array $filtros = [];
 
     protected function getStats(): array

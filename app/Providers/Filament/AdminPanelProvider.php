@@ -23,10 +23,23 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $faviconUrl = asset('favicon.ico');
+        try {
+            if (class_exists(\App\Models\SiteSetting::class)) {
+                $headerSettings = \App\Models\SiteSetting::get('header', []);
+                if (!empty($headerSettings['favicon'])) {
+                    $faviconUrl = asset('storage/' . $headerSettings['favicon']);
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fallback to default favicon if DB is not ready
+        }
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->favicon($faviconUrl)
             ->login()
             ->colors([
                 'primary' => Color::Amber,

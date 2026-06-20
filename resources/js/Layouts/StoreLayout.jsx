@@ -3,6 +3,7 @@ import Footer from '@/Components/Footer';
 import FloatingWhatsApp from '@/Components/FloatingWhatsApp';
 import ScrollToTop from '@/Components/ScrollToTop';
 import ToastContainer from '@/Components/ToastContainer';
+import PromoPopup from '@/Components/PromoPopup';
 import { useCart } from '@/Contexts/CartContext';
 import { Link, usePage } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
@@ -60,11 +61,12 @@ export default function StoreLayout({ children }) {
                 {children}
             </main>
 
-            <Footer settings={usePage().props.site_settings || {}} ecommerceSettings={settings} />
+            <Footer settings={usePage().props.site_settings?.footer || {}} ecommerceSettings={settings} />
             <FloatingAssistant />
-            <FloatingWhatsApp settings={settings} />
+            <FloatingWhatsApp settings={usePage().props.site_settings?.whatsapp || {}} />
             <ScrollToTop />
             <ToastContainer />
+            <PromoPopup config={usePage().props.site_settings?.promo_popup_ecommerce} storageKey="fapclas_promo_ecommerce" />
         </div>
     );
 }

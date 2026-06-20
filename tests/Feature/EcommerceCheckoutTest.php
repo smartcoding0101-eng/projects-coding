@@ -9,6 +9,7 @@ use App\Services\EcommerceCheckoutService;
 use App\Services\AccountingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class EcommerceCheckoutTest extends TestCase
 {
@@ -42,7 +43,7 @@ class EcommerceCheckoutTest extends TestCase
         ];
     }
 
-    /** @test */
+    #[Test]
     public function checkout_invitado_crea_pedido_y_registra_persona()
     {
         $producto = Producto::create([
@@ -83,7 +84,7 @@ class EcommerceCheckoutTest extends TestCase
         $this->assertEquals(10, $producto->fresh()->stock_actual);
     }
 
-    /** @test */
+    #[Test]
     public function checkout_falla_si_stock_insuficiente()
     {
         $this->expectException(\Exception::class);
@@ -111,7 +112,7 @@ class EcommerceCheckoutTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function checkout_calcula_stock_dinamico_con_pedidos_pendientes()
     {
         $this->expectException(\Exception::class);

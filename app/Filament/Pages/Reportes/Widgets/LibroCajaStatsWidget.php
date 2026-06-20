@@ -8,20 +8,29 @@ use Illuminate\Support\Facades\DB;
 
 class LibroCajaStatsWidget extends StatsOverviewWidget
 {
-    public ?string $desde = null;
-    public ?string $hasta = null;
+    public ?array $filtros = [];
 
     protected function getStats(): array
     {
-        $desde = $this->desde ?? now()->startOfMonth()->toDateString();
-        $hasta = $this->hasta ?? now()->toDateString();
+        $desde = $this->filtros['desde'] ?? now()->startOfMonth()->toDateString();
+        $hasta = $this->filtros['hasta'] ?? now()->toDateString();
+        $cajeroId = $this->filtros['cajero_id'] ?? null;
 
-        $saldoInicial = (float) DB::table('libro_diarios')
-            ->where('fecha', '<', $desde)
-            ->sum(DB::raw('ingreso - egreso'));
+        $saldoInicialQuery = DB::table('libro_diarios')
+            ->where('fecha', '<', $desde);
+
+        if ($cajeroId) {
+            $saldoInicialQuery->where('cajero_id', $cajeroId);
+        }
+
+        $saldoInicial = (float) $saldoInicialQuery->sum(DB::raw('ingreso - egreso'));
 
         $movimientos = DB::table('libro_diarios')
             ->whereBetween('fecha', [$desde, $hasta]);
+
+        if ($cajeroId) {
+            $movimientos->where('cajero_id', $cajeroId);
+        }
 
         $ingresos = (float) (clone $movimientos)->sum('ingreso');
         $egresos = (float) (clone $movimientos)->sum('egreso');

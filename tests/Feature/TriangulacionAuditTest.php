@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class TriangulacionAuditTest extends TestCase
 {
@@ -54,7 +55,7 @@ class TriangulacionAuditTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function auditoria_kyc_automatizado_para_invitados(): void
     {
         $checkoutService = app(EcommerceCheckoutService::class);
@@ -83,7 +84,7 @@ class TriangulacionAuditTest extends TestCase
         $this->assertEquals($persona->id, $pedido->persona_id);
     }
 
-    /** @test */
+    #[Test]
     public function auditoria_segregacion_pago_qr_sin_salida_de_stock(): void
     {
         $pedido = Pedido::create([
@@ -120,7 +121,7 @@ class TriangulacionAuditTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function auditoria_triangulacion_entrega_con_descuento_formal_y_kardex(): void
     {
         $pedido = Pedido::create([
@@ -163,7 +164,7 @@ class TriangulacionAuditTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function auditoria_estres_atomicidad_despachos_concurrentes(): void
     {
         // Simulamos 5 despachos de 10 unidades cada uno

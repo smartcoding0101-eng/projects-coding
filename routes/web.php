@@ -69,15 +69,15 @@ Route::middleware('auth')->group(function () {
     // NOTA: Los reportes admin se migraron a Filament Pages (/admin/reportes).
     // Se mantienen: index (sidebar React), estado-cuenta e historico (portal socio).
     Route::get('/reportes', [App\Http\Controllers\ReporteController::class, 'index'])->name('reportes.index');
-    // Route::get('/reportes/cartera', [App\Http\Controllers\ReporteController::class, 'cartera'])->name('reportes.cartera');
-    // Route::get('/reportes/morosidad', [App\Http\Controllers\ReporteController::class, 'morosidad'])->name('reportes.morosidad');
+    Route::get('/reportes/cartera', [App\Http\Controllers\ReporteController::class, 'cartera'])->name('reportes.cartera');
+    Route::get('/reportes/morosidad', [App\Http\Controllers\ReporteController::class, 'morosidad'])->name('reportes.morosidad');
     Route::get('/reportes/estado-cuenta', [App\Http\Controllers\ReporteController::class, 'estadoCuenta'])->name('reportes.estado-cuenta');
-    // Route::get('/reportes/planilla', [App\Http\Controllers\ReporteController::class, 'planilla'])->name('reportes.planilla');
+    Route::get('/reportes/planilla', [App\Http\Controllers\ReporteController::class, 'planilla'])->name('reportes.planilla');
     Route::get('/reportes/historico', [App\Http\Controllers\ReporteController::class, 'historico'])->name('reportes.historico');
-    // Route::get('/reportes/recaudacion', [App\Http\Controllers\ReporteController::class, 'recaudacion'])->name('reportes.recaudacion');
-    // Route::get('/reportes/ecommerce', [App\Http\Controllers\ReporteController::class, 'ecommerce'])->name('reportes.ecommerce');
-    // Route::get('/reportes/caja', [App\Http\Controllers\ReporteController::class, 'caja'])->name('reportes.caja');
-    // Route::get('/reportes/conciliacion-ecommerce', [App\Http\Controllers\ReporteController::class, 'conciliacionEcommerce'])->name('reportes.conciliacion-ecommerce');
+    Route::get('/reportes/recaudacion', [App\Http\Controllers\ReporteController::class, 'recaudacion'])->name('reportes.recaudacion');
+    Route::get('/reportes/ecommerce', [App\Http\Controllers\ReporteController::class, 'ecommerce'])->name('reportes.ecommerce');
+    Route::get('/reportes/caja', [App\Http\Controllers\ReporteController::class, 'caja'])->name('reportes.caja');
+    Route::get('/reportes/conciliacion-ecommerce', [App\Http\Controllers\ReporteController::class, 'conciliacionEcommerce'])->name('reportes.conciliacion-ecommerce');
 
     // Módulo de Personas / Afiliados
     Route::get('/admin/personas', [App\Http\Controllers\Admin\PersonaController::class, 'index'])->name('admin.personas.index');

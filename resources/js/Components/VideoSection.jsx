@@ -42,9 +42,9 @@ export default function VideoSection({ cmsData = null }) {
 
     const mainVideo = {
         title: cmsData?.main_title || '¿Qué significa ser Fapclas?',
-        sub: 'Spot Institucional',
+        sub: cmsData?.main_subtitle || 'Spot Institucional',
         url: mainVideoUrl,
-        img: getUrl(cmsData?.main_thumbnail) || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+        img: getUrl(cmsData?.main_thumbnail) || null,
     };
 
     const defaultGallery = [
@@ -57,7 +57,9 @@ export default function VideoSection({ cmsData = null }) {
         ? cmsData.gallery.map(v => ({
             title: v.title || 'Video',
             sub: v.subtitle || '',
-            url: v.url || '',
+            // Local file takes priority over YouTube URL
+            url: v.local_video_file ? getUrl(v.local_video_file) : (v.url || ''),
+            localFile: v.local_video_file ? getUrl(v.local_video_file) : null,
             img: getUrl(v.thumbnail) || null,
         }))
         : defaultGallery;
@@ -83,8 +85,10 @@ export default function VideoSection({ cmsData = null }) {
                 >
                     {mainVideo.img ? (
                         <img src={mainVideo.img} alt={mainVideo.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                    ) : localVideoFile ? (
+                        <video src={localVideoFile} preload="metadata" className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" muted playsInline />
                     ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-black"></div>
+                        <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt={mainVideo.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
                     )}
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-500 flex items-center justify-center">
                         <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all border border-white/50 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
@@ -106,8 +110,10 @@ export default function VideoSection({ cmsData = null }) {
                         >
                             {video.img ? (
                                 <img src={video.img} alt={video.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                            ) : video.localFile ? (
+                                <video src={video.localFile} preload="metadata" className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" muted playsInline />
                             ) : (
-                                <div className="w-full h-full bg-zinc-800"></div>
+                                <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=800&q=80" alt={video.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
                             )}
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-500 flex items-center justify-center">
                                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all border border-white/50">

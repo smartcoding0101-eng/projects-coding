@@ -131,7 +131,7 @@ class EcommerceController extends Controller
             'carrito' => 'required|array|min:1',
             'carrito.*.id' => 'required|exists:productos,id',
             'carrito.*.cantidad' => 'required|integer|min:1',
-            'tipo_pago' => 'required|in:qr,credito_asociado',
+            'tipo_pago' => 'required|in:qr,credito_asociado,efectivo,transferencia',
             'logistica.tipo_entrega' => 'required|in:recojo_tienda,envio_domicilio',
             'logistica.direccion_envio' => 'required_if:logistica.tipo_entrega,envio_domicilio|nullable|string'
         ], [
@@ -161,11 +161,13 @@ class EcommerceController extends Controller
                 null // Ya no se sube comprobante manual
             );
 
+            session()->put('allowed_order_' . $pedido->numero_orden, true);
+
             if ($validated['tipo_pago'] === 'qr') {
                 return redirect()->route('beneficios.pasarela', $pedido->numero_orden);
             }
 
-            return redirect()->route('beneficios.success', $pedido->numero_orden)->with('success', 'Pedido a crédito procesado con éxito.');
+            return redirect()->route('beneficios.success', $pedido->numero_orden)->with('success', 'Pedido registrado con éxito. Presenta tu comprobante al recoger.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['checkout' => $e->getMessage()]);
         }
@@ -174,6 +176,7 @@ class EcommerceController extends Controller
     public function pasarela($numero_orden)
     {
         $pedido = Pedido::where('numero_orden', $numero_orden)->firstOrFail();
+        $this->authorizePedido($pedido);
 
         if ($pedido->estado_pago !== 'pendiente_validacion') {
             return redirect()->route('beneficios.success', $pedido->numero_orden)->with('info', 'Este pedido ya fue procesado o pagado.');
@@ -210,6 +213,8 @@ class EcommerceController extends Controller
                 $pedido->user->notify(new \App\Notifications\NotificacionPedido($pedido));
             }
 
+            session()->put('allowed_order_' . $pedido->numero_orden, true);
+
             return redirect()->route('beneficios.success', $pedido->numero_orden)->with('success', 'Pago confirmado automáticamente por la pasarela QR.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
@@ -220,9 +225,37 @@ class EcommerceController extends Controller
     public function success($numero_orden)
     {
         $pedido = Pedido::where('numero_orden', $numero_orden)->firstOrFail();
+        $this->authorizePedido($pedido);
 
         return inertia('Ecommerce/Success', [
             'pedido' => $pedido
         ]);
+    }
+
+    private function authorizePedido(Pedido $pedido)
+    {
+        $user = auth()->user();
+
+        // 1. Si es Administrador, Oficial o Cajero, permitir siempre.
+        if ($user && $user->hasAnyRole(['SuperAdmin', 'Oficial Crédito', 'Cajero'])) {
+            return;
+        }
+
+        // 2. Si el pedido pertenece a un usuario registrado:
+        if ($pedido->user_id !== null) {
+            // Solo permitir si es el dueño autenticado
+            if ($user && $user->id === $pedido->user_id) {
+                return;
+            }
+        } else {
+            // 3. Si es un pedido de invitado (guest):
+            // Permitir si tiene el token de autorización en la sesión
+            if (session()->has('allowed_order_' . $pedido->numero_orden)) {
+                return;
+            }
+        }
+
+        // De lo contrario, abortar con 403
+        abort(403, 'No tiene autorización para ver este pedido.');
     }
 }

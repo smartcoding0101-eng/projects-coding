@@ -33,14 +33,16 @@ const VideoBlock = ({ data }) => {
         title: main_title || 'Spot Institucional',
         sub: main_subtitle || 'Video Principal',
         url: mainVideoUrl || '',
-        img: getImageUrl(main_thumbnail) || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+        img: getImageUrl(main_thumbnail) || null
     };
 
     const galleryVideos = (gallery || []).map(v => ({
         title: v.title,
         sub: v.subtitle || '',
-        url: v.url,
-        img: getImageUrl(v.thumbnail) || 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=800&q=80'
+        // Local file takes priority over YouTube URL
+        url: v.local_video_file ? getImageUrl(v.local_video_file) : (v.url || ''),
+        localFile: v.local_video_file ? getImageUrl(v.local_video_file) : null,
+        img: getImageUrl(v.thumbnail) || null,
     }));
 
     return (
@@ -64,7 +66,13 @@ const VideoBlock = ({ data }) => {
                         onClick={() => playVideo(mainVideo)}
                         className="relative rounded-[2.5rem] overflow-hidden aspect-video shadow-2xl group border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-700 relative z-10 cursor-pointer"
                     >
-                        <img src={mainVideo.img} alt={mainVideo.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                        {mainVideo.img ? (
+                            <img src={mainVideo.img} alt={mainVideo.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                        ) : local_video_file ? (
+                            <video src={getImageUrl(local_video_file)} preload="metadata" className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" muted playsInline />
+                        ) : (
+                            <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt={mainVideo.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                        )}
                         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-500 flex items-center justify-center">
                             <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all border border-white/50 shadow-[0_0_50px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_80px_rgba(255,255,255,0.4)]">
                                 <svg className="w-12 h-12 sm:w-16 sm:h-16 text-white ml-2 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -86,7 +94,13 @@ const VideoBlock = ({ data }) => {
                                 onClick={() => playVideo(video)}
                                 className="relative rounded-3xl overflow-hidden aspect-video shadow-md hover:shadow-xl group border border-gray-100 transform hover:-translate-y-1 transition-all duration-500 cursor-pointer"
                             >
-                                <img src={video.img} alt={video.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                                {video.img ? (
+                                    <img src={video.img} alt={video.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                                ) : video.localFile ? (
+                                    <video src={video.localFile} preload="metadata" className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" muted playsInline />
+                                ) : (
+                                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=800&q=80" alt={video.title} className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000" />
+                                )}
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-500 flex items-center justify-center">
                                     <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all border border-white/50">
                                         <svg className="w-5 h-5 text-white ml-1 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>

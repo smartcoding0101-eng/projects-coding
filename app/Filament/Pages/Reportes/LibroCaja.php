@@ -42,6 +42,13 @@ class LibroCaja extends Page implements HasForms
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
+    }
+
     public function mount(): void
     {
         $this->filterForm->fill([
@@ -72,6 +79,9 @@ class LibroCaja extends Page implements HasForms
 
     public function filter(): void
     {
+        $this->filtros = $this->filterForm->getState();
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
     }
 
     public function getData(): array

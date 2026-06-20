@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TipoCredito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Gate;
 
 class TipoCreditoController extends Controller
 {
@@ -13,6 +14,8 @@ class TipoCreditoController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('gestionar creditos');
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -35,6 +38,8 @@ class TipoCreditoController extends Controller
      */
     public function update(Request $request, TipoCredito $tipo)
     {
+        Gate::authorize('gestionar creditos');
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -57,6 +62,8 @@ class TipoCreditoController extends Controller
      */
     public function destroy(TipoCredito $tipo)
     {
+        Gate::authorize('gestionar creditos');
+
         // En un caso real, validar si tiene créditos asociados antes de eliminar, 
         // o usar SoftDeletes. Para Fapclas, podemos intentar eliminar o desactivar.
         try {

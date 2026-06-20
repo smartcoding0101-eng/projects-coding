@@ -1,12 +1,14 @@
 import { Head } from '@inertiajs/react';
 import Header from '../../Components/Header';
 import Footer from '../../Components/Footer';
+import SplashScreen from '../../Components/SplashScreen';
 
 export default function Constitucion() {
     return (
         <>
             <Head title="Constitución - FAPCLAS R.L." />
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface selection:bg-primary/20 flex flex-col">
+                <SplashScreen />
                 <Header />
                 <main className="flex-grow pt-32 pb-24">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

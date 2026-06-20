@@ -122,34 +122,41 @@ class AccountingService
      */
     public function registrarPagoCuota(User $socio, PlanPago $cuota, string $metodoPago = 'Planilla'): LibroDiario
     {
-        $montoTotal = $cuota->cuota_total + $cuota->monto_mora;
-        $concepto = "Pago Cuota #{$cuota->nro_cuota} - Crédito #{$cuota->credito_id}";
+        DB::beginTransaction();
+        try {
+            $montoTotal = $cuota->cuota_total + $cuota->monto_mora;
+            $concepto = "Pago Cuota #{$cuota->nro_cuota} - Crédito #{$cuota->credito_id}";
 
-        if ($cuota->monto_mora > 0) {
-            $concepto .= " (incluye mora Bs. " . number_format($cuota->monto_mora, 2) . ")";
+            if ($cuota->monto_mora > 0) {
+                $concepto .= " (incluye mora Bs. " . number_format($cuota->monto_mora, 2) . ")";
+            }
+
+            $asiento = LibroDiario::create([
+                'user_id' => $socio->id,
+                'cajero_id' => auth()->id(),
+                'fecha' => now()->toDateString(),
+                'concepto' => $concepto,
+                'ingreso' => $montoTotal,
+                'egreso' => 0,
+                'tipo_transaccion' => 'pago_cuota',
+                'referencia_id' => $cuota->id,
+            ]);
+
+            // Registrar en Kardex
+            $this->kardex->registrarPagoCuota(
+                $socio, $cuota->credito_id, $cuota->id,
+                $cuota->nro_cuota, $montoTotal, $metodoPago
+            );
+
+            // Inyectar en Caja activa (INGRESO)
+            $this->inyectarEnCaja('ingreso', $concepto, 'pago_credito', $montoTotal, 'efectivo', 'PlanPago', $cuota->id);
+
+            DB::commit();
+            return $asiento;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-
-        $asiento = LibroDiario::create([
-            'user_id' => $socio->id,
-            'cajero_id' => auth()->id(),
-            'fecha' => now()->toDateString(),
-            'concepto' => $concepto,
-            'ingreso' => $montoTotal,
-            'egreso' => 0,
-            'tipo_transaccion' => 'pago_cuota',
-            'referencia_id' => $cuota->id,
-        ]);
-
-        // Registrar en Kardex
-        $this->kardex->registrarPagoCuota(
-            $socio, $cuota->credito_id, $cuota->id,
-            $cuota->nro_cuota, $montoTotal, $metodoPago
-        );
-
-        // Inyectar en Caja activa (INGRESO)
-        $this->inyectarEnCaja('ingreso', $concepto, 'pago_credito', $montoTotal, 'efectivo', 'PlanPago', $cuota->id);
-
-        return $asiento;
     }
 
     /**
@@ -157,24 +164,31 @@ class AccountingService
      */
     public function registrarMora(User $socio, PlanPago $cuota, float $montoMora): LibroDiario
     {
-        $asiento = LibroDiario::create([
-            'user_id' => $socio->id,
-            'cajero_id' => auth()->id(),
-            'fecha' => now()->toDateString(),
-            'concepto' => "Interés moratorio - Cuota #{$cuota->nro_cuota} - Crédito #{$cuota->credito_id}",
-            'ingreso' => $montoMora,
-            'egreso' => 0,
-            'tipo_transaccion' => 'mora',
-            'referencia_id' => $cuota->id,
-        ]);
+        DB::beginTransaction();
+        try {
+            $asiento = LibroDiario::create([
+                'user_id' => $socio->id,
+                'cajero_id' => auth()->id(),
+                'fecha' => now()->toDateString(),
+                'concepto' => "Interés moratorio - Cuota #{$cuota->nro_cuota} - Crédito #{$cuota->credito_id}",
+                'ingreso' => $montoMora,
+                'egreso' => 0,
+                'tipo_transaccion' => 'mora',
+                'referencia_id' => $cuota->id,
+            ]);
 
-        // Registrar en Kardex
-        $this->kardex->registrarMora(
-            $socio, $cuota->id, $cuota->nro_cuota,
-            $cuota->credito_id, $montoMora
-        );
+            // Registrar en Kardex
+            $this->kardex->registrarMora(
+                $socio, $cuota->id, $cuota->nro_cuota,
+                $cuota->credito_id, $montoMora
+            );
 
-        return $asiento;
+            DB::commit();
+            return $asiento;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import Footer from '../../Components/Footer';
 import FloatingWhatsApp from '../../Components/FloatingWhatsApp';
 import ScrollToTop from '../../Components/ScrollToTop';
 import ToastContainer from '../../Components/ToastContainer';
+import SplashScreen from '../../Components/SplashScreen';
 import { Calendar, Tag, ChevronLeft, Share2 } from 'lucide-react';
 
 export default function NoticiaDetail({ noticia }) {
@@ -17,6 +18,7 @@ export default function NoticiaDetail({ noticia }) {
                 <meta property="og:title" content={`${noticia.titulo} - FAPCLAS R.L.`} />
             </Head>
             <div className="min-h-screen font-sans antialiased text-brand-main bg-main flex flex-col selection:bg-primary/20">
+                <SplashScreen />
                 <Header />
 
                 <main className="pt-20 flex-grow">

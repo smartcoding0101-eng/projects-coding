@@ -9,9 +9,45 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class MorosidadStatsWidget extends StatsOverviewWidget
 {
+    public ?array $filtros = [];
+
     protected function getStats(): array
     {
-        $cuotasMora = PlanPago::where('estado', PlanPago::ESTADO_RETRASADA)->get();
+        $minDias = $this->filtros['min_dias'] ?? null;
+        $maxDias = $this->filtros['max_dias'] ?? null;
+        $tipoId = $this->filtros['tipo_id'] ?? null;
+        $search = $this->filtros['search'] ?? null;
+
+        $query = PlanPago::where('plan_pagos.estado', PlanPago::ESTADO_RETRASADA)
+            ->join('creditos', 'plan_pagos.credito_id', '=', 'creditos.id')
+            ->join('users', 'creditos.user_id', '=', 'users.id')
+            ->join('personas', 'users.persona_id', '=', 'personas.id')
+            ->select('plan_pagos.*', 'creditos.tipo_credito_id', 'users.name', 'personas.ci');
+
+        if ($tipoId) {
+            $query->where('creditos.tipo_credito_id', $tipoId);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('users.name', 'like', "%{$search}%")
+                    ->orWhere('personas.ci', 'like', "%{$search}%");
+            });
+        }
+
+        $cuotasMora = $query->get();
+
+        if ($minDias !== null || $maxDias !== null) {
+            $cuotasMora = $cuotasMora->filter(function ($c) use ($minDias, $maxDias) {
+                $dias = $c->fecha_vencimiento ? (int) \Carbon\Carbon::parse($c->fecha_vencimiento)->diffInDays(now(), false) : 0;
+                if ($minDias !== null && $dias < $minDias)
+                    return false;
+                if ($maxDias !== null && $dias > $maxDias)
+                    return false;
+                return true;
+            });
+        }
+
         $sociosAfectados = $cuotasMora->pluck('credito_id')->unique()->count();
 
         // Trend: cuotas retrasadas por mes

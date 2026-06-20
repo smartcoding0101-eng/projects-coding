@@ -263,20 +263,33 @@ class PageForm
                                 Repeater::make('gallery')
                                     ->label('Videos de la Galería')
                                     ->schema([
-                                        TextInput::make('title')->required(),
-                                        TextInput::make('subtitle'),
-                                        TextInput::make('url')->label('URL del Video')->url()->required(),
+                                        TextInput::make('title')->required()->columnSpan(1),
+                                        TextInput::make('subtitle')->columnSpan(1),
+                                        TextInput::make('url')
+                                            ->label('URL del Video (YouTube/Vimeo)')
+                                            ->url()
+                                            ->columnSpanFull()
+                                            ->hint('Opcional si subes un video local abajo.'),
+                                        FileUpload::make('local_video_file')
+                                            ->label('O Subir Video Local (.mp4) — MAX: 25MB')
+                                            ->acceptedFileTypes(['video/mp4', 'video/webm'])
+                                            ->maxSize(25600)
+                                            ->disk('public')
+                                            ->directory('pages/videos_locales')
+                                            ->columnSpanFull()
+                                            ->hint('Si subes un archivo local, tendrá prioridad sobre la URL de YouTube.'),
                                         FileUpload::make('thumbnail')
                                             ->label('Thumbnail del Video')
                                             ->image()
                                             ->disk('public')
                                             ->directory('pages/videos')
                                             ->helperText('📐 Dimensiones: 1280 × 720 px · Relación 16:9 · Formatos: JPG, PNG')
-                                            ->hint('Vista previa del video en la galería.')
+                                            ->hint('Vista previa del video en la galería. Opcional si usas video local (se mostrará el primer frame).')
                                             ->imageResizeMode('cover')
                                             ->imageCropAspectRatio('16:9')
                                             ->imageResizeTargetWidth('1280')
-                                            ->imageResizeTargetHeight('720'),
+                                            ->imageResizeTargetHeight('720')
+                                            ->columnSpanFull(),
                                     ])
                                     ->columns(2)
                                     ->collapsible()
@@ -400,7 +413,8 @@ class PageForm
                     ])
                     ->collapsible()
                     ->collapsed(false)
-                    ->blockNumbers(false),
+                    ->blockNumbers(false)
+                    ->blockPickerColumns(2),
 
                 Section::make('Metadatos y SEO (Optimización de Buscadores)')
                     ->statePath('metadata')

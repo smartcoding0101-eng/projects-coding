@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\KardexService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class KardexServiceTest extends TestCase
 {
@@ -22,7 +23,7 @@ class KardexServiceTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function registra_movimiento_con_saldo_acumulado_correcto(): void
     {
         $mov1 = $this->service->registrar($this->user, 'aporte', 'Aporte inicial', 1000, 0);
@@ -35,7 +36,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals(1200, $mov3->saldo_acumulado);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_aporte_crea_movimiento_tipo_aporte(): void
     {
         $mov = $this->service->registrarAporte($this->user, 500);
@@ -46,7 +47,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals(500, $mov->saldo_acumulado);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_desembolso_crea_movimiento_correcto(): void
     {
         $mov = $this->service->registrarDesembolso($this->user, 10000, 42);
@@ -57,7 +58,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals(42, $mov->referencia_id);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_pago_cuota_genera_egreso(): void
     {
         // Primero dar saldo
@@ -72,7 +73,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals('Planilla', $mov->metodo);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_interes_ganado_incrementa_saldo(): void
     {
         $this->service->registrarAporte($this->user, 10000);
@@ -84,7 +85,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals('Automático', $mov->metodo);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_mora_genera_egreso(): void
     {
         $mov = $this->service->registrarMora($this->user, 100, 3, 10, 45.50);
@@ -93,7 +94,7 @@ class KardexServiceTest extends TestCase
         $this->assertEquals(45.50, $mov->egreso);
     }
 
-    /** @test */
+    #[Test]
     public function registrar_compra_convenio_genera_egreso(): void
     {
         $this->service->registrarAporte($this->user, 2000);
@@ -105,7 +106,7 @@ class KardexServiceTest extends TestCase
         $this->assertStringContains('Seguro Dental', $mov->concepto);
     }
 
-    /** @test */
+    #[Test]
     public function saldo_usuario_independiente_de_otro(): void
     {
         $otroUser = User::factory()->create();

@@ -40,6 +40,13 @@ class EstadoCuenta extends Page implements HasForms
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
+    }
+
 
     public ?array $filtros = [];
 
@@ -72,7 +79,9 @@ class EstadoCuenta extends Page implements HasForms
 
     public function filter(): void
     {
-        // Al ejecutar filter(), Livewire redesplegará los widgets con los nuevos $filtros
+        $this->filtros = $this->filterForm->getState();
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
     }
 
 

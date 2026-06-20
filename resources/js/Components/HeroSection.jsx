@@ -97,13 +97,26 @@ export default function HeroSection({ cmsSlides = [] }) {
                             }`}
                     >
                         {slide.image ? (
-                            <div
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
-                                style={{
-                                    backgroundImage: `url(${slide.image})`,
-                                    transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
-                                }}
-                            ></div>
+                            slide.image.endsWith('.mp4') || slide.image.endsWith('.webm') ? (
+                                <video
+                                    src={slide.image}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    preload="none"
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[12000ms] ease-linear origin-center"
+                                    style={{ transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)' }}
+                                />
+                            ) : (
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear origin-center"
+                                    style={{
+                                        backgroundImage: `url(${slide.image})`,
+                                        transform: index === currentSlide ? 'scale(1.08)' : 'scale(1)'
+                                    }}
+                                ></div>
+                            )
                         ) : (
                             <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black"></div>
                         )}

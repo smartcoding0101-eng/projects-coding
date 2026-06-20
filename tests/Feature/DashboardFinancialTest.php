@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 use Carbon\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 
 class DashboardFinancialTest extends TestCase
 {
@@ -33,7 +34,7 @@ class DashboardFinancialTest extends TestCase
         $this->socio = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function dashboard_calculates_capital_recuperado_correctly_from_plan_pagos()
     {
         $tipo = TipoCredito::create([
@@ -99,7 +100,7 @@ class DashboardFinancialTest extends TestCase
         $this->assertEquals(10000, $metrics['montoPrestado']);
     }
 
-    /** @test */
+    #[Test]
     public function dashboard_resilient_to_missing_tables_does_not_throw_500()
     {
         // To simulate this we could drop a table, but RefreshDatabase rebuilds it immediately

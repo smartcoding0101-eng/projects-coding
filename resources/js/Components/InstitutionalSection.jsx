@@ -51,7 +51,7 @@ export default function InstitutionalSection({ cmsData = null }) {
 
 
     return (
-        <section className="py-12 bg-surface" id="institucional">
+        <section className="py-20 lg:py-32 bg-surface" id="institucional">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
 
@@ -118,13 +118,13 @@ export default function InstitutionalSection({ cmsData = null }) {
                         </div>
 
                         {/* Imagen 1 — Columna Izquierda Tall */}
-                        <div className="col-span-1 rounded-3xl overflow-hidden mt-8 shadow-lg group relative">
+                        <div className="col-span-1 rounded-3xl overflow-hidden mt-8 h-[calc(100%-2rem)] shadow-lg group relative">
                             <img src={img1} alt="Identidad 1" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-primary/20 mix-blend-multiply opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
 
                         {/* Columna Derecha — 2 imágenes */}
-                        <div className="col-span-1 grid grid-rows-2 gap-4">
+                        <div className="col-span-1 grid grid-rows-2 gap-4 h-full">
                             <div className="rounded-3xl overflow-hidden shadow-lg group relative">
                                 <img src={img2} alt="Identidad 2" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                             </div>

@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use App\Models\KardexProducto;
@@ -78,6 +79,12 @@ class PedidosTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('descargarPdf')
+                    ->label('Ver PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->url(fn($record) => route('pedidos.pdf', $record->numero_orden))
+                    ->openUrlInNewTab(),
                 Action::make('validarPago')
                     ->label('Validar Pago')
                     ->icon('heroicon-o-check-circle')
@@ -114,15 +121,45 @@ class PedidosTable
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->modalHeading('Confirmar Rechazo de Pago')
-                    ->modalDescription(fn($record) => "¿Está seguro de rechazar el pago del pedido #{$record->numero_orden}? Esta acción devolverá el stock reservado.")
-                    ->modalSubmitActionLabel('Sí, Rechazar Pago')
+                    ->modalHeading('Confirmar Anulación de Pedido')
+                    ->modalDescription(fn($record) => "¿Está seguro de rechazar el pago del pedido #{$record->numero_orden}? El pedido quedará ANULADO y el stock de cada producto será devuelto al inventario automáticamente.")
+                    ->modalSubmitActionLabel('Sí, Anular Pedido y Devolver Stock')
                     ->modalCancelActionLabel('Cancelar')
                     ->visible(fn($record) => $record->estado_pago === 'pendiente_validacion' && auth()->user()->hasRole(['SuperAdmin', 'Administrador']))
                     ->action(function ($record) {
-                        $record->update(['estado_pago' => 'rechazado']);
+                        DB::transaction(function () use ($record) {
+                            $record->load('detalles.producto');
+
+                            // AUDITORÍA: Devolver stock de cada producto y registrar en Kardex
+                            foreach ($record->detalles as $detalle) {
+                                $producto = $detalle->producto;
+                                if (!$producto) continue;
+
+                                $nuevoStock = $producto->stock_actual + $detalle->cantidad;
+                                $producto->update(['stock_actual' => $nuevoStock]);
+
+                                KardexProducto::create([
+                                    'producto_id'      => $producto->id,
+                                    'tipo_movimiento'  => 'ingreso',
+                                    'cantidad'         => $detalle->cantidad,
+                                    'saldo_stock'      => $nuevoStock,
+                                    'costo_unitario'   => $detalle->precio_unitario,
+                                    'concepto'         => "Devolución por Anulación - Pedido #{$record->numero_orden}",
+                                    'usuario_admin_id' => auth()->id(),
+                                    'notas'            => "Pedido anulado/rechazado. Stock reintegrado al inventario.",
+                                ]);
+                            }
+
+                            // Marcar pedido como anulado/rechazado
+                            $record->update([
+                                'estado_pago'     => 'rechazado',
+                                'observaciones'   => trim(($record->observaciones ?? '') . "\n[AUDITORÍA " . now()->format('Y-m-d H:i:s') . "] Pedido anulado por " . auth()->user()->name . ". Stock devuelto al inventario."),
+                            ]);
+                        });
+
                         Notification::make()
-                            ->title('Pago Rechazado')
+                            ->title('Pedido Anulado — Stock Devuelto')
+                            ->body('El pedido fue rechazado y el stock de todos los productos fue reintegrado al inventario con registro en Kardex.')
                             ->danger()
                             ->send();
                     }),
@@ -242,7 +279,26 @@ class PedidosTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Eliminar Seleccionados')
+                        ->requiresConfirmation()
+                        ->modalHeading('Eliminar Pedidos')
+                        ->modalDescription('Solo se eliminarán pedidos en estado Rechazado o Pendiente de Validación. Los pedidos Pagados o Entregados son INALTERABLES por normativa de auditoría financiera.')
+                        ->before(function ($records, \Filament\Actions\DeleteBulkAction $action) {
+                            $bloqueados = $records->filter(
+                                fn($r) => in_array($r->estado_pago, ['pagado']) || $r->estado_entrega === 'entregado'
+                            );
+                            if ($bloqueados->isNotEmpty()) {
+                                Notification::make()
+                                    ->title('Eliminación Bloqueada — Trazabilidad Financiera')
+                                    ->body('Uno o más pedidos seleccionados están en estado Pagado o Entregado y no pueden eliminarse. Deselecciónelos e intente nuevamente.')
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                                $action->cancel();
+                            }
+                        })
+                        ->visible(fn() => auth()->user()->hasRole('SuperAdmin')),
                 ]),
             ]);
     }

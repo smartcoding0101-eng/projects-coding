@@ -84,7 +84,7 @@ export default function PasarelaQR({ pedido, settings }) {
                         {/* Simulación para propósitos de Desarrollo */}
                         <div className="mt-10 pt-6 border-t border-brand">
                             <div className="text-xs text-center text-orange-500 font-bold mb-3">
-                                ⚠️ Entorno de Desarrollo (Simulación API Webhook)
+                                ⚠️ Desarrollar pago virtual
                             </div>
                             <button
                                 onClick={simularPago}
@@ -101,7 +101,7 @@ export default function PasarelaQR({ pedido, settings }) {
                                     </span>
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        <CheckCircle2 className="w-4 h-4" /> Simular Pago Recibido
+                                        <CheckCircle2 className="w-4 h-4" /> Confirmar el pago
                                     </span>
                                 )}
                             </button>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ShoppingCart, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, ShieldCheck, Lock, EyeOff } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
 import { motion } from 'framer-motion';
 
@@ -10,7 +10,21 @@ export default function Show({ producto, auth, settings, relacionados }) {
     const [cantidad, setCantidad] = useState(1);
     const isSocio = auth?.user?.roles?.includes('Socio');
 
-    const precioReal = isSocio && producto.precio_asociado > 0 ? producto.precio_asociado : producto.precio_general;
+    const mostrarPreciosPublico = settings?.ecommerce_mostrar_precios === 'si' || settings?.ecommerce_mostrar_precios === 'true' || settings?.ecommerce_mostrar_precios === true;
+    const isAdmin = auth?.user?.roles?.includes('SuperAdmin') || auth?.user?.roles?.includes('Oficial Crédito') || auth?.user?.roles?.includes('Cajero');
+    const puedeVerPrecios = mostrarPreciosPublico || auth?.user !== null;
+
+    const getPrecioReal = () => {
+        if (!puedeVerPrecios) return null;
+        if (isSocio) {
+            if (producto.precio_asociado > 0) return producto.precio_asociado;
+            const descGlobal = parseFloat(settings?.ecommerce_descuento_socios_global || 0);
+            if (descGlobal > 0) return (producto.precio_general * (1 - descGlobal / 100)).toFixed(2);
+            return producto.precio_general;
+        }
+        return producto.precio_general;
+    };
+    const precioReal = getPrecioReal();
 
     const handleAddToCart = () => {
         addToCart({ ...producto, precio_final: precioReal }, cantidad);
@@ -66,7 +80,7 @@ export default function Show({ producto, auth, settings, relacionados }) {
 
                             <div className="mb-8">
                                 <div className="text-sm text-brand-muted mb-2 font-bold tracking-wider uppercase">Precio Unitario</div>
-                                {(auth?.user || settings?.ecommerce_mostrar_precios !== 'no') ? (
+                                {puedeVerPrecios ? (
                                     <div className="flex items-end gap-4">
                                         {settings?.ecommerce_mostrar_precio_venta === 'si' && (
                                             <div className="flex flex-col">
@@ -88,7 +102,7 @@ export default function Show({ producto, auth, settings, relacionados }) {
                                     <div className="inline-flex items-center gap-2 px-4 py-3 bg-brand/5 border border-brand/50 rounded-lg">
                                         <ShieldCheck className="w-5 h-5 text-brand-muted" />
                                         <span className="text-sm text-brand-main font-semibold">
-                                            Debes <Link href="/login" className="text-primary hover:underline">iniciar sesión</Link> para ver el precio.
+                                            Precios no disponibles temporalmente.
                                         </span>
                                     </div>
                                 )}

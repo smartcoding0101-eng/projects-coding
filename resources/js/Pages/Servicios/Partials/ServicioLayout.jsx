@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import Header from '@/Components/Header';
 import Footer from '@/Components/Footer';
+import SplashScreen from '@/Components/SplashScreen';
 import { motion } from 'framer-motion';
 
 export default function ServicioLayout({ servicio, whatsappSoporte, children }) {
@@ -11,6 +12,7 @@ export default function ServicioLayout({ servicio, whatsappSoporte, children }) 
     return (
         <div className="min-h-screen bg-card-fap font-sans antialiased text-black">
             <Head title={`${nombre} - FAPCLAS R.L.`} />
+            <SplashScreen />
             <Header />
 
             <main className="pt-20">

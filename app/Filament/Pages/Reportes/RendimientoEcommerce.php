@@ -44,6 +44,7 @@ class RendimientoEcommerce extends Page implements HasForms
     {
         return [
             Widgets\EcommerceVentasChart::class,
+            Widgets\EcommerceClientesChart::class,
         ];
     }
 
@@ -77,6 +78,23 @@ class RendimientoEcommerce extends Page implements HasForms
 
     public function filter(): void
     {
+        // Lee el estado actual del formulario
+        $this->filtros = $this->filterForm->getState();
+
+        // Limpia el cache de widgets para que se re-instancien con los nuevos datos
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
+    }
+
+    /**
+     * Filament 5: pasa datos a los widgets hijos via getWidgetData().
+     * Los widgets reciben estas propiedades automáticamente.
+     */
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
     }
 
     public function getData(): array
@@ -92,12 +110,22 @@ class RendimientoEcommerce extends Page implements HasForms
             $queryPedidos->where('estado_pago', $estadoPago);
         }
 
-        $ventasPeriodo = (float) (clone $queryPedidos)->where('estado_pago', 'pagado')->sum('total');
-        $pedidosTotal = DB::table('pedidos')
+        // Ventas reales cobradas del periodo (siempre con estado 'pagado')
+        $ventasPeriodo = (float) DB::table('pedidos')
             ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+            ->where('estado_pago', 'pagado')
+            ->sum('total');
+
+        // Total de pedidos considerando el filtro de estado actual
+        $pedidosTotal = (clone $queryPedidos)->count();
+
+        // Pedidos pagados en el periodo para calcular el ticket promedio
+        $pedidosPagados = DB::table('pedidos')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
+            ->where('estado_pago', 'pagado')
             ->count();
 
-        $ticketPromedio = $pedidosTotal > 0 ? ($ventasPeriodo / $pedidosTotal) : 0;
+        $ticketPromedio = $pedidosPagados > 0 ? ($ventasPeriodo / $pedidosPagados) : 0;
 
         $valorizado = DB::table('productos')
             ->where('activo', true)
@@ -105,8 +133,13 @@ class RendimientoEcommerce extends Page implements HasForms
 
         $recientes = DB::table('pedidos')
             ->select('id', 'numero_orden', 'nombre_cliente', 'tipo_pago', 'estado_pago', 'total', 'created_at')
-            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59'])
-            ->orderByDesc('created_at')
+            ->whereBetween('created_at', [$desde . ' 00:00:00', $hasta . ' 23:59:59']);
+
+        if ($estadoPago) {
+            $recientes->where('estado_pago', $estadoPago);
+        }
+
+        $recientes = $recientes->orderByDesc('created_at')
             ->limit(15)
             ->get();
 

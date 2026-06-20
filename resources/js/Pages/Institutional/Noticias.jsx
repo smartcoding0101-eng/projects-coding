@@ -5,12 +5,14 @@ import Footer from '../../Components/Footer';
 import FloatingWhatsApp from '../../Components/FloatingWhatsApp';
 import ScrollToTop from '../../Components/ScrollToTop';
 import ToastContainer from '../../Components/ToastContainer';
+import SplashScreen from '../../Components/SplashScreen';
 
 export default function Noticias({ noticias = [] }) {
     return (
         <>
             <Head title="Últimas Noticias - FAPCLAS R.L." />
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface flex flex-col selection:bg-primary/20">
+                <SplashScreen />
                 <Header />
                 <main className="pt-20 flex-grow">
                     <NewsSection news={noticias} />

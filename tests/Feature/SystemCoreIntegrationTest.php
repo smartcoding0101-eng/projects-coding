@@ -16,6 +16,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Test;
 
 class SystemCoreIntegrationTest extends TestCase
 {
@@ -101,8 +102,8 @@ class SystemCoreIntegrationTest extends TestCase
      * 3. El Admin despacha el producto.
      * 4. Verificaciones de Kardex de Producto (Físico) y Kardex Financiero (Saldo).
      *
-     * @test 
      */
+    #[Test]
     public function full_system_core_lifecycle_integration()
     {
         // ==========================================

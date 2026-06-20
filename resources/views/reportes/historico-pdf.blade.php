@@ -41,13 +41,13 @@
         <table>
             <tr>
                 <td class="label">Afiliado:</td>
-                <td class="value">{{ $socio_seleccionado->name }}</td>
+                <td class="value">{{ $socio_seleccionado['nombre'] ?? 'N/D' }}</td>
                 <td class="label">Identificación:</td>
-                <td class="value">{{ $socio_seleccionado->ci ?? 'N/D' }}</td>
+                <td class="value">{{ $socio_seleccionado['ci'] ?? 'N/D' }}</td>
             </tr>
             <tr>
                 <td class="label">Grado/Cargo:</td>
-                <td class="value">{{ $socio_seleccionado->grado ?? 'Socio' }}</td>
+                <td class="value">{{ $socio_seleccionado['grado'] ?? 'Socio' }}</td>
                 <td class="label">Fecha Reporte:</td>
                 <td class="value">{{ now()->format('d/m/Y H:i') }}</td>
             </tr>
@@ -58,19 +58,19 @@
         <tr>
             <td class="summary-item">
                 <span class="summary-label">Créditos Totales</span>
-                <span class="summary-value">{{ $metricas['creditos_totales'] }}</span>
+                <span class="summary-value">{{ $resumen['total_creditos'] ?? 0 }}</span>
             </td>
             <td class="summary-item">
-                <span class="summary-label">Capital Aprobado</span>
-                <span class="summary-value">Bs {{ number_format($metricas['monto_total_aprobado'], 2) }}</span>
+                <span class="summary-label">Vigentes</span>
+                <span class="summary-value">{{ $resumen['vigentes'] ?? 0 }}</span>
             </td>
             <td class="summary-item">
-                <span class="summary-label">Capital Amortizado</span>
-                <span class="summary-value">Bs {{ number_format($metricas['capital_pagado_total'], 2) }}</span>
+                <span class="summary-label">Total Solicitado</span>
+                <span class="summary-value">Bs {{ number_format($resumen['total_solicitado'] ?? 0, 2) }}</span>
             </td>
             <td class="summary-item">
-                <span class="summary-label">Eventos de Mora</span>
-                <span class="summary-value" style="color: #b91c1c;">{{ $metricas['cuotas_mora_historicas'] }}</span>
+                <span class="summary-label">Calificación Buró</span>
+                <span class="summary-value" style="color: #059669; font-weight: bold;">{{ $resumen['calificacion'] ?? 'N/D' }}</span>
             </td>
         </tr>
     </table>
@@ -87,15 +87,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($historial_creditos as $c)
+            @foreach($historial as $c)
                 <tr>
-                    <td>#{{ $c->id }}</td>
-                    <td>{{ $c->tipo_credito->nombre ?? 'General' }}</td>
-                    <td>{{ $c->created_at->format('d/m/Y') }}</td>
-                    <td style="text-align: right; font-weight: bold;">Bs {{ number_format($c->monto_aprobado, 2) }}</td>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $c['tipo'] }}</td>
+                    <td>{{ $c['fecha_inicio'] }}</td>
+                    <td style="text-align: right; font-weight: bold;">Bs {{ number_format($c['monto'], 2) }}</td>
                     <td style="text-align: center;">
-                        <span class="status {{ $c->estado == 'Pagado' ? 'status-pagado' : ($c->estado == 'En Mora' ? 'status-mora' : 'status-pendiente') }}">
-                            {{ $c->estado }}
+                        <span class="status {{ $c['estado'] == 'Pagado' ? 'status-pagado' : ($c['estado'] == 'En Mora' ? 'status-mora' : 'status-pendiente') }}">
+                            {{ $c['estado'] }}
                         </span>
                     </td>
                 </tr>

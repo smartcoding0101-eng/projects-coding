@@ -50,17 +50,17 @@ export default function AuthenticatedLayout({ header, children }) {
     ];
 
     const administrationItems = [
-        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*'), permissions: ['ver creditos', 'evaluar creditos'], icon: <Banknote className="w-4 h-4 text-emerald-500" /> },
-        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*'), permissions: ['ver libro diario'], icon: <BookOpen className="w-4 h-4 text-indigo-500" /> },
-        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*'), permissions: ['ver kardex general'], icon: <FolderOpen className="w-4 h-4 text-amber-500" /> },
-        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), permissions: ['ver reportes financieros'], icon: <PieChart className="w-4 h-4 text-blue-500" /> },
+        { label: 'Créditos', href: route('creditos.index'), active: route().current('creditos.*'), permissions: ['gestionar creditos', 'aprobar creditos'], icon: <Banknote className="w-4 h-4 text-emerald-500" /> },
+        { label: 'Libretas', href: route('libro-diario.index'), active: route().current('libro-diario.*'), permissions: ['ver reportes'], icon: <BookOpen className="w-4 h-4 text-indigo-500" /> },
+        { label: 'Kardex', href: route('kardex.index'), active: route().current('kardex.*'), permissions: ['ver reportes'], icon: <FolderOpen className="w-4 h-4 text-amber-500" /> },
+        { label: 'Reportes', href: route('reportes.index'), active: route().current('reportes.*'), permissions: ['ver reportes'], icon: <PieChart className="w-4 h-4 text-blue-500" /> },
         { label: 'Caja general', href: route('admin.caja.index'), active: route().current('admin.caja.*'), permissions: ['gestionar usuarios'], icon: <MonitorPlay className="w-4 h-4 text-rose-500" /> },
     ];
 
     const ecommerceItems = [];
 
     const adjustmentsItems = [
-        { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['ver personas'], icon: <Users className="w-4 h-4 text-blue-500" /> },
+        { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['gestionar usuarios'], icon: <Users className="w-4 h-4 text-blue-500" /> },
         { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> },
     ];
 

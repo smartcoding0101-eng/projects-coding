@@ -64,6 +64,7 @@ class MovimientosEcommerce extends Page implements HasForms
 
     public function filter(): void
     {
+        $this->filtros = $this->filterForm->getState();
     }
 
     public function getData(): array
@@ -98,6 +99,35 @@ class MovimientosEcommerce extends Page implements HasForms
 
         $pedidos = $query->paginate(25);
 
+        // Mapeamos los pedidos a la estructura de movimientos esperada por la vista Blade
+        $items = $pedidos->items();
+        usort($items, fn($a, $b) => strcmp($a->created_at, $b->created_at));
+
+        $saldo = 0;
+        $mapped = [];
+        foreach ($items as $p) {
+            $esIngreso = $p->estado_pago === 'pagado';
+            $monto = (float) $p->total;
+
+            $ingreso = $esIngreso ? $monto : 0;
+            $egreso = 0; // No hay egresos registrados directamente en la tabla de pedidos
+
+            $saldo += $ingreso - $egreso;
+
+            $mapped[] = [
+                'fecha' => \Carbon\Carbon::parse($p->created_at)->format('d/m/Y H:i'),
+                'tipo' => $esIngreso ? 'ingreso' : 'pendiente',
+                'referencia' => $p->numero_orden,
+                'concepto' => "Pago de Pedido #" . $p->numero_orden . " - " . ($p->nombre_cliente ?? ($p->user->name ?? 'Invitado')),
+                'ingreso' => $ingreso,
+                'egreso' => $egreso,
+                'saldo' => $saldo,
+            ];
+        }
+
+        // Revertimos para mostrar del más nuevo al más viejo
+        $movimientos = array_reverse($mapped);
+
         $stats = [
             'total_ventas' => (float) Pedido::where('estado_pago', 'pagado')->sum('total'),
             'cantidad_pedidos' => Pedido::count(),
@@ -107,6 +137,7 @@ class MovimientosEcommerce extends Page implements HasForms
 
         return [
             'pedidos' => $pedidos,
+            'movimientos' => $movimientos,
             'stats' => $stats,
         ];
     }

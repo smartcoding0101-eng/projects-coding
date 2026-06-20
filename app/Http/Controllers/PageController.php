@@ -22,6 +22,9 @@ class PageController extends Controller
                     'header' => SiteSetting::get('header', []),
                     'footer' => SiteSetting::get('footer', []),
                     'whatsapp' => SiteSetting::get('whatsapp', []),
+                    'promo_popup_landing' => SiteSetting::get('promo_popup_landing', []),
+                    'promo_popup_ecommerce' => SiteSetting::get('promo_popup_ecommerce', []),
+                    'splash' => SiteSetting::get('splash', []),
                 ];
             });
         } catch (\Exception $e) {
@@ -29,6 +32,9 @@ class PageController extends Controller
                 'header' => [],
                 'footer' => [],
                 'whatsapp' => [],
+                'promo_popup_landing' => [],
+                'promo_popup_ecommerce' => [],
+                'splash' => [],
             ];
         }
     }

@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Filament\Pages\Dashboard;
+use PHPUnit\Framework\Attributes\Test;
 
 class RolesAuthTest extends TestCase
 {
@@ -31,7 +32,7 @@ class RolesAuthTest extends TestCase
         $this->socio->assignRole('Socio');
     }
 
-    /** @test */
+    #[Test]
     public function socio_no_puede_acceder_al_panel_admin()
     {
         // En Filament, el acceso al panel se rige por canAccessPanel
@@ -41,7 +42,7 @@ class RolesAuthTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function admin_puede_acceder_al_panel_admin()
     {
         $response = $this->actingAs($this->admin)->get('/admin');

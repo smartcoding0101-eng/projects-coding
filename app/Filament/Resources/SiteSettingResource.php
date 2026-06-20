@@ -57,6 +57,18 @@ class SiteSettingResource extends Resource
             // --- HEADER ---
             Section::make('Configuración del Header')
                 ->schema([
+                    FileUpload::make('favicon')
+                        ->label('Favicon del Sitio')
+                        ->image()
+                        ->disk('public')
+                        ->directory('site/favicon')
+                        ->deletable()
+                        ->nullable()
+                        ->helperText('📐 Dimensiones recomendadas: 32x32px o 192x192px (Pantallas retina) · Relación de aspecto 1:1 · Formatos: ICO, PNG, WEBP, SVG')
+                        ->imageResizeMode('contain')
+                        ->imageCropAspectRatio('1:1')
+                        ->imageResizeTargetWidth('192')
+                        ->imageResizeTargetHeight('192'),
                     Group::make([
                         TextInput::make('phone')->label('Teléfono de Soporte')->placeholder('800-10-FAPCLAS'),
                         TextInput::make('phone_link')->label('Link Teléfono')->placeholder('tel:80010XXXX'),
@@ -73,6 +85,17 @@ class SiteSettingResource extends Resource
                         TextInput::make('cta_portal_text')->label('Texto Botón Portal')->default('Acceso al Portal'),
                         TextInput::make('cta_tienda_text')->label('Texto Botón Tienda')->default('Tienda Virtual'),
                     ])->columns(2),
+                    Section::make('SEO y Metadatos (Buscadores / Google)')
+                        ->schema([
+                            Textarea::make('meta_description')
+                                ->label('Meta Descripción')
+                                ->helperText('Escribe una descripción concisa de tu cooperativa (recomendado: 150-160 caracteres). Esto es lo que aparecerá en los resultados de búsqueda de Google.')
+                                ->rows(3)
+                                ->maxLength(255),
+                            TextInput::make('meta_keywords')
+                                ->label('Palabras Clave (Keywords)')
+                                ->helperText('Separadas por comas. Ej: cooperativa, créditos, ahorro, fapclas'),
+                        ])->collapsible()->collapsed(),
                     Repeater::make('top_links')
                         ->label('Links de la Barra Superior')
                         ->schema([
@@ -176,6 +199,226 @@ class SiteSettingResource extends Resource
                 ])
                 ->visible(fn($record) => $record?->key === 'whatsapp')
                 ->collapsed(),
+
+            // --- PROMO POPUP LANDING ---
+            Section::make('Popup Promocional - Landing Page')
+                ->schema([
+                    Toggle::make('enabled')
+                        ->label('Habilitar Popup')
+                        ->default(false),
+                    
+                    \Filament\Forms\Components\Select::make('type')
+                        ->label('Tipo de Popup')
+                        ->options([
+                            'oferta' => '🏷️ Oferta Especial',
+                            'noticia' => '📰 Noticia',
+                            'informacion' => 'ℹ️ Información',
+                        ])
+                        ->required()
+                        ->default('oferta'),
+
+                    FileUpload::make('image')
+                        ->label('Imagen del Popup')
+                        ->image()
+                        ->disk('public')
+                        ->directory('site/popups')
+                        ->helperText('📐 Dimensiones sugeridas: 800x600px. Formatos: JPG, PNG, WEBP')
+                        ->imageResizeMode('cover'),
+
+                    TextInput::make('title')
+                        ->label('Título')
+                        ->maxLength(100),
+
+                    Textarea::make('description')
+                        ->label('Descripción / Detalle')
+                        ->rows(3),
+
+                    Group::make([
+                        TextInput::make('button_text')
+                            ->label('Texto del Botón (CTA)')
+                            ->placeholder('Ej: Ver Más'),
+                        TextInput::make('button_link')
+                            ->label('Enlace del Botón')
+                            ->placeholder('Ej: /beneficios'),
+                    ])->columns(2),
+
+                    Group::make([
+                        Toggle::make('show_once')
+                            ->label('Mostrar una sola vez por sesión')
+                            ->default(true)
+                            ->helperText('Si está activo, solo se mostrará una vez hasta que el usuario cierre el navegador.'),
+                        TextInput::make('delay_ms')
+                            ->label('Retardo para mostrar (ms)')
+                            ->numeric()
+                            ->default(1000)
+                            ->suffix('ms'),
+                    ])->columns(2),
+
+                    \Filament\Forms\Components\DateTimePicker::make('expires_at')
+                        ->label('Fecha de expiración (opcional)')
+                        ->helperText('Si se define, el popup se desactivará automáticamente después de esta fecha.'),
+                ])
+                ->visible(fn($record) => $record?->key === 'promo_popup_landing'),
+
+            // --- PROMO POPUP ECOMMERCE ---
+            Section::make('Popup Promocional - Ecommerce')
+                ->schema([
+                    Toggle::make('enabled')
+                        ->label('Habilitar Popup')
+                        ->default(false),
+                    
+                    \Filament\Forms\Components\Select::make('type')
+                        ->label('Tipo de Popup')
+                        ->options([
+                            'oferta' => '🏷️ Oferta Especial',
+                            'noticia' => '📰 Noticia',
+                            'informacion' => 'ℹ️ Información',
+                        ])
+                        ->required()
+                        ->default('oferta'),
+
+                    FileUpload::make('image')
+                        ->label('Imagen del Popup')
+                        ->image()
+                        ->disk('public')
+                        ->directory('site/popups')
+                        ->helperText('📐 Dimensiones sugeridas: 800x600px. Formatos: JPG, PNG, WEBP')
+                        ->imageResizeMode('cover'),
+
+                    TextInput::make('title')
+                        ->label('Título')
+                        ->maxLength(100),
+
+                    Textarea::make('description')
+                        ->label('Descripción / Detalle')
+                        ->rows(3),
+
+                    Group::make([
+                        TextInput::make('button_text')
+                            ->label('Texto del Botón (CTA)')
+                            ->placeholder('Ej: Ver Ofertas'),
+                        TextInput::make('button_link')
+                            ->label('Enlace del Botón')
+                            ->placeholder('Ej: #catalogo'),
+                    ])->columns(2),
+
+                    Group::make([
+                        Toggle::make('show_once')
+                            ->label('Mostrar una sola vez por sesión')
+                            ->default(true)
+                            ->helperText('Si está activo, solo se mostrará una vez hasta que el usuario cierre el navegador.'),
+                        TextInput::make('delay_ms')
+                            ->label('Retardo para mostrar (ms)')
+                            ->numeric()
+                            ->default(800)
+                            ->suffix('ms'),
+                    ])->columns(2),
+
+                    \Filament\Forms\Components\DateTimePicker::make('expires_at')
+                        ->label('Fecha de expiración (opcional)')
+                        ->helperText('Si se define, el popup se desactivará automáticamente después de esta fecha.'),
+                ])
+                ->visible(fn($record) => $record?->key === 'promo_popup_ecommerce')
+                ->collapsed(),
+
+            // --- SPLASH SCREEN ---
+            Section::make('🚀 Splash Screen de Bienvenida')
+                ->description('Pantalla de carga animada que se muestra la primera vez que un visitante entra al sitio.')
+                ->schema([
+                    Toggle::make('enabled')
+                        ->label('Habilitar Splash Screen')
+                        ->default(true)
+                        ->helperText('Si está activo, se mostrará una pantalla de bienvenida animada al cargar la página por primera vez.'),
+
+                    Group::make([
+                        \Filament\Forms\Components\Select::make('logo_type')
+                            ->label('Tipo de Logo')
+                            ->options([
+                                'text' => '✏️ Solo Texto',
+                                'image' => '🖼️ Imagen',
+                                'both' => '🔠 Texto + Imagen',
+                            ])
+                            ->default('text')
+                            ->helperText('Define qué mostrar como logo durante el splash.'),
+
+                        \Filament\Forms\Components\Select::make('logo_size')
+                            ->label('Tamaño del Logo')
+                            ->options([
+                                'sm' => 'Pequeño (160px)',
+                                'md' => 'Mediano (240px)',
+                                'lg' => 'Grande (320px)',
+                                'xl' => 'Extra Grande (400px)',
+                            ])
+                            ->default('md')
+                            ->helperText('Aplica para logos tipo Imagen.'),
+                    ])->columns(2),
+
+                    Group::make([
+                        \Filament\Forms\Components\Select::make('style')
+                            ->label('Estilo Visual')
+                            ->options([
+                                'dark' => '🌑 Oscuro (por defecto)',
+                                'light' => '☀️ Claro',
+                                'brand' => '🎨 Color de Marca',
+                            ])
+                            ->default('dark'),
+
+                        \Filament\Forms\Components\Select::make('animation')
+                            ->label('Animación de Salida')
+                            ->options([
+                                'fade'     => '🌫️ Desvanecer (Fade)',
+                                'slide-up' => '⬆️ Deslizar hacia arriba',
+                                'zoom-out' => '🔍 Alejar (Zoom Out)',
+                            ])
+                            ->default('fade')
+                            ->helperText('Efecto visual al ocultarse.'),
+                    ])->columns(2),
+
+                    FileUpload::make('logo_image')
+                        ->label('Imagen del Logo (opcional)')
+                        ->image()
+                        ->disk('public')
+                        ->directory('site/splash')
+                        ->helperText('📐 Recomendado: 200×200 px, PNG transparente. Solo se usa si el tipo de logo es "Imagen" o "Texto + Imagen".')
+                        ->imageResizeMode('contain')
+                        ->imageResizeTargetWidth('200')
+                        ->imageResizeTargetHeight('200'),
+
+                    Group::make([
+                        TextInput::make('title')
+                            ->label('Título Principal')
+                            ->default('FAPCLAS')
+                            ->placeholder('Ej: FAPCLAS'),
+
+                        TextInput::make('subtitle')
+                            ->label('Subtítulo / Eslogan')
+                            ->default('R.L.')
+                            ->placeholder('Ej: R.L.'),
+                    ])->columns(2),
+
+                    Textarea::make('tagline')
+                        ->label('Tagline (texto pequeño debajo del logo)')
+                        ->placeholder('Ej: Tu cooperativa de confianza')
+                        ->rows(2),
+
+                    Group::make([
+                        \Filament\Forms\Components\TextInput::make('duration_ms')
+                            ->label('Duración del Splash (ms)')
+                            ->numeric()
+                            ->default(2500)
+                            ->suffix('ms')
+                            ->helperText('Tiempo en milisegundos antes de mostrar el sitio. Mínimo recomendado: 1500ms.'),
+
+                        \Filament\Forms\Components\TextInput::make('show_every_minutes')
+                            ->label('Mostrar cada X minutos')
+                            ->numeric()
+                            ->default(0)
+                            ->suffix('min')
+                            ->helperText('0 = solo una vez por sesión. Ej: 60 = se repite cada hora.'),
+                    ])->columns(2),
+                ])
+                ->visible(fn($record) => $record?->key === 'splash')
+                ->collapsed(),
         ];
     }
 
@@ -190,12 +433,18 @@ class SiteSettingResource extends Resource
                         'header' => 'info',
                         'footer' => 'success',
                         'whatsapp' => 'warning',
+                        'promo_popup_landing' => 'danger',
+                        'promo_popup_ecommerce' => 'primary',
+                        'splash' => 'gray',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         'header' => '🏠 Header / Navegación',
                         'footer' => '📋 Footer / Pie de Página',
                         'whatsapp' => '💬 WhatsApp Flotante',
+                        'promo_popup_landing' => '🚀 Popup - Landing Page',
+                        'promo_popup_ecommerce' => '🛍️ Popup - Ecommerce',
+                        'splash' => '✨ Splash Screen',
                         default => $state,
                     }),
                 TextColumn::make('updated_at')

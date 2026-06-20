@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { ShoppingCart, Search, Filter, ShoppingBag, ArrowRight, EyeOff } from 'lucide-react';
+import { ShoppingCart, Search, Filter, ShoppingBag, ArrowRight, EyeOff, Lock } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import BlurText from '@/Components/BlurText';
@@ -10,8 +10,12 @@ export default function Store({ productos, categorias, filtros, auth, settings }
     const { addToCart, cartCount } = useCart();
     const isSocio = auth?.user?.roles?.includes('Socio');
 
+    const mostrarPreciosPublico = settings?.ecommerce_mostrar_precios === 'si' || settings?.ecommerce_mostrar_precios === 'true' || settings?.ecommerce_mostrar_precios === true;
+    const isAdmin = auth?.user?.roles?.includes('SuperAdmin') || auth?.user?.roles?.includes('Oficial Crédito') || auth?.user?.roles?.includes('Cajero');
+    const puedeVerPrecios = mostrarPreciosPublico || auth?.user !== null;
+
     const getPrecioReal = (producto) => {
-        if (settings?.ecommerce_mostrar_precios === 'no' && !auth?.user) return null;
+        if (!puedeVerPrecios) return null;
 
         if (isSocio) {
             if (producto.precio_asociado > 0) return producto.precio_asociado;
@@ -345,7 +349,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
 
                                                 <div className="mt-4 flex items-end justify-between">
                                                     <div>
-                                                        {(auth?.user || settings?.ecommerce_mostrar_precios !== 'no') ? (
+                                                        {puedeVerPrecios ? (
                                                             precio ? (
                                                                 <div className="flex flex-col justify-end h-full">
                                                                     {settings?.ecommerce_mostrar_precio_venta === 'si' && (
@@ -364,7 +368,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                                                 </div>
                                                             ) : null
                                                         ) : (
-                                                            <div className="text-xs font-bold text-brand-muted flex items-center pt-2"><EyeOff className="w-3.5 h-3.5 mr-1" /> Login para precio</div>
+                                                            <div className="text-xs font-bold text-brand-muted flex items-center pt-2"><EyeOff className="w-3.5 h-3.5 mr-1" /> Precios no disponibles</div>
                                                         )}
                                                     </div>
 

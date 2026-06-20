@@ -1,9 +1,11 @@
 import React from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link } from '@inertiajs/react';
-import { CheckCircle, ShoppingBag, MapPin } from 'lucide-react';
+import { CheckCircle, ShoppingBag, MapPin, FileText } from 'lucide-react';
 
 export default function Success({ pedido }) {
+    const pdfUrl = `/pedidos/comprobante/${pedido.numero_orden}`;
+
     return (
         <StoreLayout>
             <Head title="Pedido Confirmado" />
@@ -21,7 +23,9 @@ export default function Success({ pedido }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-10">
                         <div className="bg-brand/5 border border-brand p-6 rounded-2xl">
-                            <h3 className="text-sm font-bold text-brand-main mb-4 flex items-center uppercase tracking-wider"><ShoppingBag className="w-4 h-4 mr-2 text-[#F7BD16]" /> Resumen</h3>
+                            <h3 className="text-sm font-bold text-brand-main mb-4 flex items-center uppercase tracking-wider">
+                                <ShoppingBag className="w-4 h-4 mr-2 text-[#F7BD16]" /> Resumen
+                            </h3>
                             <div className="space-y-2 text-sm text-gray-600">
                                 <div className="flex justify-between"><span>Cliente:</span> <span className="font-medium text-brand-main">{pedido.nombre_cliente}</span></div>
                                 <div className="flex justify-between"><span>Total pagado:</span> <span className="font-bold text-brand-main">Bs. {pedido.total}</span></div>
@@ -32,17 +36,35 @@ export default function Success({ pedido }) {
 
                         <div className="bg-[#F7BD16]/5 border border-[#F7BD16]/20 p-6 rounded-2xl relative overflow-hidden">
                             <MapPin className="absolute -bottom-4 -right-4 w-32 h-32 text-[#F7BD16]/10" />
-                            <h3 className="text-sm font-bold text-[#28361d] mb-4 flex items-center uppercase tracking-wider relative z-10"><MapPin className="w-4 h-4 mr-2 text-[#F7BD16]" /> Recojo en Tienda</h3>
+                            <h3 className="text-sm font-bold text-[#28361d] mb-4 flex items-center uppercase tracking-wider relative z-10">
+                                <MapPin className="w-4 h-4 mr-2 text-[#F7BD16]" /> Recojo en Tienda
+                            </h3>
                             <p className="text-sm text-[#28361d] relative z-10 font-medium">
                                 Tu pedido estará listo para recoger en nuestra tienda física principal. Por favor presenta tu C.I. y el número de orden.
                             </p>
                         </div>
                     </div>
 
-                    <p className="text-brand-muted mb-8">Tu pedido se procesará tan pronto se valide el pago.</p>
-                    <Link href={route('beneficios.index')} className="bg-[#28361d] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#1a2312] transition-colors">
-                        Volver a la Tienda
-                    </Link>
+                    <p className="text-brand-muted mb-6">Tu pedido se procesará tan pronto se valide el pago.</p>
+
+                    {/* Acciones principales */}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <a
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-[#28361d] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#1a2312] transition-colors border border-[#a1c286]/30 shadow-md"
+                        >
+                            <FileText className="w-5 h-5 text-[#a1c286]" />
+                            Descargar Comprobante PDF
+                        </a>
+                        <Link
+                            href={route('beneficios.index')}
+                            className="inline-flex items-center gap-2 bg-white text-[#28361d] px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm"
+                        >
+                            Volver a la Tienda
+                        </Link>
+                    </div>
                 </div>
             </div>
         </StoreLayout>

@@ -13,6 +13,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+use App\Models\KardexProducto;
 
 class ProductosTable
 {
@@ -21,7 +23,10 @@ class ProductosTable
         return $table
             ->columns([
                 ImageColumn::make('imagen_path')
-                    ->label('Imagen'),
+                    ->label('Imagen')
+                    ->disk('public')
+                    ->square()
+                    ->size(50),
                 TextColumn::make('codigo_sku')
                     ->searchable()
                     ->label('SKU'),
@@ -39,6 +44,10 @@ class ProductosTable
                     ->numeric()
                     ->sortable()
                     ->label('Stock'),
+                TextColumn::make('fecha_vencimiento')
+                    ->label('Vencimiento')
+                    ->date('d/m/Y')
+                    ->sortable(),
                 ToggleColumn::make('activo')
                     ->label('Activo'),
                 TextColumn::make('marca')
@@ -55,10 +64,6 @@ class ProductosTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('calibre')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('fecha_vencimiento')
-                    ->date()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('precio_asociado')
                     ->numeric()
@@ -156,10 +161,58 @@ class ProductosTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    // SOFT-DELETE: Bloqueo si stock > 0; si pasa, deja registro de auditoría en Kardex
+                    DeleteBulkAction::make()
+                        ->label('Desactivar / Dar de Baja')
+                        ->requiresConfirmation()
+                        ->modalHeading('Dar de Baja Productos')
+                        ->modalDescription('Los productos con historial de ventas o Kardex no serán eliminados físicamente. Si alguno tiene stock activo, se registrará una baja de inventario en el Kardex antes de desactivarlo.')
+                        ->before(function ($records, DeleteBulkAction $action) {
+                            foreach ($records as $producto) {
+                                // Registrar baja de stock si tiene inventario valorizado
+                                if ($producto->stock_actual > 0) {
+                                    KardexProducto::create([
+                                        'producto_id'      => $producto->id,
+                                        'tipo_movimiento'  => 'egreso',
+                                        'cantidad'         => $producto->stock_actual,
+                                        'saldo_stock'      => 0,
+                                        'costo_unitario'   => $producto->precio_costo ?? 0,
+                                        'concepto'         => 'Baja Administrativa de Inventario',
+                                        'usuario_admin_id' => auth()->id(),
+                                        'notas'            => '[AUDITORÍA ' . now()->format('Y-m-d H:i:s') . '] Producto dado de baja con ' . $producto->stock_actual . ' unidades en stock. Stock ajustado a 0 para mantener integridad contable.',
+                                    ]);
+                                    $producto->update(['stock_actual' => 0]);
+                                }
+                            }
+                        }),
+
+                    // FORCE-DELETE: Bloqueado absolutamente si tiene ventas o kardex histórico
+                    ForceDeleteBulkAction::make()
+                        ->label('Eliminar Permanentemente')
+                        ->requiresConfirmation()
+                        ->modalHeading('⚠️ Eliminación Física Permanente')
+                        ->modalDescription('ADVERTENCIA: Esta acción es irreversible. Solo se permite si el producto no tiene ningún historial de ventas ni movimientos de Kardex.')
+                        ->before(function ($records, ForceDeleteBulkAction $action) {
+                            $bloqueados = $records->filter(
+                                fn($p) => $p->kardex()->withTrashed()->count() > 0
+                                    || \App\Models\PedidoDetalle::where('producto_id', $p->id)->exists()
+                            );
+                            if ($bloqueados->isNotEmpty()) {
+                                $nombres = $bloqueados->pluck('nombre')->join(', ');
+                                Notification::make()
+                                    ->title('Eliminación Física Bloqueada — Trazabilidad')
+                                    ->body("Los siguientes productos tienen historial de ventas o Kardex y no pueden eliminarse físicamente: {$nombres}")
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                                $action->cancel();
+                            }
+                        })
+                        ->visible(fn() => auth()->user()->hasRole('SuperAdmin')),
+
                     RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('id', 'desc');
     }
 }

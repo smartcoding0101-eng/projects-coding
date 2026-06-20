@@ -18,9 +18,9 @@ const ProductCardsBlock = ({ data }) => {
         return `/storage/${img}`;
     };
 
-    // Split items into rows: first 3, then rest in groups of 4
+    // Split items into rows: first 3, then rest
     const row1 = items.slice(0, 3);
-    const row2 = items.slice(3, 7);
+    const row2 = items.slice(3);
 
     return (
         <section className="py-12 bg-surface relative overflow-hidden" id="servicios">
@@ -51,9 +51,9 @@ const ProductCardsBlock = ({ data }) => {
                     </div>
                 )}
 
-                {/* Row 2: 4 cards */}
+                {/* Row 2: remaining cards */}
                 {row2.length > 0 && (
-                    <div className="grid md:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {row2.map((item, idx) => (
                             <ServiceCard key={idx + 3} item={item} getImageUrl={getImageUrl} />
                         ))}

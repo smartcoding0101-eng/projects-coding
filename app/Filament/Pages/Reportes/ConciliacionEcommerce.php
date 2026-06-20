@@ -60,6 +60,7 @@ class ConciliacionEcommerce extends Page implements HasForms
 
     public function filter(): void
     {
+        $this->filtros = $this->filterForm->getState();
     }
 
     public function getData(): array
@@ -97,7 +98,19 @@ class ConciliacionEcommerce extends Page implements HasForms
             ->groupBy('productos.id', 'productos.nombre', 'productos.codigo_sku')
             ->get();
 
+        // Mapea los pedidos para que coincidan con lo que espera el Blade (registros)
+        $registros = $pendientes->map(fn($p) => [
+            'fecha' => \Carbon\Carbon::parse($p->created_at)->format('d/m/Y H:i'),
+            'orden' => $p->numero_orden,
+            'cliente' => $p->nombre_cliente,
+            'metodo' => $p->tipo_pago,
+            'estado_pago' => $p->estado_pago,
+            'estado_pedido' => $p->estado_entrega,
+            'total' => (float) $p->total,
+        ]);
+
         return [
+            'registros' => $registros,
             'pendientes' => $pendientes,
             'resumen' => [
                 'total_pedidos_retenidos' => $pendientes->count(),

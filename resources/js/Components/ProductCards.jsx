@@ -80,8 +80,8 @@ export default function ProductCards({ cmsData = null, servicios = [] }) {
 
                 {/* Fila 2: resto de tarjetas */}
                 {items.length > 3 && (
-                    <div className={`grid md:grid-cols-${Math.min(4, items.length - 3)} gap-6`}>
-                        {items.slice(3, 7).map((servicio) => (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {items.slice(3).map((servicio) => (
                             <ServiceCard key={servicio.id} servicio={servicio} />
                         ))}
                     </div>

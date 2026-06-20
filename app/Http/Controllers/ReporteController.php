@@ -26,7 +26,7 @@ class ReporteController extends Controller
      */
     public function index()
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         return Inertia::render('Reportes/Index');
     }
@@ -37,7 +37,7 @@ class ReporteController extends Controller
 
     public function cartera(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $tipoId = $request->input('tipo_id');
         $estado = $request->input('estado');
@@ -141,7 +141,7 @@ class ReporteController extends Controller
 
     public function morosidad(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $minDias = $request->input('min_dias');
         $maxDias = $request->input('max_dias');
@@ -241,7 +241,7 @@ class ReporteController extends Controller
             $socioId = null;
         }
 
-        $isAdmin = $user->hasAnyRole(['SuperAdmin', 'Oficial Crédito']);
+        $isAdmin = $user->hasAnyRole(['SuperAdmin', 'Oficial Crédito', 'Cajero']);
 
         if ($socioId && $isAdmin) {
             $socio = User::findOrFail($socioId);
@@ -329,7 +329,7 @@ class ReporteController extends Controller
 
     public function planilla(Request $request, BoletaService $boleta)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $mesAnio = $request->input('mes', now()->format('Y-m'));
         $data = $boleta->generarPlanillaDescuento($mesAnio);
@@ -351,7 +351,7 @@ class ReporteController extends Controller
     // ═══════════════════════════════════════════
     public function historico(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $socioId = $request->input('socio_id');
         $fechaInicio = $request->input('fecha_inicio');
@@ -433,7 +433,7 @@ class ReporteController extends Controller
      */
     public function recaudacion(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $desde = $request->input('desde', now()->startOfMonth()->toDateString());
         $hasta = $request->input('hasta', now()->toDateString());
@@ -536,7 +536,7 @@ class ReporteController extends Controller
      */
     public function ecommerce(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $desde = $request->input('desde', now()->startOfMonth()->toDateString());
         $hasta = $request->input('hasta', now()->toDateString());
@@ -650,7 +650,7 @@ class ReporteController extends Controller
      */
     public function caja(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $desde = $request->input('desde', now()->startOfMonth()->toDateString());
         $hasta = $request->input('hasta', now()->toDateString());
@@ -773,7 +773,7 @@ class ReporteController extends Controller
      */
     public function conciliacionEcommerce(Request $request)
     {
-        Gate::authorize('gestionar usuarios');
+        Gate::authorize('ver reportes');
 
         $desde = $request->input('desde', now()->startOfMonth()->toDateString());
         $hasta = $request->input('hasta', now()->toDateString());

@@ -37,6 +37,33 @@ class HandleInertiaRequests extends Middleware
             $ecommerceSettings['ecommerce_hero_slides'] = json_decode($ecommerceSettings['ecommerce_hero_slides'], true);
         }
 
+        // ─── Splash Screen config (landing page only) ─────────────────────────
+        $splashConfig = \App\Models\SiteSetting::get('splash', []);
+
+        // ─── Site Settings (global for header, footer, whatsapp) ──────────────
+        $siteSettings = [];
+        try {
+            $siteSettings = \Illuminate\Support\Facades\Cache::remember('site_settings_payload', 3600, function () {
+                return [
+                    'header' => \App\Models\SiteSetting::get('header', []),
+                    'footer' => \App\Models\SiteSetting::get('footer', []),
+                    'whatsapp' => \App\Models\SiteSetting::get('whatsapp', []),
+                    'promo_popup_landing' => \App\Models\SiteSetting::get('promo_popup_landing', []),
+                    'promo_popup_ecommerce' => \App\Models\SiteSetting::get('promo_popup_ecommerce', []),
+                    'splash' => \App\Models\SiteSetting::get('splash', []),
+                ];
+            });
+        } catch (\Exception $e) {
+            $siteSettings = [
+                'header' => [],
+                'footer' => [],
+                'whatsapp' => [],
+                'promo_popup_landing' => [],
+                'promo_popup_ecommerce' => [],
+                'splash' => [],
+            ];
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -47,6 +74,9 @@ class HandleInertiaRequests extends Middleware
                 ]) : null,
             ],
             'settings' => $ecommerceSettings,
+            'splash' => $splashConfig,
+            'site_settings' => $siteSettings,
+            'siteSettings' => $siteSettings,
             // ─── Flash messages para el sistema de Toasts global ───────────────
             'flash' => [
                 'success' => $request->session()->get('success'),

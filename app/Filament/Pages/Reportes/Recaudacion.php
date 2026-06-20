@@ -40,6 +40,13 @@ class Recaudacion extends Page implements HasForms
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
+    }
+
     protected function getFooterWidgets(): array
     {
         return [
@@ -72,6 +79,9 @@ class Recaudacion extends Page implements HasForms
 
     public function filter(): void
     {
+        $this->filtros = $this->filterForm->getState();
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
     }
 
     public function getData(): array

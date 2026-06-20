@@ -220,13 +220,48 @@ class PersonaController extends Controller
     {
         Gate::authorize('gestionar usuarios');
         
+        // 1. Regla de Seguridad Raíz: No se puede eliminar al Fundador (SuperAdmin)
         if ($persona->user && $persona->user->id === 1) {
             return redirect()->back()->with('error', 'No se puede eliminar la persona asociada al Fundador.');
         }
 
+        // Cargar agregados para auditoría
+        $persona->loadCount(['creditos', 'kardex', 'comprasConvenio']);
+        $saldoAportes = $persona->cuentaAportacion->saldo_actual ?? 0;
+        $tieneDeuda = ($persona->deuda_total ?? 0) > 0;
+
+        // 2. Regla de Seguridad Financiera: Bloqueo por Saldos Activos o Deudas Pendientes (Riesgo Crítico de Fraude)
+        if ($saldoAportes > 0 || $tieneDeuda) {
+            return redirect()->back()->with('error', 'Acción Denegada: El afiliado posee saldos activos en el sistema (Aportes: ' . number_format($saldoAportes, 2) . ' Bs, Deuda: ' . number_format($persona->deuda_total ?? 0, 2) . ' Bs). Liquide estas cuentas antes de proceder.');
+        }
+
+        // 3. Regla de Trazabilidad Contable: Si posee historial transaccional, inactivamos en estado PASIVO
+        if ($persona->kardex_count > 0 || $persona->creditos_count > 0 || $persona->compras_convenio_count > 0) {
+            
+            // Registramos la acción en las observaciones como pista de auditoría inalterable
+            $auditLog = "\n[AUDITORÍA " . now()->format('Y-m-d H:i:s') . "] Intento de borrado físico bloqueado. Registro inactivado administrativamente en estado 'PASIVO' para preservar la trazabilidad transaccional e histórica.";
+            
+            $persona->update([
+                'situacion_laboral' => 'PASIVO',
+                'observaciones' => trim(($persona->observaciones ?? '') . $auditLog)
+            ]);
+
+            // Revocamos su cuenta de acceso al sistema para seguridad inmediata
+            if ($persona->user) {
+                $persona->user->delete();
+            }
+
+            return redirect()->back()->with('warning', 'Trazabilidad Conservada: El afiliado cuenta con historial transaccional previo. Se ha bloqueado la eliminación física y se ha cambiado su estado a PASIVO de forma segura, revocando sus accesos.');
+        }
+
+        // 4. Eliminación Física Limpia: Solo si es un registro sin ningún tipo de historial (creado por error o prospecto vacío)
+        if ($persona->user) {
+            $persona->user->delete();
+        }
+
         $persona->delete();
 
-        return redirect()->back()->with('success', 'Registro de persona eliminado.');
+        return redirect()->back()->with('success', 'Registro vacío eliminado de forma definitiva (Cero trazabilidad encontrada).');
     }
 
     public function kardexPdf(Persona $persona)

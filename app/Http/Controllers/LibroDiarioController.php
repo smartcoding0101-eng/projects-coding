@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class LibroDiarioController extends Controller
@@ -78,6 +79,8 @@ class LibroDiarioController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('ver reportes');
+
         $query = $this->buildQuery($request);
         $totales = $this->calcularTotales($query);
 
@@ -120,6 +123,8 @@ class LibroDiarioController extends Controller
 
     public function exportPdf(Request $request)
     {
+        Gate::authorize('ver reportes');
+
         $query = $this->buildQuery($request);
         $totales = $this->calcularTotales($query);
 
@@ -143,6 +148,8 @@ class LibroDiarioController extends Controller
 
     public function exportExcel(Request $request)
     {
+        Gate::authorize('ver reportes');
+
         $query = $this->buildQuery($request);
 
         $asientos = $query->orderBy('fecha', 'desc')

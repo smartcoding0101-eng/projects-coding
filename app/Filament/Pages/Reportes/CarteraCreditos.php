@@ -45,6 +45,13 @@ class CarteraCreditos extends Page implements HasForms
         ];
     }
 
+    public function getWidgetData(): array
+    {
+        return [
+            'filtros' => $this->filtros ?? [],
+        ];
+    }
+
     protected function getFooterWidgets(): array
     {
         return [
@@ -94,7 +101,9 @@ class CarteraCreditos extends Page implements HasForms
 
     public function filter(): void
     {
-        // Trigger re-render
+        $this->filtros = $this->filterForm->getState();
+        unset($this->cachedHeaderWidgetsSchemaComponents);
+        unset($this->cachedFooterWidgetsSchemaComponents);
     }
 
     public function getData(): array

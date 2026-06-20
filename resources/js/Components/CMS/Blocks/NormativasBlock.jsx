@@ -1,5 +1,6 @@
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
+import DocumentAction from '../../DocumentAction';
 
 const NormativeDocuments = ({ data }) => {
     const { title, subtitle, items = [] } = data;
@@ -10,28 +11,27 @@ const NormativeDocuments = ({ data }) => {
                 bg: 'bg-blue-50',
                 text: 'text-blue-600',
                 shadow: 'hover:shadow-[0_20px_50px_rgba(59,130,246,0.1)]',
-                btn: 'text-blue-600 bg-blue-50/50'
+                btn: 'text-blue-600 bg-blue-50/50',
             },
             emerald: {
                 bg: 'bg-emerald-50',
                 text: 'text-emerald-600',
                 shadow: 'hover:shadow-[0_20px_50px_rgba(16,185,129,0.1)]',
-                btn: 'text-emerald-600 bg-emerald-50/50'
+                btn: 'text-emerald-600 bg-emerald-50/50',
             },
             primary: {
                 bg: 'bg-primary/10',
                 text: 'text-primary',
                 shadow: 'hover:shadow-[0_20px_50px_rgba(85,107,47,0.15)]',
-                btn: 'text-primary bg-primary/10'
+                btn: 'text-primary bg-primary/10',
             },
             gold: {
                 bg: 'bg-secondary/15',
                 text: 'text-secondary-dark',
                 shadow: 'hover:shadow-[0_20px_50px_rgba(255,215,0,0.15)]',
-                btn: 'text-secondary-dark bg-secondary/10'
-            }
+                btn: 'text-secondary-dark bg-secondary/10',
+            },
         };
-
         return colors[color] || colors.primary;
     };
 
@@ -52,8 +52,8 @@ const NormativeDocuments = ({ data }) => {
                         const styles = getColorClasses(item.color);
 
                         return (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 className={`bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-[0_20px_40px_rgba(0,0,0,0.03)] transition-all duration-300 group ${styles.shadow}`}
                             >
                                 <div className="flex items-center gap-5 mb-6">
@@ -72,14 +72,13 @@ const NormativeDocuments = ({ data }) => {
                                 <p className="text-gray-500 mb-8 font-sans leading-relaxed text-base min-h-[80px]">
                                     {item.description}
                                 </p>
-                                <a 
-                                    href={`/storage/${item.file}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className={`inline-flex items-center gap-2 font-bold hover:underline group-hover:gap-4 transition-all w-max px-6 py-2.5 rounded-full ${styles.btn}`}
-                                >
-                                    {item.button_text || 'Descargar PDF'} &darr;
-                                </a>
+
+                                {/* Usa el componente compartido: detecta 403/404 y muestra alerta ámbar */}
+                                <DocumentAction
+                                    filePath={item.file}
+                                    label={item.button_text || 'Descargar PDF'}
+                                    btnClass={styles.btn}
+                                />
                             </div>
                         );
                     })}

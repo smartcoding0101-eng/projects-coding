@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle, Eye, LayoutGrid, Briefcase, PlusCircle, ShieldCheck, X, History, TrendingUp, TrendingDown, Receipt, Printer, FileSpreadsheet, Search, Save, Landmark } from 'lucide-react';
+import { Users, PencilLine, UserMinus, UserPlus, AlertCircle, XCircle, Eye, LayoutGrid, Briefcase, PlusCircle, ShieldCheck, X, History, TrendingUp, TrendingDown, Receipt, Printer, FileSpreadsheet, Search, Save, Landmark, ShieldAlert, AlertTriangle, Trash2 } from 'lucide-react';
 import { Tab } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,6 +14,8 @@ export default function Index({ personas, auth, roles, stats, filters }) {
     const [editingPersona, setEditingPersona] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showUserModal, setShowUserModal] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     // Sistema de Permisos Granulares
     const userPermissions = auth.user.permissions || [];
@@ -82,8 +84,18 @@ export default function Index({ personas, auth, roles, stats, filters }) {
     };
 
     const deletePersona = (persona) => {
-        if (confirm(`¿ELIMINACIÓN DEFINITIVA de ${persona.nombres} ${persona.apellidos}? Esta acción es irreversible.`)) {
-            router.delete(route('admin.personas.destroy', persona.id));
+        setDeleteTarget(persona);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (deleteTarget) {
+            router.delete(route('admin.personas.destroy', deleteTarget.id), {
+                onSuccess: () => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteTarget(null);
+                },
+            });
         }
     };
 
@@ -759,6 +771,145 @@ export default function Index({ personas, auth, roles, stats, filters }) {
                                     </button>
                                 </div>
                             </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* SEGURIDAD: DIÁLOGO DE ELIMINACIÓN PREMIUM */}
+            <AnimatePresence>
+                {isDeleteModalOpen && deleteTarget && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }} 
+                            animate={{ scale: 1, opacity: 1 }} 
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card-fap p-6 rounded-lg border border-brand shadow-2xl max-w-md w-full text-center relative overflow-hidden"
+                        >
+                            {(deleteTarget.id === 1 || deleteTarget.user?.id === 1 || (deleteTarget.nombres + ' ' + deleteTarget.apellidos).toLowerCase().includes('root')) ? (
+                                // CASO 1: BLOQUEO FUNDADOR / COMANDANTE ROOT
+                                <div className="space-y-5">
+                                    <div className="flex justify-center">
+                                        <div className="p-3 bg-red-100 rounded-full text-red-600 animate-pulse">
+                                            <ShieldAlert className="w-12 h-12" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-red-700 uppercase tracking-widest">
+                                            Acción Bloqueada por Seguridad
+                                        </h4>
+                                        <p className="text-[10px] text-brand-muted mt-1 uppercase tracking-wider font-bold">
+                                            Fundador / SuperAdministrador
+                                        </p>
+                                    </div>
+                                    <div className="bg-red-50/80 border border-red-200 rounded-lg p-4 text-[11px] text-red-900 leading-relaxed font-semibold text-left">
+                                        El perfil de <strong className="text-red-700 font-extrabold">{deleteTarget.nombres} {deleteTarget.apellidos}</strong> (Comandante Root) representa la identidad del Fundador y SuperAdministrador principal del ERP. 
+                                        <br/><br/>
+                                        Su eliminación o alteración estructural está bloqueada de forma permanente para salvaguardar la integridad operativa y de seguridad del sistema FAPCLAS R.L.
+                                    </div>
+                                    <div className="pt-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setIsDeleteModalOpen(false);
+                                                setDeleteTarget(null);
+                                            }} 
+                                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-md transition-all active:scale-98"
+                                        >
+                                            Entendido / Volver al Panel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : ((parseFloat(deleteTarget.cuenta_aportacion?.saldo_actual || 0) > 0 || parseFloat(deleteTarget.deuda_total || 0) > 0) ? (
+                                // CASO 2: BLOQUEO POR SALDOS ACTIVOS (RIESGO FINANCIERO CRÍTICO)
+                                <div className="space-y-5">
+                                    <div className="flex justify-center">
+                                        <div className="p-3 bg-red-100 rounded-full text-red-600">
+                                            <ShieldAlert className="w-12 h-12" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-red-700 uppercase tracking-widest">
+                                            Eliminación Denegada
+                                        </h4>
+                                        <p className="text-[10px] text-red-500 mt-1 uppercase tracking-wider font-bold">
+                                            Cuentas y Saldos Activos
+                                        </p>
+                                    </div>
+                                    <div className="bg-red-50/80 border border-red-200 rounded-lg p-4 text-[11px] text-red-955 leading-relaxed text-left font-medium space-y-2">
+                                        <p>No se puede eliminar al afiliado <strong className="text-red-700 font-extrabold">{deleteTarget.nombres} {deleteTarget.apellidos}</strong> debido a que posee cuentas activas con saldo en el sistema:</p>
+                                        <ul className="list-disc pl-4 space-y-1 text-[10px] font-bold text-red-900">
+                                            <li>Saldo de Aportes: {new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2 }).format(deleteTarget.cuenta_aportacion?.saldo_actual || 0)} Bs.</li>
+                                            <li>Deuda Vigente: {new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2 }).format(deleteTarget.deuda_total || 0)} Bs.</li>
+                                        </ul>
+                                        <p className="text-[10px] text-red-700 font-semibold pt-1">Por normativas de auditoría financiera, liquide o concilie todas sus cuentas y créditos antes de intentar la baja.</p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setIsDeleteModalOpen(false);
+                                                setDeleteTarget(null);
+                                            }} 
+                                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-md transition-all active:scale-98"
+                                        >
+                                            Entendido / Volver al Panel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                // CASO 3: CONFIRMACIÓN PREMIUM / AUDITORÍA PASIVO
+                                <div className="space-y-5">
+                                    <div className="flex justify-center">
+                                        <div className="p-3 bg-amber-100 rounded-full text-amber-600">
+                                            <AlertTriangle className="w-12 h-12" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-gray-800 uppercase tracking-widest">
+                                            ¿Proceder con la Baja?
+                                        </h4>
+                                        <p className="text-[10px] text-brand-muted mt-1 uppercase tracking-wider font-bold">
+                                            Control de Trazabilidad e Historial
+                                        </p>
+                                    </div>
+                                    <p className="text-xs text-gray-600 font-medium px-2 leading-relaxed">
+                                        ¿Estás seguro de que deseas dar de baja a <strong>{deleteTarget.nombres} {deleteTarget.apellidos}</strong> del Directorio Maestro de Afiliados?
+                                    </p>
+                                    <div className="bg-amber-50/80 border border-amber-200 rounded p-4 text-[10px] text-amber-955 font-medium flex items-start gap-2 text-left space-y-1 flex-col">
+                                        <div className="flex items-center gap-1.5 font-bold text-amber-800">
+                                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                            <span>Política de Auditoría ERP FAPCLAS R.L.</span>
+                                        </div>
+                                        <p className="leading-relaxed">
+                                            Si el sistema detecta que el afiliado posee <strong>historial transaccional previo</strong> (Kardex, compras o créditos antiguos), su registro físico <strong>no será eliminado</strong> para preservar los balances contables de la cooperativa. En su lugar, el sistema cambiará automáticamente su estado a <strong className="text-amber-800">PASIVO</strong> y desactivará sus accesos. 
+                                        </p>
+                                        <p className="leading-relaxed text-[9px] text-amber-700 font-semibold">
+                                            Si es un registro totalmente vacío (creado por error), se eliminará definitivamente.
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setIsDeleteModalOpen(false);
+                                                setDeleteTarget(null);
+                                            }} 
+                                            className="flex-1 py-2.5 text-[10px] font-bold text-brand-muted uppercase tracking-widest border border-brand rounded hover:bg-brand/10 transition-all"
+                                        >
+                                            Abortar
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onClick={confirmDelete}
+                                            className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                            Confirmar Acción
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </motion.div>
                     </div>
                 )}

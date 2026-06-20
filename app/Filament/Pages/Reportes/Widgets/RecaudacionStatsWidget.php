@@ -10,13 +10,12 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class RecaudacionStatsWidget extends StatsOverviewWidget
 {
-    public ?string $desde = null;
-    public ?string $hasta = null;
+    public ?array $filtros = [];
 
     protected function getStats(): array
     {
-        $desde = $this->desde ?? now()->startOfMonth()->toDateString();
-        $hasta = $this->hasta ?? now()->toDateString();
+        $desde = $this->filtros['desde'] ?? now()->startOfMonth()->toDateString();
+        $hasta = $this->filtros['hasta'] ?? now()->toDateString();
 
         $pagos = PlanPago::where('estado', PlanPago::ESTADO_PAGADA)
             ->whereBetween('fecha_pago_real', [$desde, Carbon::parse($hasta)->endOfDay()])
