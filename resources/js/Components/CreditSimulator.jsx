@@ -47,10 +47,10 @@ export default function CreditSimulator() {
                     <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary-dark">Simulador Financiero Pro</span>
                 </div>
-                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2 md:min-h-[40px]">
+                <h2 className="section-title font-display text-3xl font-black tracking-tight leading-none mb-2 md:min-h-[40px]" style={{ color: 'var(--st-color, #0f172a)' }}>
                     <TextType text="Tu Solución Inmediata" as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                 </h2>
-                <p className="text-black text-xs font-bold">Calcula con total transparencia institucional.</p>
+                <p className="text-black text-xs font-bold" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>Calcula con total transparencia institucional.</p>
             </div>
 
             <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)]">

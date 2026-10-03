@@ -54,6 +54,7 @@ export default function Login({ status, canResetPassword }) {
                             direction="top"
                             align="left"
                             className="font-display font-bold text-3xl text-white mb-6 leading-tight drop-shadow-lg"
+                            style={{ color: '#ffffff' }}
                         />
                         <p className="text-gray-200 text-sm leading-relaxed font-sans pr-6 opacity-90 border-l-2 border-primary/40 pl-4">
                             Gestiona tus aportaciones y créditos al instante. Entorno avalado y regulado por la institución para garantizar la máxima transparencia en tus finanzas.

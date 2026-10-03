@@ -16,6 +16,10 @@ class Producto extends Model
         'imagen_path', 'observacion', 'activo'
     ];
 
+    protected $casts = [
+        'imagen_path' => 'array',
+    ];
+
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);

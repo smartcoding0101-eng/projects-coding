@@ -25,6 +25,8 @@ class PageController extends Controller
                     'promo_popup_landing' => SiteSetting::get('promo_popup_landing', []),
                     'promo_popup_ecommerce' => SiteSetting::get('promo_popup_ecommerce', []),
                     'splash' => SiteSetting::get('splash', []),
+                    'landing_styles' => SiteSetting::get('landing_styles', []),
+                    'ecommerce_styles' => SiteSetting::get('ecommerce_styles', []),
                 ];
             });
         } catch (\Exception $e) {
@@ -35,6 +37,8 @@ class PageController extends Controller
                 'promo_popup_landing' => [],
                 'promo_popup_ecommerce' => [],
                 'splash' => [],
+                'landing_styles' => [],
+                'ecommerce_styles' => [],
             ];
         }
     }

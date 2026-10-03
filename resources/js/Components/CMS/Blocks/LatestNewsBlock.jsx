@@ -34,10 +34,11 @@ const LatestNewsBlock = ({ data }) => {
                         <BlurText
                             as="h2"
                             text={title}
-                            className="font-display text-4xl md:text-5xl font-black text-on-surface tracking-tight"
+                            className="section-title font-display text-4xl md:text-5xl font-black tracking-tight"
+                            style={{ color: 'var(--st-color, #0f172a)' }}
                         />
                         {subtitle && (
-                            <p className="mt-3 text-gray-500 text-lg max-w-xl">{subtitle}</p>
+                            <p className="mt-3 text-gray-500 text-lg max-w-xl" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>{subtitle}</p>
                         )}
                     </div>
                     <Link

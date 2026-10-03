@@ -34,11 +34,14 @@ const ProductCardsBlock = ({ data }) => {
                     <span className="bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-4 py-1.5 rounded-full inline-block mb-4">
                         Todo en un solo lugar
                     </span>
-                    <h2 className="font-display text-4xl md:text-6xl font-black text-on-surface tracking-tight">
+                    <h2
+                        className="section-title font-display text-4xl md:text-6xl font-black tracking-tight"
+                        style={{ color: 'var(--st-color, #0f172a)' }}
+                    >
                         {title}
                     </h2>
                     {subtitle && (
-                        <p className="mt-4 text-gray-500 max-w-xl mx-auto text-lg">{subtitle}</p>
+                        <p className="mt-4 text-gray-500 max-w-xl mx-auto text-lg" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>{subtitle}</p>
                     )}
                 </div>
 
@@ -74,7 +77,7 @@ function ServiceCard({ item, getImageUrl }) {
             {...wrapperProps}
             className={`group relative rounded-[2rem] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 block ${
                 isDestacado
-                    ? 'bg-primary text-white shadow-xl shadow-primary/20'
+                    ? 'bg-primary text-white shadow-xl shadow-primary/20 is-destacado'
                     : 'bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(85,107,47,0.12)]'
             }`}
         >
@@ -105,9 +108,10 @@ function ServiceCard({ item, getImageUrl }) {
                     <DynamicIcon name={item.icon} className="w-7 h-7" />
                 </div>
 
-                <h4 className={`font-display text-xl font-black mt-4 mb-2 tracking-tight ${
-                    isDestacado ? 'text-white' : 'text-on-surface'
-                }`}>
+                <h4
+                    className={`card-title font-display text-xl font-black mt-4 mb-2 tracking-tight ${isDestacado ? 'text-white card-title-white' : 'text-on-surface'}`}
+                    style={isDestacado ? { color: '#ffffff' } : { color: 'var(--card-color-title, #0f172a)' }}
+                >
                     {item.name}
                 </h4>
                 <p className={`text-sm leading-relaxed mb-4 ${

@@ -35,6 +35,42 @@ class SiteSettingResource extends Resource
 
     protected static ?int $navigationSort = 0;
 
+    protected static function getFontOptions(): array
+    {
+        return [
+            'Inter'            => 'Inter (Web Standard)',
+            'Roboto'           => 'Roboto',
+            'Montserrat'       => 'Montserrat',
+            'Outfit'           => 'Outfit',
+            'Poppins'          => 'Poppins',
+            'Lato'             => 'Lato',
+            'Nunito'           => 'Nunito',
+            'Open Sans'        => 'Open Sans',
+            'Raleway'          => 'Raleway',
+            'Playfair Display' => 'Playfair Display (Serif)',
+            'Merriweather'     => 'Merriweather (Serif)',
+            'Georgia'          => 'Georgia (Serif)',
+            'Arial'            => 'Arial',
+            'Calibri'          => 'Calibri',
+            'Times New Roman'  => 'Times New Roman',
+        ];
+    }
+
+    protected static function getFontWeightOptions(): array
+    {
+        return [
+            '100' => '100 – Thin',
+            '200' => '200 – Extra Light',
+            '300' => '300 – Light',
+            '400' => '400 – Regular',
+            '500' => '500 – Medium',
+            '600' => '600 – SemiBold',
+            '700' => '700 – Bold',
+            '800' => '800 – Extra Bold',
+            '900' => '900 – Black',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -87,6 +123,10 @@ class SiteSettingResource extends Resource
                     ])->columns(2),
                     Section::make('SEO y Metadatos (Buscadores / Google)')
                         ->schema([
+                            TextInput::make('meta_title')
+                                ->label('Título SEO (<title>)')
+                                ->helperText('Define el título principal que se mostrará en los resultados de Google (snippet). Ej: Cooperativa de ahorro y creditos Fapclas R.L.')
+                                ->maxLength(255),
                             Textarea::make('meta_description')
                                 ->label('Meta Descripción')
                                 ->helperText('Escribe una descripción concisa de tu cooperativa (recomendado: 150-160 caracteres). Esto es lo que aparecerá en los resultados de búsqueda de Google.')
@@ -419,6 +459,438 @@ class SiteSettingResource extends Resource
                 ])
                 ->visible(fn($record) => $record?->key === 'splash')
                 ->collapsed(),
+
+            // --- LANDING STYLES: Tabs por Bloque ---
+            Tabs::make('Estilos Landing Page')
+                ->tabs([
+                    Tab::make('🌐 Global')
+                        ->schema([
+                            Section::make('Fuentes Globales (Base de Todo el Sitio)')
+                                ->description('Define la tipografía base que heredan todos los bloques. Cada bloque puede sobreescribir esto de manera independiente.')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('global.font_family_title')
+                                            ->label('Fuente Global de Títulos')
+                                            ->options(static::getFontOptions())
+                                            ->default('Inter')->required(),
+                                        \Filament\Forms\Components\Select::make('global.font_family_body')
+                                            ->label('Fuente Global de Cuerpo')
+                                            ->options(static::getFontOptions())
+                                            ->default('Inter')->required(),
+                                        \Filament\Forms\Components\Select::make('global.font_weight_title')
+                                            ->label('Peso de Títulos')
+                                            ->options(static::getFontWeightOptions())
+                                            ->default('700'),
+                                        \Filament\Forms\Components\Select::make('global.font_weight_body')
+                                            ->label('Peso del Cuerpo')
+                                            ->options(static::getFontWeightOptions())
+                                            ->default('400'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_primary')
+                                            ->label('Color Primario (Marca)')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_secondary')
+                                            ->label('Color Secundario')->default('#eab308'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_text')
+                                            ->label('Color de Texto Base')
+                                            ->helperText('Color para párrafos y descripciones.')
+                                            ->default('#1e293b'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_title')
+                                            ->label('Color de Títulos Base (Por Defecto)')
+                                            ->helperText('Usar color oscuro (ej. #0f172a o #1e293b) si el fondo de la página es blanco/claro.')
+                                            ->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_bg_page')
+                                            ->label('Fondo de Página')->default('#f8faf6'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        TextInput::make('global.font_size_h1')->label('Tamaño H1')->default('2.75rem'),
+                                        TextInput::make('global.font_size_h2')->label('Tamaño H2')->default('2rem'),
+                                        TextInput::make('global.font_size_h3')->label('Tamaño H3')->default('1.5rem'),
+                                        TextInput::make('global.font_size_body')->label('Tamaño Cuerpo')->default('1rem'),
+                                        TextInput::make('global.font_size_small')->label('Tamaño Pequeño')->default('0.875rem'),
+                                        TextInput::make('global.line_height')->label('Interlineado')->default('1.65'),
+                                        TextInput::make('global.letter_spacing')->label('Espaciado entre letras')->default('0em'),
+                                    ])->columns(4),
+                                ]),
+                        ]),
+
+                    Tab::make('🦸 Hero / Banner')
+                        ->schema([
+                            Section::make('Estilos del Bloque Hero (Sección de Bienvenida)')
+                                ->description('Tipografía y colores específicos del hero que aparece al inicio de la landing.')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('hero.font_family_title')
+                                            ->label('Fuente del Título Hero')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('hero.font_weight_title')
+                                            ->label('Peso del Título Hero')->options(static::getFontWeightOptions())->default('900'),
+                                        \Filament\Forms\Components\Select::make('hero.text_transform_title')
+                                            ->label('Transformación del Título')
+                                            ->options(['none'=>'Normal','uppercase'=>'MAYÚSCULAS','lowercase'=>'minúsculas','capitalize'=>'Primera Mayúscula'])
+                                            ->default('none'),
+                                        \Filament\Forms\Components\Select::make('hero.text_align')
+                                            ->label('Alineación de Texto')
+                                            ->options(['left'=>'Izquierda','center'=>'Centro','right'=>'Derecha'])
+                                            ->default('left'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        TextInput::make('hero.font_size_title')->label('Tamaño del Título')->default('3.5rem'),
+                                        TextInput::make('hero.font_size_subtitle')->label('Tamaño del Subtítulo')->default('1.5rem'),
+                                        TextInput::make('hero.font_size_description')->label('Tamaño de Descripción')->default('1.125rem'),
+                                        TextInput::make('hero.letter_spacing_title')->label('Espaciado Título')->default('-0.02em'),
+                                        TextInput::make('hero.line_height_title')->label('Interlineado Título')->default('1.1'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('hero.color_title')->label('Color del Título')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.color_subtitle')->label('Color del Subtítulo')->default('#eab308'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.color_description')->label('Color Descripción')->default('#cbd5e1'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.color_overlay')->label('Color Overlay (fondo)')->default('#0f172a'),
+                                        TextInput::make('hero.overlay_opacity')->label('Opacidad Overlay (0-1)')->default('0.55'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('hero.btn_primary_bg')->label('Botón Primario BG')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.btn_primary_text')->label('Botón Primario Texto')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.btn_secondary_bg')->label('Botón Secundario BG')->default('transparent'),
+                                        \Filament\Forms\Components\ColorPicker::make('hero.btn_secondary_text')->label('Botón Secundario Texto')->default('#ffffff'),
+                                        TextInput::make('hero.btn_border_radius')->label('Radio de Borde Botón')->default('0.5rem'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('🧭 Navegación')
+                        ->schema([
+                            Section::make('Estilos del Header / Menú de Navegación')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('nav.font_family')->label('Fuente del Menú')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('nav.font_weight')->label('Peso del Texto Menú')->options(static::getFontWeightOptions())->default('500'),
+                                        TextInput::make('nav.font_size')->label('Tamaño de Texto Menú')->default('0.9rem'),
+                                        \Filament\Forms\Components\Select::make('nav.text_transform')->label('Transformación')
+                                            ->options(['none'=>'Normal','uppercase'=>'MAYÚSCULAS','capitalize'=>'Primera Mayúscula'])->default('none'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('nav.color_bg')->label('Fondo del Header')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('nav.color_bg_scroll')->label('Fondo al hacer Scroll')->default('#1e293b'),
+                                        \Filament\Forms\Components\ColorPicker::make('nav.color_link')->label('Color de Links')->default('#f1f5f9'),
+                                        \Filament\Forms\Components\ColorPicker::make('nav.color_link_hover')->label('Color Hover Links')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('nav.color_logo')->label('Color del Logo')->default('#ffffff'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('nav.topbar_bg')->label('Fondo Barra Superior')->default('#166534'),
+                                        \Filament\Forms\Components\ColorPicker::make('nav.topbar_text')->label('Texto Barra Superior')->default('#dcfce7'),
+                                        TextInput::make('nav.topbar_font_size')->label('Tamaño Texto Topbar')->default('0.8rem'),
+                                    ])->columns(3),
+                                ]),
+                        ]),
+
+                    Tab::make('📋 Secciones / Títulos')
+                        ->schema([
+                            Section::make('Estilos de Títulos de Sección')
+                                ->description('Controla los títulos (H2) que encabezan cada bloque de la landing: "Nuestros Servicios", "Testimonios", etc.')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('section_title.font_family')->label('Fuente del Título')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('section_title.font_weight')->label('Peso')->options(static::getFontWeightOptions())->default('800'),
+                                        TextInput::make('section_title.font_size')->label('Tamaño H2 Sección')->default('2rem'),
+                                        \Filament\Forms\Components\Select::make('section_title.text_transform')->label('Transformación')
+                                            ->options(['none'=>'Normal','uppercase'=>'MAYÚSCULAS','capitalize'=>'Capitalizado'])->default('none'),
+                                        \Filament\Forms\Components\Select::make('section_title.text_align')->label('Alineación')
+                                            ->options(['left'=>'Izquierda','center'=>'Centro','right'=>'Derecha'])->default('center'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('section_title.color_title')
+                                            ->label('Color Título H2 (Secciones)')
+                                            ->helperText('Aplica a títulos de secciones sobre fondo claro ("Nuestros Servicios", "Noticias", etc.).')
+                                            ->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('section_title.color_subtitle')->label('Color Subtítulo')->default('#64748b'),
+                                        \Filament\Forms\Components\ColorPicker::make('section_title.color_badge')->label('Color Badge/Etiqueta')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('section_title.color_badge_text')->label('Color Texto Badge')->default('#ffffff'),
+                                        TextInput::make('section_title.margin_bottom')->label('Separación inferior')->default('3rem'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        TextInput::make('section_title.font_size_subtitle')->label('Tamaño Subtítulo')->default('1.1rem'),
+                                        TextInput::make('section_title.letter_spacing')->label('Espaciado letras')->default('0em'),
+                                        TextInput::make('section_title.line_height')->label('Interlineado')->default('1.3'),
+                                    ])->columns(3),
+                                ]),
+                        ]),
+
+                    Tab::make('🃏 Tarjetas')
+                        ->schema([
+                            Section::make('Estilos de Tarjetas de Servicios / Beneficios')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('cards.font_family_title')->label('Fuente del Título de Tarjeta')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('cards.font_weight_title')->label('Peso del Título')->options(static::getFontWeightOptions())->default('700'),
+                                        TextInput::make('cards.font_size_title')->label('Tamaño del Título')->default('1.25rem'),
+                                        TextInput::make('cards.font_size_body')->label('Tamaño de Descripción')->default('0.95rem'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_bg')->label('Fondo de Tarjeta')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_bg_hover')->label('Fondo en Hover')->default('#f0fdf4'),
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_title')
+                                            ->label('Color de Título')
+                                            ->helperText('Color para tarjetas con fondo blanco/claro (las destacadas oscuras usan blanco automáticamente).')
+                                            ->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_body')->label('Color de Descripción')->default('#64748b'),
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_icon')->label('Color de Ícono')->default('#22c55e'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_border')->label('Color del Borde')->default('#e2e8f0'),
+                                        \Filament\Forms\Components\ColorPicker::make('cards.color_border_hover')->label('Color Borde en Hover')->default('#22c55e'),
+                                        TextInput::make('cards.border_radius')->label('Radio de Borde')->default('1rem'),
+                                        TextInput::make('cards.padding')->label('Padding Interno')->default('1.5rem'),
+                                    ])->columns(4),
+                                ]),
+                        ]),
+
+                    Tab::make('📊 Estadísticas')
+                        ->schema([
+                            Section::make('Estilos de la Sección de Cifradores / Estadísticas')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('stats.font_family_value')->label('Fuente del Número/Valor')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('stats.font_weight_value')->label('Peso del Número')->options(static::getFontWeightOptions())->default('800'),
+                                        TextInput::make('stats.font_size_value')->label('Tamaño del Número')->default('3rem'),
+                                        TextInput::make('stats.font_size_label')->label('Tamaño de Etiqueta')->default('0.9rem'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('stats.color_bg')->label('Fondo de la Sección')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('stats.color_value')->label('Color del Número')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('stats.color_label')->label('Color de la Etiqueta')->default('#94a3b8'),
+                                        \Filament\Forms\Components\ColorPicker::make('stats.color_icon')->label('Color del Ícono')->default('#eab308'),
+                                    ])->columns(4),
+                                ]),
+                        ]),
+
+                    Tab::make('💬 Testimonios')
+                        ->schema([
+                            Section::make('Estilos del Bloque de Testimonios')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('testimonials.font_family_quote')->label('Fuente del Testimonio')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('testimonials.font_style_quote')->label('Estilo del Texto')
+                                            ->options(['normal'=>'Normal','italic'=>'Cursiva'])->default('italic'),
+                                        TextInput::make('testimonials.font_size_quote')->label('Tamaño del Texto')->default('1.1rem'),
+                                        TextInput::make('testimonials.font_size_author')->label('Tamaño del Autor')->default('0.95rem'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('testimonials.color_bg_card')->label('Fondo de Tarjeta')->default('rgba(255,255,255,0.05)'),
+                                        \Filament\Forms\Components\ColorPicker::make('testimonials.color_quote_text')->label('Color Texto Testimonio')->default('#e2e8f0'),
+                                        \Filament\Forms\Components\ColorPicker::make('testimonials.color_author')->label('Color Autor')->default('#94a3b8'),
+                                        \Filament\Forms\Components\ColorPicker::make('testimonials.color_stars')->label('Color Estrellas')->default('#eab308'),
+                                        \Filament\Forms\Components\ColorPicker::make('testimonials.color_section_bg')->label('Fondo Sección')->default('#0f172a'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('🦶 Footer')
+                        ->schema([
+                            Section::make('Estilos del Pie de Página')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('footer.font_family')->label('Fuente del Footer')->options(static::getFontOptions())->default('Inter'),
+                                        TextInput::make('footer.font_size_body')->label('Tamaño de Texto')->default('0.9rem'),
+                                        TextInput::make('footer.font_size_title')->label('Tamaño de Títulos')->default('1rem'),
+                                        \Filament\Forms\Components\Select::make('footer.font_weight_title')->label('Peso Títulos')->options(static::getFontWeightOptions())->default('600'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_bg')->label('Fondo del Footer')->default('#020617'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_text')->label('Color de Texto')->default('#94a3b8'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_title')->label('Color de Títulos')->default('#f1f5f9'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_link')->label('Color de Links')->default('#94a3b8'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_link_hover')->label('Color Links Hover')->default('#22c55e'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_border')->label('Color Línea Divisoria')->default('#1e293b'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_copyright_bg')->label('Fondo Copyright')->default('#000000'),
+                                        \Filament\Forms\Components\ColorPicker::make('footer.color_copyright_text')->label('Texto Copyright')->default('#475569'),
+                                    ])->columns(3),
+                                ]),
+                        ]),
+
+                    Tab::make('🔘 Botones Globales')
+                        ->schema([
+                            Section::make('Estilos de Botones (Globales Landing)')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('buttons.font_family')->label('Fuente de Botones')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('buttons.font_weight')->label('Peso de Texto')->options(static::getFontWeightOptions())->default('600'),
+                                        TextInput::make('buttons.font_size')->label('Tamaño de Texto')->default('0.95rem'),
+                                        \Filament\Forms\Components\Select::make('buttons.text_transform')->label('Transformación')
+                                            ->options(['none'=>'Normal','uppercase'=>'MAYÚSCULAS','capitalize'=>'Capitalizado'])->default('none'),
+                                    ])->columns(4),
+                                    Section::make('Botón Primario')->schema([
+                                        Group::make([
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.primary_bg')->label('Fondo')->default('#22c55e'),
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.primary_text')->label('Texto')->default('#ffffff'),
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.primary_bg_hover')->label('Fondo Hover')->default('#16a34a'),
+                                            TextInput::make('buttons.primary_border_radius')->label('Radio de Borde')->default('0.5rem'),
+                                            TextInput::make('buttons.primary_padding')->label('Padding (py px)')->default('0.75rem 1.75rem'),
+                                        ])->columns(5),
+                                    ])->collapsible()->collapsed(),
+                                    Section::make('Botón Secundario / Outline')->schema([
+                                        Group::make([
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.secondary_bg')->label('Fondo')->default('transparent'),
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.secondary_text')->label('Texto')->default('#22c55e'),
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.secondary_border')->label('Borde')->default('#22c55e'),
+                                            \Filament\Forms\Components\ColorPicker::make('buttons.secondary_bg_hover')->label('Fondo Hover')->default('#f0fdf4'),
+                                            TextInput::make('buttons.secondary_border_radius')->label('Radio de Borde')->default('0.5rem'),
+                                        ])->columns(5),
+                                    ])->collapsible()->collapsed(),
+                                ]),
+                        ]),
+                ])
+                ->visible(fn($record) => $record?->key === 'landing_styles')
+                ->contained(false),
+
+            // --- ECOMMERCE STYLES: Tabs por Bloque ---
+            Tabs::make('Estilos Ecommerce')
+                ->tabs([
+                    Tab::make('🌐 Global')
+                        ->schema([
+                            Section::make('Fuentes y Colores Base del E-commerce')
+                                ->description('Configuración base que afecta todo el E-commerce. Cada bloque puede sobreescribir de forma independiente.')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('global.font_family_title')->label('Fuente de Títulos')->options(static::getFontOptions())->default('Inter')->required(),
+                                        \Filament\Forms\Components\Select::make('global.font_family_body')->label('Fuente de Cuerpo')->options(static::getFontOptions())->default('Inter')->required(),
+                                        \Filament\Forms\Components\Select::make('global.font_weight_title')->label('Peso Títulos')->options(static::getFontWeightOptions())->default('700'),
+                                        \Filament\Forms\Components\Select::make('global.font_weight_body')->label('Peso Cuerpo')->options(static::getFontWeightOptions())->default('400'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_primary')->label('Color Primario')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_accent')->label('Color de Acento')->default('#eab308'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_text')->label('Color Texto Base')->default('#1e293b'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_title')->label('Color Títulos Base')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_bg_page')->label('Fondo de Página')->default('#f8faf6'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        TextInput::make('global.font_size_h1')->label('Tamaño H1')->default('2.25rem'),
+                                        TextInput::make('global.font_size_h2')->label('Tamaño H2')->default('1.75rem'),
+                                        TextInput::make('global.font_size_h3')->label('Tamaño H3')->default('1.25rem'),
+                                        TextInput::make('global.font_size_body')->label('Tamaño Cuerpo')->default('0.95rem'),
+                                        TextInput::make('global.line_height')->label('Interlineado')->default('1.5'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('🏷️ Hero Tienda')
+                        ->schema([
+                            Section::make('Estilos del Hero/Banner de la Tienda')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('store_hero.font_family_title')->label('Fuente Título')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('store_hero.font_weight_title')->label('Peso del Título')->options(static::getFontWeightOptions())->default('800'),
+                                        TextInput::make('store_hero.font_size_title')->label('Tamaño Título')->default('2.75rem'),
+                                        \Filament\Forms\Components\Select::make('store_hero.text_align')->label('Alineación')
+                                            ->options(['left'=>'Izquierda','center'=>'Centro','right'=>'Derecha'])->default('center'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_bg')->label('Fondo Hero')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_title')->label('Color Título')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_subtitle')->label('Color Subtítulo')->default('#eab308'),
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_badge_bg')->label('Fondo Badge')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_badge_text')->label('Texto Badge')->default('#ffffff'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('📦 Tarjetas de Producto')
+                        ->schema([
+                            Section::make('Estilos de Tarjetas en el Catálogo')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('product_card.font_family_name')->label('Fuente Nombre Producto')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('product_card.font_weight_name')->label('Peso Nombre')->options(static::getFontWeightOptions())->default('600'),
+                                        TextInput::make('product_card.font_size_name')->label('Tamaño Nombre')->default('1rem'),
+                                        TextInput::make('product_card.font_size_price')->label('Tamaño Precio')->default('1.25rem'),
+                                        TextInput::make('product_card.font_size_description')->label('Tamaño Descripción')->default('0.875rem'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_bg')->label('Fondo Tarjeta')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_bg_hover')->label('Fondo Hover')->default('#f0fdf4'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_name')->label('Color Nombre')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_price')->label('Color Precio')->default('#16a34a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_price_credit')->label('Color Precio Crédito')->default('#eab308'),
+                                    ])->columns(5),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_description')->label('Color Descripción')->default('#64748b'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_border')->label('Color Borde')->default('#e2e8f0'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_badge_stock')->label('Color Badge Stock')->default('#dcfce7'),
+                                        TextInput::make('product_card.border_radius')->label('Radio de Borde')->default('1rem'),
+                                    ])->columns(4),
+                                    Section::make('Botón Agregar al Carrito')->schema([
+                                        Group::make([
+                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg')->label('Fondo Botón')->default('#22c55e'),
+                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_text')->label('Texto Botón')->default('#ffffff'),
+                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg_hover')->label('Fondo Hover')->default('#16a34a'),
+                                            TextInput::make('product_card.btn_font_size')->label('Tamaño Texto Botón')->default('0.875rem'),
+                                            \Filament\Forms\Components\Select::make('product_card.btn_font_weight')->label('Peso Texto')->options(static::getFontWeightOptions())->default('600'),
+                                        ])->columns(5),
+                                    ])->collapsible()->collapsed(),
+                                ]),
+                        ]),
+
+                    Tab::make('🔍 Detalle de Producto')
+                        ->schema([
+                            Section::make('Estilos de la Página de Detalle del Producto')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('product_detail.font_family_title')->label('Fuente del Título')->options(static::getFontOptions())->default('Inter'),
+                                        \Filament\Forms\Components\Select::make('product_detail.font_weight_title')->label('Peso del Título')->options(static::getFontWeightOptions())->default('700'),
+                                        TextInput::make('product_detail.font_size_title')->label('Tamaño Título')->default('1.875rem'),
+                                        TextInput::make('product_detail.font_size_price')->label('Tamaño del Precio')->default('1.75rem'),
+                                    ])->columns(4),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_title')->label('Color del Título')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_price')->label('Color del Precio')->default('#16a34a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_price_credit')->label('Color Precio Crédito')->default('#d97706'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_bg')->label('Fondo Página')->default('#f8faf6'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_description')->label('Color Descripción')->default('#475569'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('🏷️ Categorías / Filtros')
+                        ->schema([
+                            Section::make('Estilos de la Barra de Categorías y Filtros')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('filters.font_family')->label('Fuente')->options(static::getFontOptions())->default('Inter'),
+                                        TextInput::make('filters.font_size')->label('Tamaño de Texto')->default('0.875rem'),
+                                        \Filament\Forms\Components\Select::make('filters.font_weight_active')->label('Peso Activo')->options(static::getFontWeightOptions())->default('700'),
+                                    ])->columns(3),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_bg_active')->label('Fondo Categoría Activa')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_text_active')->label('Texto Activa')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_bg_inactive')->label('Fondo Inactiva')->default('#f1f5f9'),
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_text_inactive')->label('Texto Inactiva')->default('#64748b'),
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_border')->label('Color Borde')->default('#e2e8f0'),
+                                    ])->columns(5),
+                                ]),
+                        ]),
+
+                    Tab::make('🛒 Checkout / Carrito')
+                        ->schema([
+                            Section::make('Estilos del Carrito y Página de Checkout')
+                                ->schema([
+                                    Group::make([
+                                        \Filament\Forms\Components\Select::make('checkout.font_family')->label('Fuente')->options(static::getFontOptions())->default('Inter'),
+                                        TextInput::make('checkout.font_size_title')->label('Tamaño Título Sección')->default('1.25rem'),
+                                        TextInput::make('checkout.font_size_item')->label('Tamaño Item Carrito')->default('0.95rem'),
+                                    ])->columns(3),
+                                    Group::make([
+                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_bg_panel')->label('Fondo Panel')->default('#ffffff'),
+                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_total')->label('Color Total')->default('#0f172a'),
+                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_btn_checkout_bg')->label('Botón Pagar BG')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_btn_checkout_text')->label('Botón Pagar Texto')->default('#ffffff'),
+                                    ])->columns(4),
+                                ]),
+                        ]),
+                ])
+                ->visible(fn($record) => $record?->key === 'ecommerce_styles')
+                ->contained(false),
         ];
     }
 
@@ -436,6 +908,8 @@ class SiteSettingResource extends Resource
                         'promo_popup_landing' => 'danger',
                         'promo_popup_ecommerce' => 'primary',
                         'splash' => 'gray',
+                        'landing_styles' => 'warning',
+                        'ecommerce_styles' => 'success',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
@@ -445,6 +919,8 @@ class SiteSettingResource extends Resource
                         'promo_popup_landing' => '🚀 Popup - Landing Page',
                         'promo_popup_ecommerce' => '🛍️ Popup - Ecommerce',
                         'splash' => '✨ Splash Screen',
+                        'landing_styles' => '🎨 Estilos - Landing Page',
+                        'ecommerce_styles' => '🛍️ Estilos - E-commerce',
                         default => $state,
                     }),
                 TextColumn::make('updated_at')

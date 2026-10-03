@@ -62,7 +62,8 @@ export default function GallerySection({ cmsGallery = null }) {
                     <BlurText
                         as="h3"
                         text={subtitle}
-                        className="font-display text-5xl font-black text-on-surface tracking-tight"
+                        className="section-title font-display text-5xl font-black tracking-tight"
+                        style={{ color: 'var(--st-color, #0f172a)' }}
                     />
                     <div className="w-24 h-1 bg-secondary mx-auto mt-6 rounded-full"></div>
                     <p className="mt-8 text-zinc-500 max-w-2xl mx-auto text-xl leading-relaxed">{description}</p>

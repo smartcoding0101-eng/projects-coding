@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use App\Filament\Components\WordEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -385,7 +386,7 @@ class PageForm
                             ->schema([
                                 TextInput::make('title')->required()->label('Título Principal'),
                                 TextInput::make('subtitle')->label('Subtítulo'),
-                                Textarea::make('content')->required()->label('Contenido / Párrafos')->rows(6),
+                                WordEditor::make('content')->required()->label('Contenido / Párrafos'),
                                 FileUpload::make('image')
                                     ->image()
                                     ->disk('public')

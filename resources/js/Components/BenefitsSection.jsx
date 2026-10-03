@@ -45,10 +45,10 @@ export default function BenefitsSection({ cmsData = null }) {
                     <span className="w-2 h-2 bg-secondary rounded-full"></span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-secondary-dark">Ecosistema Institucional</span>
                 </div>
-                <h2 className="font-display text-3xl font-black text-on-surface tracking-tight leading-none mb-2 md:min-h-[40px]">
+                <h2 className="section-title font-display text-3xl font-black tracking-tight leading-none mb-2 md:min-h-[40px]" style={{ color: 'var(--st-color, #0f172a)' }}>
                     <TextType text="Beneficios Exclusivos" as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                 </h2>
-                <p className="text-gray-400 text-xs font-medium">Más allá del crédito, somos tu respaldo integral.</p>
+                <p className="text-gray-400 text-xs font-medium" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>Más allá del crédito, somos tu respaldo integral.</p>
             </div>
 
             <div className="bg-white rounded-[2.5rem] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col gap-6 overflow-hidden transition-all hover:shadow-xl group">

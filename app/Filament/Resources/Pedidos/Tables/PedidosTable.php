@@ -64,6 +64,20 @@ class PedidosTable
                         default => $state,
                     })
                     ->label('Entrega'),
+                \Filament\Tables\Columns\ImageColumn::make('comprobante_qr_path')
+                    ->label('Comprobante')
+                    ->disk('public')
+                    ->size(40)
+                    ->url(fn($record) => $record->comprobante_qr_path ? asset('storage/' . $record->comprobante_qr_path) : null, true)
+                    ->openUrlInNewTab()
+                    ->placeholder('Sin subir'),
+                TextColumn::make('gps_latitud')
+                    ->label('Ubicación GPS')
+                    ->formatStateUsing(fn($record) => $record->gps_latitud ? '📍 Ver Mapa' : '-')
+                    ->color(fn($record) => $record->gps_latitud ? 'primary' : 'gray')
+                    ->url(fn($record) => $record->gps_latitud && $record->gps_longitud ? "https://www.google.com/maps/search/?api=1&query={$record->gps_latitud},{$record->gps_longitud}" : null, true)
+                    ->openUrlInNewTab()
+                    ->placeholder('-'),
                 TextColumn::make('total')
                     ->numeric()
                     ->prefix('Bs ')
@@ -277,6 +291,7 @@ class PedidosTable
                             ->send();
                     }),
             ])
+            ->poll('10s')
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

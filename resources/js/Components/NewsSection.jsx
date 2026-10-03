@@ -30,8 +30,8 @@ export default function NewsSection({ news = [] }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center mb-16">
                     <span className="uppercase font-bold text-xs tracking-widest text-primary block mb-3">Actualidad y Transparencia</span>
-                    <h2 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-6">Últimas Noticias</h2>
-                    <p className="text-xl text-gray-500 max-w-2xl mx-auto">Mantente informado sobre los avances institucionales, nuevos convenios y campañas financieras de tu cooperativa.</p>
+                    <h2 className="section-title font-display text-4xl md:text-5xl font-bold mb-6" style={{ color: 'var(--st-color, #0f172a)' }}>Últimas Noticias</h2>
+                    <p className="text-xl text-gray-500 max-w-2xl mx-auto" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>Mantente informado sobre los avances institucionales, nuevos convenios y campañas financieras de tu cooperativa.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

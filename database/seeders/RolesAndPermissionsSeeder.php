@@ -54,7 +54,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ], [
             'name' => 'Comandante Root',
             'persona_id' => $personaAdmin->id,
-            'password' => bcrypt('Admin123!'),
+            'password' => bcrypt('Sistemas12345'),
         ]);
 
         $admin->assignRole($roleAdmin);

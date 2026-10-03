@@ -11,7 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Components\WordEditor;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -99,7 +99,7 @@ class NoticiaResource extends Resource
                             ->label('Resumen (Extracto)')
                             ->rows(3),
 
-                        RichEditor::make('contenido')
+                        WordEditor::make('contenido')
                             ->label('Contenido Completo')
                             ->columnSpanFull(),
                     ]),

@@ -87,10 +87,29 @@ class EcommerceCheckoutService
                     throw new \Exception("Los envíos a domicilio no están habilitados actualmente.");
                 }
 
-                $costoEnvio = (float) Configuracion::getValor('ecommerce_envio_domicilio_precio', '15.00');
                 $direccionEnvio = $logistica['direccion_envio'] ?? null;
                 if (!$direccionEnvio) {
                     throw new \Exception("La dirección de envío es obligatoria para envíos a domicilio.");
+                }
+
+                $latCliente = $logistica['gps_latitud'] ?? null;
+                $lngCliente = $logistica['gps_longitud'] ?? null;
+
+                if ($latCliente && $lngCliente) {
+                    $latTienda = (float) Configuracion::getValor('ecommerce_tienda_latitud', '-17.7828');
+                    $lngTienda = (float) Configuracion::getValor('ecommerce_tienda_longitud', '-63.1812');
+                    $tarifaBase = (float) Configuracion::getValor('ecommerce_envio_tarifa_base', '10.00');
+                    $radioBase = (float) Configuracion::getValor('ecommerce_envio_radio_base', '3.0');
+                    $precioKmExtra = (float) Configuracion::getValor('ecommerce_envio_precio_km_adicional', '2.00');
+
+                    $distancia = $this->calcularDistanciaKm($latTienda, $lngTienda, $latCliente, $lngCliente);
+                    if ($distancia <= $radioBase) {
+                        $costoEnvio = $tarifaBase;
+                    } else {
+                        $costoEnvio = $tarifaBase + ($distancia - $radioBase) * $precioKmExtra;
+                    }
+                } else {
+                    $costoEnvio = (float) Configuracion::getValor('ecommerce_envio_tarifa_base', '10.00');
                 }
             }
 
@@ -147,6 +166,9 @@ class EcommerceCheckoutService
                 $personaId = $persona->id;
             }
 
+            $gpsLat = $logistica['gps_latitud'] ?? null;
+            $gpsLng = $logistica['gps_longitud'] ?? null;
+
             $pedido = Pedido::create([
                 'numero_orden' => 'TMP-' . uniqid(), // Placeholder temporal
                 'user_id' => $user ? $user->id : null,
@@ -162,7 +184,9 @@ class EcommerceCheckoutService
                 'estado_entrega' => 'por_recoger',
                 'total' => $total,
                 'comprobante_qr_path' => $comprobantePath,
-                'observaciones' => $datosCliente['observaciones'] ?? null
+                'observaciones' => $datosCliente['observaciones'] ?? null,
+                'gps_latitud' => $gpsLat,
+                'gps_longitud' => $gpsLng
             ]);
 
             // Actualizar inmediatamente para asegurar el número incremental exacto de la BD sin colisiones
@@ -187,5 +211,18 @@ class EcommerceCheckoutService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    private function calcularDistanciaKm($lat1, $lon1, $lat2, $lon2)
+    {
+        if (!$lat1 || !$lon1 || !$lat2 || !$lon2) return 0;
+        $earthRadius = 6371; // km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat/2) * sin($dLat/2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon/2) * sin($dLon/2);
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        return $earthRadius * $c;
     }
 }

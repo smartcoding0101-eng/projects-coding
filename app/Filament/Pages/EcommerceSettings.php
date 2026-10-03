@@ -53,9 +53,22 @@ class EcommerceSettings extends Page implements HasForms
         }
 
         // Cast booleans robustly (handling 'si', 'no', 'true', 'false', '1', '0')
-        foreach (['ecommerce_mostrar_precios', 'ecommerce_mostrar_precio_venta', 'ecommerce_mostrar_precio_credito', 'ecommerce_mostrar_stock', 'ecommerce_habilitar_invitados', 'ecommerce_modo_mantenimiento', 'ecommerce_pago_exige_caja'] as $boolKey) {
+        foreach (['ecommerce_mostrar_precios', 'ecommerce_mostrar_precio_venta', 'ecommerce_mostrar_precio_credito', 'ecommerce_mostrar_stock', 'ecommerce_habilitar_invitados', 'ecommerce_modo_mantenimiento', 'ecommerce_pago_exige_caja', 'ecommerce_exigir_comprobante', 'ecommerce_envio_domicilio_activo'] as $boolKey) {
             $val = $settings[$boolKey] ?? null;
             $settings[$boolKey] = ($val === 'si' || $val === 'true' || $val === '1' || $val === 1 || $val === true);
+        }
+
+        // Normalize paths for FileUploads to ensure Filament gets relative paths
+        foreach (['ecommerce_qr_pago', 'ecommerce_admin_sonido_pedido_custom'] as $fileKey) {
+            if (isset($settings[$fileKey]) && $settings[$fileKey]) {
+                $val = $settings[$fileKey];
+                $val = str_replace(Storage::disk('public')->url(''), '', $val);
+                $val = ltrim(parse_url($val, PHP_URL_PATH) ?? $val, '/');
+                if (str_starts_with($val, 'storage/')) {
+                    $val = substr($val, 8);
+                }
+                $settings[$fileKey] = $val;
+            }
         }
 
         $this->form->fill($settings);
@@ -146,7 +159,52 @@ class EcommerceSettings extends Page implements HasForms
                                             ->imagePreviewHeight('200')
                                             ->helperText('📐 Dimensiones: 800 × 800 px · Relación 1:1 (Cuadrado) · Formatos: PNG (recomendado para QR), JPG')
                                             ->hint('Código QR de pago que verán los clientes en el checkout. PNG garantiza mejor lectura del escáner.'),
+                                        Toggle::make('ecommerce_exigir_comprobante')
+                                            ->label('Exigir Comprobante de Pago QR')
+                                            ->helperText('Si se activa, el cliente deberá subir obligatoriamente una imagen del comprobante de transferencia para proceder.'),
                                     ]),
+
+                                Section::make('Envíos a Domicilio')
+                                    ->description('Configura la disponibilidad, coordenadas de la tienda y tarifas basadas en distancia.')
+                                    ->schema([
+                                        Toggle::make('ecommerce_envio_domicilio_activo')
+                                            ->label('Habilitar Envíos a Domicilio')
+                                            ->helperText('Permite a los clientes elegir envío a domicilio en el Checkout.')
+                                            ->columnSpanFull(),
+                                            
+                                        TextInput::make('ecommerce_tienda_latitud')
+                                            ->label('Latitud de la Tienda')
+                                            ->placeholder('-17.7828')
+                                            ->default('-17.7828')
+                                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_envio_domicilio_activo') === true),
+                                            
+                                        TextInput::make('ecommerce_tienda_longitud')
+                                            ->label('Longitud de la Tienda')
+                                            ->placeholder('-63.1812')
+                                            ->default('-63.1812')
+                                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_envio_domicilio_activo') === true),
+
+                                        TextInput::make('ecommerce_envio_tarifa_base')
+                                            ->label('Tarifa Base de Envío')
+                                            ->numeric()
+                                            ->prefix('Bs')
+                                            ->default('10.00')
+                                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_envio_domicilio_activo') === true),
+
+                                        TextInput::make('ecommerce_envio_radio_base')
+                                            ->label('Radio de Cobertura Base (Km)')
+                                            ->numeric()
+                                            ->suffix('km')
+                                            ->default('3.0')
+                                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_envio_domicilio_activo') === true),
+
+                                        TextInput::make('ecommerce_envio_precio_km_adicional')
+                                            ->label('Precio por Kilómetro Adicional')
+                                            ->numeric()
+                                            ->prefix('Bs')
+                                            ->default('2.00')
+                                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_envio_domicilio_activo') === true),
+                                    ])->columns(2),
 
                                 Section::make('Visibilidad de Precios y Stock')
                                     ->schema([
@@ -217,6 +275,28 @@ class EcommerceSettings extends Page implements HasForms
                                             ->helperText('Si se activa, los pagos deben pasar por el módulo de Caja.'),
                                     ])->columns(1),
 
+                                Section::make('Notificaciones y Alertas (Admin)')
+                                    ->schema([
+                                        \Filament\Forms\Components\Select::make('ecommerce_admin_sonido_pedido_tipo')
+                                            ->label('Sonido de Nuevo Pedido')
+                                            ->options([
+                                                'campana' => 'Campana de Recepción',
+                                                'caja_registradora' => 'Caja Registradora',
+                                                'notificacion_suave' => 'Notificación Suave',
+                                                'personalizado' => 'Sonido Personalizado (Subir MP3)',
+                                            ])
+                                            ->live()
+                                            ->default('campana')
+                                            ->helperText('El sonido que se reproducirá en el panel de administración cuando llegue un nuevo pedido.'),
+                                        FileUpload::make('ecommerce_admin_sonido_pedido_custom')
+                                            ->label('Subir Archivo MP3')
+                                            ->disk('public')
+                                            ->directory('ecommerce/sounds')
+                                            ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/x-mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'application/ogg', 'audio/aac'])
+                                            ->maxSize(5120)
+                                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('ecommerce_admin_sonido_pedido_tipo') === 'personalizado'),
+                                    ]),
+
                                 Section::make('Texto Legal')
                                     ->schema([
                                         Textarea::make('ecommerce_nota_legal')
@@ -224,6 +304,20 @@ class EcommerceSettings extends Page implements HasForms
                                             ->rows(4)
                                             ->columnSpanFull(),
                                     ]),
+                                
+                                Section::make('Estilos de la Pasarela de Pago')
+                                    ->description('Configura los colores principales de los elementos de la pasarela de pago.')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('ecommerce_pasarela_texto_comprobante')
+                                            ->label('Color del Texto: Adjuntar Comprobante')
+                                            ->type('color')
+                                            ->default('#064e3b'),
+                                            
+                                        \Filament\Forms\Components\TextInput::make('ecommerce_pasarela_btn_confirmar')
+                                            ->label('Color del Botón: Confirmar Pago')
+                                            ->type('color')
+                                            ->default('#064e3b'),
+                                    ])->columns(2),
                             ]),
 
                         // ═══════════════════════════════════════
@@ -339,14 +433,48 @@ class EcommerceSettings extends Page implements HasForms
             );
         }
 
-        // ── QR image path ───────────────────────────────────────
-        if (isset($data['ecommerce_qr_pago']) && $data['ecommerce_qr_pago']) {
-            $qrValue = $data['ecommerce_qr_pago'];
-            // FileUpload returns a path relative to disk; store full url
-            if (!str_starts_with($qrValue, '/') && !str_starts_with($qrValue, 'http')) {
-                $qrValue = Storage::disk('public')->url($qrValue);
+        // ── QR image path & cleanup ─────────────────────────────
+        $oldQrPath = Configuracion::where('key', 'ecommerce_qr_pago')->value('value');
+        if (isset($data['ecommerce_qr_pago'])) {
+            if ($data['ecommerce_qr_pago']) {
+                $qrValue = str_replace(Storage::disk('public')->url(''), '', $data['ecommerce_qr_pago']);
+                $qrValue = ltrim(parse_url($qrValue, PHP_URL_PATH) ?? $qrValue, '/');
+                if (str_starts_with($qrValue, 'storage/')) {
+                    $qrValue = substr($qrValue, 8);
+                }
+                $data['ecommerce_qr_pago'] = $qrValue;
+            } else {
+                $data['ecommerce_qr_pago'] = '';
             }
-            $data['ecommerce_qr_pago'] = $qrValue;
+
+            // If the QR has changed, delete the old file
+            if ($oldQrPath && $oldQrPath !== $data['ecommerce_qr_pago']) {
+                if (Storage::disk('public')->exists($oldQrPath)) {
+                    Storage::disk('public')->delete($oldQrPath);
+                }
+            }
+        }
+
+        // ── Custom sound path & cleanup ─────────────────────────
+        $oldSoundPath = Configuracion::where('key', 'ecommerce_admin_sonido_pedido_custom')->value('value');
+        if (isset($data['ecommerce_admin_sonido_pedido_custom'])) {
+            if ($data['ecommerce_admin_sonido_pedido_custom']) {
+                $soundValue = str_replace(Storage::disk('public')->url(''), '', $data['ecommerce_admin_sonido_pedido_custom']);
+                $soundValue = ltrim(parse_url($soundValue, PHP_URL_PATH) ?? $soundValue, '/');
+                if (str_starts_with($soundValue, 'storage/')) {
+                    $soundValue = substr($soundValue, 8);
+                }
+                $data['ecommerce_admin_sonido_pedido_custom'] = $soundValue;
+            } else {
+                $data['ecommerce_admin_sonido_pedido_custom'] = '';
+            }
+
+            // If the sound file has changed, delete the old file
+            if ($oldSoundPath && $oldSoundPath !== $data['ecommerce_admin_sonido_pedido_custom']) {
+                if (Storage::disk('public')->exists($oldSoundPath)) {
+                    Storage::disk('public')->delete($oldSoundPath);
+                }
+            }
         }
 
         // ── Persist each key ────────────────────────────────────

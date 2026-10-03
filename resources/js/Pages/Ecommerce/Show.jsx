@@ -1,18 +1,37 @@
 import React, { useState } from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ShoppingCart, ShieldCheck, Lock, EyeOff } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, ShieldCheck, Lock, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
 import { motion } from 'framer-motion';
 
 export default function Show({ producto, auth, settings, relacionados }) {
     const { addToCart, cartCount } = useCart();
     const [cantidad, setCantidad] = useState(1);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const isSocio = auth?.user?.roles?.includes('Socio');
 
     const mostrarPreciosPublico = settings?.ecommerce_mostrar_precios === 'si' || settings?.ecommerce_mostrar_precios === 'true' || settings?.ecommerce_mostrar_precios === true;
     const isAdmin = auth?.user?.roles?.includes('SuperAdmin') || auth?.user?.roles?.includes('Oficial Crédito') || auth?.user?.roles?.includes('Cajero');
     const puedeVerPrecios = mostrarPreciosPublico || auth?.user !== null;
+
+    const getImagesArray = (imgPath) => {
+        if (!imgPath) return [];
+        if (Array.isArray(imgPath)) return imgPath;
+        if (typeof imgPath === 'string') {
+            try {
+                const parsed = JSON.parse(imgPath);
+                if (Array.isArray(parsed)) return parsed;
+            } catch(e) {}
+            return [imgPath];
+        }
+        return [];
+    };
+
+    const formatImageUrl = (url) => {
+        if (!url || typeof url !== 'string') return '';
+        return url.startsWith('http') ? url : `/storage/${url}`;
+    };
 
     const getPrecioReal = () => {
         if (!puedeVerPrecios) return null;
@@ -39,17 +58,60 @@ export default function Show({ producto, auth, settings, relacionados }) {
                     <ArrowLeft className="w-4 h-4 mr-2" /> Volver al Catálogo
                 </Link>
 
-                <div className="bg-card-fap rounded-3xl shadow-sm border border-brand overflow-hidden">
+                <div className="bg-[var(--pd-bg)] rounded-3xl shadow-sm border border-[var(--pd-border)] overflow-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                         {/* Img Section */}
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ duration: 0.5 }}
-                            className="bg-brand/5 flex items-center justify-center p-12 relative overflow-hidden group"
+                            className="bg-brand/5 flex items-center justify-center p-8 md:p-12 relative group"
                         >
-                            {producto.imagen_path ? (
-                                <img src={producto.imagen_path?.startsWith('http') ? producto.imagen_path : `/storage/${producto.imagen_path}`} alt={producto.nombre} className="w-full max-w-md object-contain mix-blend-multiply transition-transform duration-100 group-hover:scale-110" />
+                            {getImagesArray(producto.imagen_path).length > 0 ? (
+                                <div className="flex flex-col items-center gap-4 w-full">
+                                    <div className="relative w-full flex justify-center items-center group/slider">
+                                        <img 
+                                            src={formatImageUrl(getImagesArray(producto.imagen_path)[currentImageIndex])} 
+                                            alt={producto.nombre} 
+                                            className="w-auto max-w-full h-auto max-h-[400px] md:max-h-[450px] object-contain transition-transform duration-300 group-hover/slider:scale-105" 
+                                        />
+                                        
+                                        {getImagesArray(producto.imagen_path).length > 1 && (
+                                            <>
+                                                <button 
+                                                    onClick={() => setCurrentImageIndex(prev => prev === 0 ? getImagesArray(producto.imagen_path).length - 1 : prev - 1)}
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur border border-brand/20 rounded-full flex items-center justify-center text-brand-main shadow-md opacity-0 group-hover/slider:opacity-100 hover:bg-[#F7BD16] hover:text-white transition-all z-10"
+                                                >
+                                                    <ChevronLeft className="w-6 h-6" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => setCurrentImageIndex(prev => prev === getImagesArray(producto.imagen_path).length - 1 ? 0 : prev + 1)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur border border-brand/20 rounded-full flex items-center justify-center text-brand-main shadow-md opacity-0 group-hover/slider:opacity-100 hover:bg-[#F7BD16] hover:text-white transition-all z-10"
+                                                >
+                                                    <ChevronRight className="w-6 h-6" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {getImagesArray(producto.imagen_path).length > 1 && (
+                                        <div className="flex gap-3 mt-6 overflow-x-auto pb-4 w-full justify-center px-4 snap-x">
+                                            {getImagesArray(producto.imagen_path).map((img, i) => (
+                                                <button 
+                                                    key={i} 
+                                                    onClick={() => setCurrentImageIndex(i)}
+                                                    className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all snap-center ${currentImageIndex === i ? 'border-[#F7BD16] shadow-md scale-110' : 'border-transparent hover:border-brand/40 opacity-60 hover:opacity-100'}`}
+                                                >
+                                                    <img 
+                                                        src={formatImageUrl(img)} 
+                                                        alt={`${producto.nombre} ${i+1}`} 
+                                                        className="w-full h-full object-cover bg-white mix-blend-multiply" 
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="text-gray-300 w-full aspect-square flex items-center justify-center transition-transform duration-100 group-hover:scale-110">
                                     <ShoppingCart className="w-32 h-32 opacity-20" />
@@ -69,12 +131,12 @@ export default function Show({ producto, auth, settings, relacionados }) {
                             transition={{ duration: 0.5, delay: 0.1 }}
                             className="p-8 lg:p-12 flex flex-col justify-center"
                         >
-                            <div className="text-sm font-bold tracking-widest text-[#F7BD16] uppercase mb-2">
+                            <div className="text-sm font-bold tracking-widest text-[var(--color-primary)] uppercase mb-2">
                                 {producto.categoria?.nombre} • SKU: {producto.codigo_sku}
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-extrabold text-brand-main mb-4">{producto.nombre}</h1>
+                            <h1 style={{ fontFamily: 'var(--pd-font)', fontWeight: 'var(--pd-weight-title)' }} className="text-[length:var(--pd-size-title)] lg:text-[calc(var(--pd-size-title)*1.2)] text-[var(--pd-color-title)] mb-4">{producto.nombre}</h1>
 
-                            <div className="prose prose-sm text-gray-600 mb-8">
+                            <div className="prose prose-sm text-[var(--pd-color-desc)] mb-8">
                                 <p>{producto.descripcion || 'Sin descripción detallada.'}</p>
                             </div>
 
@@ -85,16 +147,16 @@ export default function Show({ producto, auth, settings, relacionados }) {
                                         {settings?.ecommerce_mostrar_precio_venta === 'si' && (
                                             <div className="flex flex-col">
                                                 {isSocio && settings?.ecommerce_mostrar_precio_credito === 'si' && producto.precio_general > precioReal ? (
-                                                    <span className="text-lg text-brand-muted line-through mb-1">Bs. {producto.precio_general}</span>
+                                                    <span className="text-lg text-[var(--pd-color-desc)] line-through mb-1">Bs. {producto.precio_general}</span>
                                                 ) : (
-                                                    <span className="text-4xl font-black text-brand-main">Bs. {producto.precio_general}</span>
+                                                    <span className="text-4xl font-black text-[var(--pd-color-price)]">Bs. {producto.precio_general}</span>
                                                 )}
                                             </div>
                                         )}
                                         {settings?.ecommerce_mostrar_precio_credito === 'si' && isSocio && (
                                             <div className="flex flex-col">
-                                                <span className="text-[11px] text-primary font-bold uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded w-max mb-1">Precio Miembro Solidario</span>
-                                                <span className="text-4xl font-black text-primary">Bs. {precioReal}</span>
+                                                <span className="text-[11px] text-[var(--pd-color-credit)] font-bold uppercase tracking-wider bg-[var(--pd-color-credit)]/10 px-2 py-0.5 rounded w-max mb-1">Precio Miembro Solidario</span>
+                                                <span className="text-4xl font-black text-[var(--pd-color-credit)]">Bs. {precioReal}</span>
                                             </div>
                                         )}
                                     </div>
@@ -131,13 +193,13 @@ export default function Show({ producto, auth, settings, relacionados }) {
                                     <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-brand">
                                         <button
                                             onClick={handleAddToCart}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-[#28361d] hover:bg-[#1a2312] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-md"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-[var(--pd-btn-bg)] hover:bg-[var(--pd-btn-hover)] text-[var(--pd-btn-text)] px-8 py-4 rounded-xl font-bold transition-all shadow-md"
                                         >
                                             <ShoppingCart className="w-5 h-5" />
                                             Añadir al Carrito
                                         </button>
                                         {cartCount > 0 && (
-                                            <Link href={route('beneficios.checkout')} className="flex-1 flex items-center justify-center gap-2 bg-[#F7BD16]/10 hover:bg-[#F7BD16]/20 text-[#28361d] border border-[#F7BD16]/30 px-8 py-4 rounded-xl font-bold transition-colors">
+                                            <Link href={route('beneficios.checkout')} className="flex-1 flex items-center justify-center gap-2 bg-[var(--pd-btn-bg)]/10 hover:bg-[var(--pd-btn-bg)]/20 text-[var(--pd-btn-bg)] border border-[var(--pd-btn-bg)]/30 px-8 py-4 rounded-xl font-bold transition-colors">
                                                 Ir a Pagar ({cartCount})
                                             </Link>
                                         )}
@@ -169,11 +231,11 @@ export default function Show({ producto, auth, settings, relacionados }) {
                             {relacionados.map(rel => {
                                 const relPrecio = isSocio && rel.precio_asociado > 0 ? rel.precio_asociado : rel.precio_general;
                                 return (
-                                    <div key={rel.id} className="bg-card-fap rounded-2xl shadow-sm border border-brand overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                    <div key={rel.id} className="bg-[var(--pc-bg)] rounded-[var(--pc-radius)] shadow-sm border border-[var(--pc-border)] overflow-hidden hover:bg-[var(--pc-bg-hover)] hover:-translate-y-1 transition-all duration-300 group">
                                         <Link href={route('beneficios.show', rel.id)}>
                                             <div className="aspect-[4/3] bg-brand/5 relative overflow-hidden p-6 flex items-center justify-center">
-                                                {rel.imagen_path ? (
-                                                    <img src={rel.imagen_path?.startsWith('http') ? rel.imagen_path : `/storage/${rel.imagen_path}`} alt={rel.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+                                                {getImagesArray(rel.imagen_path).length > 0 ? (
+                                                    <img src={formatImageUrl(getImagesArray(rel.imagen_path)[0])} alt={rel.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                                                 ) : (
                                                     <ShoppingCart className="w-12 h-12 text-gray-300" />
                                                 )}
@@ -184,13 +246,13 @@ export default function Show({ producto, auth, settings, relacionados }) {
                                                 )}
                                             </div>
                                         </Link>
-                                        <div className="p-4 border-t border-gray-50">
+                                        <div className="p-4 border-t border-[var(--pc-border)]">
                                             <Link href={route('beneficios.show', rel.id)}>
-                                                <h3 className="font-bold text-brand-main text-sm mb-1 line-clamp-1 hover:text-[#F7BD16] transition-colors">
+                                                <h3 style={{ fontFamily: 'var(--pc-font)', fontWeight: 'var(--pc-weight-name)', fontSize: 'var(--pc-size-name)' }} className="text-[var(--pc-color-name)] mb-1 line-clamp-1 hover:text-[var(--pc-color-price)] transition-colors">
                                                     {rel.nombre}
                                                 </h3>
                                             </Link>
-                                            <div className="text-sm font-black text-brand-main">Bs. {relPrecio}</div>
+                                            <div className="text-[length:var(--pc-size-price)] font-black text-[var(--pc-color-price)]">Bs. {relPrecio}</div>
                                         </div>
                                     </div>
                                 );

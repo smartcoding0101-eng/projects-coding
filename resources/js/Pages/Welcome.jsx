@@ -43,10 +43,10 @@ export default function Welcome({
     return (
         <>
             <Head>
-                <title>{page?.metadata?.seo_title || page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"}</title>
-                {page?.metadata?.seo_description && <meta name="description" content={page.metadata.seo_description} />}
+                <title>{page?.metadata?.seo_title || header?.meta_title || page?.title || "FAPCLAS R.L. - Tu Futuro Seguro"}</title>
+                <meta name="description" content={page?.metadata?.seo_description || header?.meta_description || "FAPCLAS R.L. - Cooperativa de Ahorro y Crédito Solidaria."} />
                 {page?.metadata?.og_image && <meta property="og:image" content={`/storage/${page.metadata.og_image}`} />}
-                {page?.metadata?.seo_title && <meta property="og:title" content={page.metadata.seo_title} />}
+                <meta property="og:title" content={page?.metadata?.seo_title || header?.meta_title || page?.title || "FAPCLAS R.L."} />
             </Head>
             <div className="min-h-screen font-sans antialiased text-on-surface bg-surface selection:bg-primary/20">
                 <SplashScreen />

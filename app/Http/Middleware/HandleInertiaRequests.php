@@ -51,6 +51,8 @@ class HandleInertiaRequests extends Middleware
                     'promo_popup_landing' => \App\Models\SiteSetting::get('promo_popup_landing', []),
                     'promo_popup_ecommerce' => \App\Models\SiteSetting::get('promo_popup_ecommerce', []),
                     'splash' => \App\Models\SiteSetting::get('splash', []),
+                    'landing_styles' => \App\Models\SiteSetting::get('landing_styles', []),
+                    'ecommerce_styles' => \App\Models\SiteSetting::get('ecommerce_styles', []),
                 ];
             });
         } catch (\Exception $e) {
@@ -61,6 +63,8 @@ class HandleInertiaRequests extends Middleware
                 'promo_popup_landing' => [],
                 'promo_popup_ecommerce' => [],
                 'splash' => [],
+                'landing_styles' => [],
+                'ecommerce_styles' => [],
             ];
         }
 

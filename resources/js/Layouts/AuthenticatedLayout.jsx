@@ -61,7 +61,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
     const adjustmentsItems = [
         { label: 'Personas', href: route('admin.personas.index'), active: route().current('admin.personas.*'), permissions: ['gestionar usuarios'], icon: <Users className="w-4 h-4 text-blue-500" /> },
-        { label: 'Portal CMS', href: '/admin', active: false, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> },
+        { label: 'Portal CMS', href: '/admin', active: false, external: true, permissions: ['configurar parametros globales'], icon: <LayoutTemplate className="w-4 h-4 text-rose-500" /> },
     ];
 
     const ayudaItems = [
@@ -139,10 +139,17 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 {chunkArray(adjustmentsItems.filter(canView), 3).map((chunk, cIdx) => (
                                                     <div key={cIdx} className="flex flex-col min-w-[200px] py-1 px-1">
                                                         {chunk.map((item) => (
-                                                            <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
-                                                                <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
-                                                                <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
-                                                            </Dropdown.Link>
+                                                            item.external ? (
+                                                                <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className="block w-full px-4 py-2 text-start text-sm font-semibold leading-5 text-brand-main hover:bg-primary/10 hover:text-primary transition duration-150 ease-in-out flex items-center gap-3 rounded-md">
+                                                                    <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                                    <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                                </a>
+                                                            ) : (
+                                                                <Dropdown.Link key={item.label} href={item.href} className="flex items-center gap-3 px-4 py-2 rounded-md transition-colors hover:bg-brand/10">
+                                                                    <div className="flex-shrink-0 bg-brand/5 p-1.5 rounded-lg border border-brand/10 shadow-sm">{item.icon}</div>
+                                                                    <span className="text-[13px] font-bold text-brand-main whitespace-nowrap">{item.label}</span>
+                                                                </Dropdown.Link>
+                                                            )
                                                         ))}
                                                     </div>
                                                 ))}
@@ -274,9 +281,21 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="pt-4 pb-1 space-y-1 border-t border-brand">
                                 <div className="px-4 font-bold text-xs text-brand-muted uppercase tracking-wider">Ajustes y Core</div>
                                 {adjustmentsItems.filter(canView).map((item, idx) => (
-                                    <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
-                                        {idx + 1}. {item.label}
-                                    </ResponsiveNavLink>
+                                    item.external ? (
+                                        <a
+                                            key={item.label}
+                                            href={item.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex w-full items-center border-l-4 border-transparent py-3 pe-4 ps-4 text-[11px] font-bold uppercase tracking-widest text-brand-muted hover:border-brand hover:bg-white/5 hover:text-brand-main transition-all duration-300 ease-in-out"
+                                        >
+                                            {idx + 1}. {item.label}
+                                        </a>
+                                    ) : (
+                                        <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
+                                            {idx + 1}. {item.label}
+                                        </ResponsiveNavLink>
+                                    )
                                 ))}
                             </div>
                         )}

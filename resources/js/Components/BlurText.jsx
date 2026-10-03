@@ -5,10 +5,12 @@ const BlurText = ({
     text = '',
     delay = 0.05,
     className = '',
+    style = {},
     as: Component = 'p',
     animateBy = 'words',
     direction = 'top',
-    align = 'center'
+    align = 'center',
+    ...props
 }) => {
     const elements = animateBy === 'words' ? text.split(' ') : text.split('');
     const ref = useRef(null);
@@ -35,11 +37,13 @@ const BlurText = ({
         <Component
             ref={ref}
             className={className}
+            {...props}
             style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 justifyContent: align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end',
-                gap: animateBy === 'words' ? '0.25em' : '0em'
+                gap: animateBy === 'words' ? '0.25em' : '0em',
+                ...style
             }}
         >
             {elements.map((word, index) => (

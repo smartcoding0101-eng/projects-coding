@@ -10,7 +10,14 @@ import { CartProvider } from './Contexts/CartContext';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => {
+        const lowerTitle = title.toLowerCase();
+        const lowerApp = appName.toLowerCase();
+        if (lowerTitle.includes(lowerApp) || lowerTitle.includes('fapclas')) {
+            return title;
+        }
+        return `${title} - ${appName}`;
+    },
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,

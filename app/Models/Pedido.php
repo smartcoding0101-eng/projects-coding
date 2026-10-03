@@ -15,7 +15,8 @@ class Pedido extends Model
         'numero_orden', 'user_id', 'persona_id', 'nombre_cliente', 'ci_cliente', 'telefono_contacto',
         'tipo_pago', 'estado_pago', 'estado_entrega', 'total',
         'comprobante_qr_path', 'observaciones',
-        'tipo_entrega', 'direccion_envio', 'costo_envio'
+        'tipo_entrega', 'direccion_envio', 'costo_envio',
+        'gps_latitud', 'gps_longitud'
     ];
 
     public function user()

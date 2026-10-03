@@ -115,3 +115,59 @@
     }
 }
 
+/* Shimmer Animation */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2.5s infinite linear;
+}
+
+/* Heartbeat Animation (every 3 seconds) */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    10% {
+        transform: scale(1.06);
+    }
+    20% {
+        transform: scale(1.02);
+    }
+    30% {
+        transform: scale(1.08);
+    }
+    45% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.animate-heartbeat {
+    animation: heartbeat 3s infinite ease-in-out;
+}
+
+/* Badge Pulse Animation */
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(247,189,22,0.4); }
+    50%       { transform: scale(1.1); box-shadow: 0 4px 16px rgba(247,189,22,0.7); }
+}
+
+.animate-pulse-badge {
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+/* Ocultar botones flotantes de WhatsApp y Subir al Inicio cuando el menú móvil está abierto */
+body.mobile-menu-open a[href*="wa.me"],
+body.mobile-menu-open a[href*="wa.link"],
+body.mobile-menu-open button[aria-label="Subir al inicio"] {
+    display: none !important;
+}

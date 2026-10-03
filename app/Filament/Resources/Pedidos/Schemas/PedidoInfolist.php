@@ -31,6 +31,13 @@ class PedidoInfolist
                 TextEntry::make('direccion_envio')
                     ->placeholder('-')
                     ->columnSpanFull(),
+                TextEntry::make('gps_latitud')
+                    ->label('Ubicación GPS')
+                    ->formatStateUsing(fn($record) => $record->gps_latitud && $record->gps_longitud ? "📍 Abrir en Google Maps ({$record->gps_latitud}, {$record->gps_longitud})" : 'Sin ubicación GPS')
+                    ->color(fn($record) => $record->gps_latitud ? 'primary' : 'gray')
+                    ->url(fn($record) => $record->gps_latitud && $record->gps_longitud ? "https://www.google.com/maps/search/?api=1&query={$record->gps_latitud},{$record->gps_longitud}" : null, true)
+                    ->openUrlInNewTab()
+                    ->placeholder('-'),
                 TextEntry::make('costo_envio')
                     ->numeric(),
                 TextEntry::make('estado_pago')
@@ -39,8 +46,11 @@ class PedidoInfolist
                     ->badge(),
                 TextEntry::make('total')
                     ->numeric(),
-                TextEntry::make('comprobante_qr_path')
-                    ->placeholder('-'),
+                \Filament\Infolists\Components\ImageEntry::make('comprobante_qr_path')
+                    ->label('Comprobante')
+                    ->placeholder('Sin subir')
+                    ->url(fn($record) => $record->comprobante_qr_path ? asset('storage/' . $record->comprobante_qr_path) : null, true)
+                    ->openUrlInNewTab(),
                 TextEntry::make('observaciones')
                     ->placeholder('-')
                     ->columnSpanFull(),

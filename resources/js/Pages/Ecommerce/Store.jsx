@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StoreLayout from '@/Layouts/StoreLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { ShoppingCart, Search, Filter, ShoppingBag, ArrowRight, EyeOff, Lock } from 'lucide-react';
+import { ShoppingCart, Search, Filter, ShoppingBag, ArrowRight, EyeOff, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import BlurText from '@/Components/BlurText';
@@ -13,6 +13,21 @@ export default function Store({ productos, categorias, filtros, auth, settings }
     const mostrarPreciosPublico = settings?.ecommerce_mostrar_precios === 'si' || settings?.ecommerce_mostrar_precios === 'true' || settings?.ecommerce_mostrar_precios === true;
     const isAdmin = auth?.user?.roles?.includes('SuperAdmin') || auth?.user?.roles?.includes('Oficial Crédito') || auth?.user?.roles?.includes('Cajero');
     const puedeVerPrecios = mostrarPreciosPublico || auth?.user !== null;
+
+    const getFirstImage = (imgPath) => {
+        if (!imgPath) return null;
+        let path = imgPath;
+        if (typeof imgPath === 'string') {
+            try {
+                const parsed = JSON.parse(imgPath);
+                if (Array.isArray(parsed)) path = parsed[0];
+            } catch(e) {}
+        } else if (Array.isArray(imgPath)) {
+            path = imgPath.length > 0 ? imgPath[0] : null;
+        }
+        if (!path || typeof path !== 'string') return null;
+        return path.startsWith('http') ? path : `/storage/${path}`;
+    };
 
     const getPrecioReal = (producto) => {
         if (!puedeVerPrecios) return null;
@@ -99,9 +114,17 @@ export default function Store({ productos, categorias, filtros, auth, settings }
         setCurrentSlide(index);
     };
 
-    // Helper para resolver la URL de imagen
-    const getImageSrc = (image) => {
-        if (!image) return '';
+    // Helper para resolver la URL de imagen con fallback premium local si no está definida en la base de datos
+    const getImageSrc = (image, index = 0) => {
+        if (!image) {
+            const fallbacks = [
+                "/images/servicios/tienda.png",     // Salud / Farmacia / Bienestar (Local)
+                "/images/servicios/bordados.png",   // Ropa / Colección (Local)
+                "/images/servicios/tienda.png",     // Bebidas / Promociones (Local)
+                "/images/servicios/libreria.png"    // Libros / Conocimiento (Local)
+            ];
+            return fallbacks[index % fallbacks.length];
+        }
         if (image.startsWith('http')) return image;
         if (image.startsWith('/storage/')) return image;
         return `/storage/${image}`;
@@ -112,7 +135,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
             <Head title="Beneficios y Tienda FAPCLAS" />
 
             {/* HERO: CARRUSEL CROSSFADE (sin gaps visuales) */}
-            <div className="relative h-[500px] lg:h-[650px] overflow-hidden bg-fapclas-950 border-b border-brand">
+            <div className="relative h-[500px] lg:h-[650px] overflow-hidden bg-[var(--sh-bg)] border-b border-[var(--fil-border)]">
                 {/* Enlaces de Navegación Superior Derecha */}
                 <div className="absolute top-6 right-6 lg:right-12 z-40 flex items-center gap-6 font-bold text-sm text-gray-300">
                     <Link href={route('welcome')} className="hover:text-white transition-colors">Inicio</Link>
@@ -131,7 +154,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                         }}
                     >
                         <img
-                            src={getImageSrc(slide.image)}
+                            src={getImageSrc(slide.image, index)}
                             alt={slide.title}
                             className="w-full h-full object-cover"
                         />
@@ -153,7 +176,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                 pointerEvents: index === currentSlide ? 'auto' : 'none'
                             }}
                         >
-                            <span className="inline-block py-1.5 px-4 rounded-full bg-primary/90 text-white text-[10px] font-black tracking-widest mb-5 border border-white/20 uppercase shadow-lg backdrop-blur-sm">
+                            <span className="inline-block py-1.5 px-4 rounded-full bg-[var(--sh-badge-bg)] text-[var(--sh-badge-text)] text-[10px] font-black tracking-widest mb-5 uppercase shadow-lg backdrop-blur-sm">
                                 {slide.subtitle || 'BENEFICIOS EXCLUSIVOS'}
                             </span>
                             <BlurText
@@ -163,14 +186,15 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                 animateBy="words"
                                 direction="top"
                                 align="left"
-                                className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-tight mb-5 drop-shadow-2xl"
+                                className="text-[length:var(--sh-size-title)] font-[var(--sh-weight)] text-[var(--sh-color-title)] tracking-tighter leading-tight mb-5 drop-shadow-2xl"
+                                style={{ fontFamily: 'var(--sh-font)', textAlign: 'var(--sh-align)' }}
                             />
-                            <p className="text-lg text-gray-100 mb-8 font-medium leading-relaxed drop-shadow-md max-w-md">
+                            <p className="text-lg text-[var(--sh-color-sub)] mb-8 font-medium leading-relaxed drop-shadow-md max-w-md" style={{ textAlign: 'var(--sh-align)' }}>
                                 {slide.description}
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 {slide.button_text && (
-                                    <a href={slide.button_link || '#catalogo'} className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-sm font-black rounded-2xl text-white bg-primary hover:bg-card-fap hover:text-primary transition-all shadow-2xl uppercase tracking-widest group">
+                                    <a href={slide.button_link || '#catalogo'} className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-[length:var(--pc-btn-font-size)] font-[var(--pc-btn-font-weight)] rounded-2xl text-[var(--pc-btn-text)] bg-[var(--pc-btn-bg)] hover:bg-[var(--pc-btn-hover)] transition-all shadow-2xl uppercase tracking-widest group">
                                         {slide.button_text}
                                         <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                                     </a>
@@ -196,7 +220,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                             <button
                                 key={i}
                                 onClick={() => goToSlide(i)}
-                                className={`rounded-full transition-all duration-500 ${i === currentSlide ? 'w-10 h-2.5 bg-primary shadow-lg shadow-primary/40' : 'w-2.5 h-2.5 bg-card-fap/40 hover:bg-card-fap/70'}`}
+                                className={`rounded-full transition-all duration-500 ${i === currentSlide ? 'w-10 h-2.5 bg-[var(--sh-badge-bg)] shadow-lg shadow-[var(--sh-badge-bg)]/40' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`}
                                 aria-label={`Ir a slide ${i + 1}`}
                             />
                         ))}
@@ -209,7 +233,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
 
                     {/* Filtros / Sidebar */}
                     <div className="w-full lg:w-72 flex-shrink-0">
-                        <div className="bg-card-fap rounded-2xl shadow-sm border border-brand p-6 sticky top-6 space-y-8">
+                        <div className="bg-[var(--pc-bg)] rounded-[var(--pc-radius)] shadow-sm border border-[var(--fil-border)] p-6 sticky top-6 space-y-8">
 
                             {/* Búsqueda */}
                             <div>
@@ -221,9 +245,9 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         onKeyPress={handleSearchKeyPress}
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border-brand bg-main text-brand-main focus:border-primary focus:ring-primary text-sm"
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border-[var(--fil-border)] bg-[var(--fil-inactive-bg)] text-[var(--fil-inactive-text)] focus:border-[var(--fil-active-bg)] focus:ring-[var(--fil-active-bg)] text-[length:var(--fil-size)]"
                                     />
-                                    <Search className="w-4 h-4 text-brand-muted absolute left-3.5 top-3" />
+                                    <Search className="w-4 h-4 text-[var(--fil-inactive-text)] absolute left-3.5 top-3" />
                                 </div>
                             </div>
 
@@ -236,20 +260,20 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                         placeholder="Min"
                                         value={minPrice}
                                         onChange={(e) => setMinPrice(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg border-brand bg-main text-brand-main focus:border-primary focus:ring-primary text-sm text-center"
+                                        className="w-full px-3 py-2 rounded-lg border-[var(--fil-border)] bg-[var(--fil-inactive-bg)] text-[var(--fil-inactive-text)] focus:border-[var(--fil-active-bg)] focus:ring-[var(--fil-active-bg)] text-[length:var(--fil-size)] text-center"
                                     />
-                                    <span className="text-brand-muted font-bold">-</span>
+                                    <span className="text-[var(--fil-inactive-text)] font-bold">-</span>
                                     <input
                                         type="number"
                                         placeholder="Max"
                                         value={maxPrice}
                                         onChange={(e) => setMaxPrice(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg border-brand bg-main text-brand-main focus:border-primary focus:ring-primary text-sm text-center"
+                                        className="w-full px-3 py-2 rounded-lg border-[var(--fil-border)] bg-[var(--fil-inactive-bg)] text-[var(--fil-inactive-text)] focus:border-[var(--fil-active-bg)] focus:ring-[var(--fil-active-bg)] text-[length:var(--fil-size)] text-center"
                                     />
                                 </div>
                                 <button
                                     onClick={() => applyFilters()}
-                                    className="w-full py-2 bg-primary hover:opacity-90 text-white text-sm font-bold rounded-xl transition-all shadow-sm"
+                                    className="w-full py-2 bg-[var(--fil-active-bg)] hover:opacity-90 text-[var(--fil-active-text)] font-[var(--fil-weight-active)] rounded-xl transition-all shadow-sm"
                                 >
                                     Aplicar Filtros
                                 </button>
@@ -274,7 +298,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                 <div className="space-y-1.5">
                                     <button
                                         onClick={() => applyFilters('')}
-                                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-300 cursor-pointer ${!filtros?.categoria ? 'bg-primary text-white font-bold shadow-sm' : 'text-brand-muted hover:bg-primary/10 hover:text-primary hover:translate-x-1'}`}
+                                        className={`w-full text-left px-3 py-2.5 rounded-xl text-[length:var(--fil-size)] transition-all duration-300 cursor-pointer ${!filtros?.categoria ? 'bg-[var(--fil-active-bg)] text-[var(--fil-active-text)] font-[var(--fil-weight-active)] shadow-sm' : 'text-[var(--fil-inactive-text)] hover:bg-[var(--fil-inactive-bg)] hover:text-[var(--fil-active-text)]'}`}
                                     >
                                         Todos los Productos
                                     </button>
@@ -282,7 +306,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                         <button
                                             key={cat.id}
                                             onClick={() => applyFilters(cat.slug)}
-                                            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-300 cursor-pointer ${filtros?.categoria === cat.slug ? 'bg-primary text-white font-bold shadow-sm' : 'text-brand-muted hover:bg-primary/10 hover:text-primary hover:translate-x-1'}`}
+                                            className={`w-full text-left px-3 py-2.5 rounded-xl text-[length:var(--fil-size)] transition-all duration-300 cursor-pointer ${filtros?.categoria === cat.slug ? 'bg-[var(--fil-active-bg)] text-[var(--fil-active-text)] font-[var(--fil-weight-active)] shadow-sm' : 'text-[var(--fil-inactive-text)] hover:bg-[var(--fil-inactive-bg)] hover:text-[var(--fil-active-text)]'}`}
                                         >
                                             {cat.nombre}
                                         </button>
@@ -319,12 +343,12 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.4, delay: index * 0.05 }}
                                             key={producto.id}
-                                            className="bg-card-fap rounded-2xl shadow-sm border border-brand overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                                            className="bg-[var(--pc-bg)] rounded-[var(--pc-radius)] shadow-sm border border-[var(--pc-border)] overflow-hidden hover:bg-[var(--pc-bg-hover)] hover:-translate-y-1 transition-all duration-300 group"
                                         >
                                             <Link href={route('beneficios.show', producto.id)}>
                                                 <div className="aspect-[4/3] bg-main relative overflow-hidden">
-                                                    {producto.imagen_path ? (
-                                                        <img src={producto.imagen_path?.startsWith('http') ? producto.imagen_path : `/storage/${producto.imagen_path}`} alt={producto.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                    {getFirstImage(producto.imagen_path) ? (
+                                                        <img src={getFirstImage(producto.imagen_path)} alt={producto.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-brand-muted opacity-50">
                                                             <ShoppingBag className="w-12 h-12" />
@@ -338,11 +362,11 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                                 </div>
                                             </Link>
                                             <div className="p-4">
-                                                <div className="text-xs text-brand-muted mb-1 font-semibold tracking-wide uppercase">
+                                                <div className="text-[length:var(--pc-size-desc)] text-[var(--pc-color-desc)] mb-1 font-semibold tracking-wide uppercase">
                                                     {producto.categoria?.nombre || 'General'}
                                                 </div>
                                                 <Link href={route('beneficios.show', producto.id)}>
-                                                    <h3 className="font-bold text-brand-main text-sm mb-2 line-clamp-2 hover:text-primary transition-colors">
+                                                    <h3 style={{ fontFamily: 'var(--pc-font)', fontWeight: 'var(--pc-weight-name)', fontSize: 'var(--pc-size-name)' }} className="text-[var(--pc-color-name)] mb-2 line-clamp-2 hover:text-[var(--pc-color-price)] transition-colors">
                                                         {producto.nombre}
                                                     </h3>
                                                 </Link>
@@ -353,14 +377,14 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                                             precio ? (
                                                                 <div className="flex flex-col justify-end h-full">
                                                                     {settings?.ecommerce_mostrar_precio_venta === 'si' && (
-                                                                        <div className={`${isSocio && settings?.ecommerce_mostrar_precio_credito === 'si' && producto.precio_general > precio ? 'text-xs text-brand-muted line-through' : 'text-lg font-black text-brand-main'}`}>
+                                                                        <div className={`${isSocio && settings?.ecommerce_mostrar_precio_credito === 'si' && producto.precio_general > precio ? 'text-[length:var(--pc-size-desc)] text-[var(--pc-color-desc)] line-through' : 'text-[length:var(--pc-size-price)] font-black text-[var(--pc-color-price)]'}`}>
                                                                             Bs. {producto.precio_general}
                                                                         </div>
                                                                     )}
                                                                     {settings?.ecommerce_mostrar_precio_credito === 'si' && isSocio && (
                                                                         <div className="flex flex-col mt-0.5">
-                                                                            <div className="text-[10px] text-primary font-bold uppercase tracking-wide leading-none mb-0.5">Precio Socio</div>
-                                                                            <div className="text-lg font-black text-primary leading-none">
+                                                                            <div className="text-[10px] text-[var(--pc-color-credit)] font-bold uppercase tracking-wide leading-none mb-0.5">Precio Socio</div>
+                                                                            <div className="text-[length:var(--pc-size-price)] font-black text-[var(--pc-color-credit)] leading-none">
                                                                                 Bs. {precio}
                                                                             </div>
                                                                         </div>
@@ -378,7 +402,7 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                                                 e.preventDefault();
                                                                 addToCart({ ...producto, precio_final: precio || producto.precio_general });
                                                             }}
-                                                            className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm"
+                                                            className="w-10 h-10 rounded-full bg-[var(--pc-btn-bg)] text-[var(--pc-btn-text)] flex items-center justify-center hover:bg-[var(--pc-btn-hover)] transition-all shadow-sm"
                                                             title="Añadir al carrito"
                                                         >
                                                             <ShoppingCart className="w-4 h-4" />
@@ -397,6 +421,43 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                         </motion.div>
                                     );
                                 })}
+                            </div>
+                        )}
+
+                        {productos.last_page > 1 && (
+                            <div className="mt-16 mb-8 flex justify-center">
+                                <nav className="flex items-center gap-2">
+                                    {productos.links.map((link, index) => {
+                                        let icon = link.label;
+                                        if (link.label.includes('Previous') || link.label.includes('Anterior')) {
+                                            icon = <ChevronLeft className="w-5 h-5" />;
+                                        } else if (link.label.includes('Next') || link.label.includes('Siguiente')) {
+                                            icon = <ChevronRight className="w-5 h-5" />;
+                                        }
+
+                                        return link.url ? (
+                                            <Link
+                                                key={index}
+                                                href={link.url}
+                                                preserveScroll
+                                                className={`w-12 h-12 flex items-center justify-center rounded-2xl font-[var(--fil-weight-active)] transition-all duration-300 ${
+                                                    link.active
+                                                        ? 'bg-[var(--fil-active-bg)] text-[var(--fil-active-text)] shadow-lg scale-110 border border-[var(--fil-active-bg)]'
+                                                        : 'bg-[var(--pc-bg)] text-[var(--fil-inactive-text)] border border-[var(--fil-border)] hover:border-[var(--fil-active-bg)] hover:text-[var(--fil-active-bg)] hover:-translate-y-1 shadow-sm'
+                                                }`}
+                                            >
+                                                {typeof icon === 'string' ? <span dangerouslySetInnerHTML={{ __html: icon }} /> : icon}
+                                            </Link>
+                                        ) : (
+                                            <span
+                                                key={index}
+                                                className="w-12 h-12 flex items-center justify-center rounded-2xl font-bold text-gray-300 bg-gray-50 border border-gray-100 cursor-not-allowed"
+                                            >
+                                                {typeof icon === 'string' ? <span dangerouslySetInnerHTML={{ __html: icon }} /> : icon}
+                                            </span>
+                                        );
+                                    })}
+                                </nav>
                             </div>
                         )}
                     </div>

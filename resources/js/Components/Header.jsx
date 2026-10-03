@@ -5,7 +5,10 @@ import { Menu, X, LogIn, ShoppingBag, Phone, MessageSquare, ChevronDown } from '
 export default function Header({ settings = {} }) {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { auth } = usePage().props;
+    const { auth, url } = usePage().props;
+    const currentUrl = usePage().url;
+    const hideTopBar = currentUrl.startsWith('/beneficios');
+    console.log("Current URL:", currentUrl, "Hide Top Bar:", hideTopBar);
 
     // Valores del CMS con fallbacks
     const phone = settings.phone || '800-10-FAPCLAS';
@@ -27,10 +30,22 @@ export default function Header({ settings = {} }) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.classList.add('mobile-menu-open', 'overflow-hidden');
+        } else {
+            document.body.classList.remove('mobile-menu-open', 'overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('mobile-menu-open', 'overflow-hidden');
+        };
+    }, [mobileMenuOpen]);
+
     return (
         <>
             {/* Top Utility Bar */}
-            <div className={`w-full bg-[#1b262c] text-white/80 text-[11px] font-medium py-1.5 transition-all duration-300 tracking-wider ${scrolled ? '-translate-y-full absolute opacity-0' : 'translate-y-0 relative opacity-100 z-50'}`}>
+            {!hideTopBar && (
+                <div className={`w-full bg-[#1b262c] text-white/80 text-[11px] font-medium py-1.5 transition-all duration-300 tracking-wider ${scrolled ? '-translate-y-full absolute opacity-0' : 'translate-y-0 relative opacity-100 z-50'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div className="flex items-center gap-5">
                         <a href={phoneLink} className="flex items-center gap-1.5 hover:text-secondary transition-colors">
@@ -43,7 +58,7 @@ export default function Header({ settings = {} }) {
                             {whatsappLabel}
                         </a>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-4">
                         <div className="flex items-center gap-3">
                             <Link href={route('login')} className="flex items-center gap-1.5 hover:text-white transition-all group">
                                 <LogIn className="w-3 h-3 text-secondary transition-transform group-hover:scale-110" />
@@ -58,10 +73,11 @@ export default function Header({ settings = {} }) {
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
+            )}
 
             {/* Main Floating Pill Nav */}
-            <header className={`fixed w-full z-40 transition-all duration-500 ${scrolled ? 'top-3' : 'top-8'}`}>
+            <header className={`fixed w-full z-40 transition-all duration-500 ${scrolled || hideTopBar ? 'top-3' : 'top-8'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className={`flex justify-between items-center transition-all duration-500 border origin-top ${scrolled ? 'bg-white/95 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-full border-white/50 px-6 h-16' : 'bg-transparent border-transparent px-2 h-20'}`}>
 
@@ -145,21 +161,31 @@ export default function Header({ settings = {} }) {
 
                         {/* CTAs */}
                         <div className="flex items-center gap-3 lg:gap-5 shrink-0">
-                            {auth.user ? (
-                                <Link href="/dashboard" className="flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                            {auth?.user ? (
+                                <Link href="/dashboard" className="hidden lg:flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
                                     <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
                                     Dashboard
                                 </Link>
                             ) : (
-                                <Link href="/login" className="flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                                <Link href="/login" className="hidden lg:flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
                                     <LogIn className="w-4 h-4" />
                                     {ctaPortal}
                                 </Link>
                             )}
-                            <Link href="/beneficios" className="bg-primary text-white font-semibold px-5 py-2 rounded-full hover:bg-primary-dark hover:shadow-lg transition-all transform hover:-translate-y-0.5 shadow-md shadow-primary/20 hidden sm:flex items-center gap-1.5 text-[13px] tracking-wide">
-                                <ShoppingBag className="w-4 h-4" />
-                                {ctaTienda}
-                            </Link>
+
+                            <div className="relative block">
+                                {/* Badge Flotante */}
+                                <span className="absolute -top-2.5 right-4 bg-[#F7BD16] text-[#1b262c] text-[8px] font-black tracking-wider px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
+                                    <span>🏷️</span> BENEFICIOS Y OFERTAS
+                                </span>
+                                <Link
+                                    href="/beneficios"
+                                    className="flex items-center gap-2 bg-[#1d2516] hover:bg-[#28361d] text-white font-semibold px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(247,189,22,0.45)] shadow-[0_0_12px_rgba(247,189,22,0.25)] transition-all duration-300 transform hover:-translate-y-0.5 border border-[#F7BD16]/30 text-[13px] tracking-wide"
+                                >
+                                    <ShoppingBag className="w-4 h-4 text-[#F7BD16] stroke-[2.5]" />
+                                    <span>{ctaTienda || "Tienda de Compras"}</span>
+                                </Link>
+                            </div>
 
                             {/* Mobile Menu Toggle */}
                             <button
@@ -199,20 +225,38 @@ export default function Header({ settings = {} }) {
                         </nav>
 
                         <div className="space-y-4 pt-8 border-t border-gray-100">
-                            <Link
-                                href={route('login')}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="w-full flex items-center justify-center gap-2 bg-[#F7BD16] text-zinc-900 font-bold py-4 rounded-2xl shadow-lg shadow-[#F7BD16]/20 transition-all active:scale-95"
-                            >
-                                <LogIn className="w-5 h-5" /> {ctaPortal}
-                            </Link>
-                            <Link
-                                href="/beneficios"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="w-full flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20"
-                            >
-                                <ShoppingBag className="w-5 h-5" /> {ctaTienda}
-                            </Link>
+                            {auth?.user ? (
+                                <Link
+                                    href="/dashboard"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full flex items-center justify-center gap-2 bg-[#F7BD16] text-zinc-900 font-bold py-4 rounded-2xl shadow-lg shadow-[#F7BD16]/20 transition-all active:scale-95"
+                                >
+                                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={route('login')}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full flex items-center justify-center gap-2 bg-[#F7BD16] text-zinc-900 font-bold py-4 rounded-2xl shadow-lg shadow-[#F7BD16]/20 transition-all active:scale-95"
+                                >
+                                    <LogIn className="w-5 h-5" /> {ctaPortal}
+                                </Link>
+                            )}
+                            <div className="relative w-full">
+                                {/* Badge Flotante en Móvil */}
+                                <span className="absolute -top-2.5 right-6 bg-[#F7BD16] text-[#1b262c] text-[8px] font-black tracking-wider px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
+                                    <span>🏷️</span> BENEFICIOS Y OFERTAS
+                                </span>
+                                <Link
+                                    href="/beneficios"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full flex items-center justify-center gap-2 bg-[#1d2516] text-white font-bold py-4 rounded-2xl border border-[#F7BD16]/30 shadow-[0_0_12px_rgba(247,189,22,0.25)] hover:shadow-[0_0_20px_rgba(247,189,22,0.45)] transition-all duration-300"
+                                >
+                                    <ShoppingBag className="w-5 h-5 text-[#F7BD16] stroke-[2.5]" />
+                                    <span>{ctaTienda || "Tienda Virtual"}</span>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

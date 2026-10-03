@@ -21,16 +21,147 @@ export default function Checkout({ auth, settings }) {
         tipo_pago: 'qr',
         logistica: {
             tipo_entrega: 'recojo_tienda',
-            direccion_envio: ''
+            direccion_envio: '',
+            gps_latitud: null,
+            gps_longitud: null
         }
     });
 
+    // Helper para calcular distancia por fórmula de Haversine
+    const calcularDistanciaKm = (lat1, lon1, lat2, lon2) => {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+        const R = 6371; // Radio de la tierra en km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; // Distancia en km
+    };
+
     const isEnvioActivo = settings?.ecommerce_envio_domicilio_activo !== 'no' && settings?.ecommerce_envio_domicilio_activo !== 'false' && settings?.ecommerce_envio_domicilio_activo !== '0';
-    const precioEnvio = parseFloat(settings?.ecommerce_envio_domicilio_precio || '15.00');
-    const costoEnvio = (data.logistica.tipo_entrega === 'envio_domicilio' && isEnvioActivo) ? precioEnvio : 0.00;
+    
+    // Parámetros dinámicos desde Filament
+    const latTienda = parseFloat(settings?.ecommerce_tienda_latitud || '-17.7828');
+    const lngTienda = parseFloat(settings?.ecommerce_tienda_longitud || '-63.1812');
+    const tarifaBase = parseFloat(settings?.ecommerce_envio_tarifa_base || '10.00');
+    const radioBase = parseFloat(settings?.ecommerce_envio_radio_base || '3.0');
+    const precioKmExtra = parseFloat(settings?.ecommerce_envio_precio_km_adicional || '2.00');
+
+    // Calcular distancia si tiene GPS de envío
+    const distanciaKm = (data.logistica.tipo_entrega === 'envio_domicilio' && data.logistica.gps_latitud && data.logistica.gps_longitud)
+        ? calcularDistanciaKm(latTienda, lngTienda, data.logistica.gps_latitud, data.logistica.gps_longitud)
+        : 0;
+
+    // Calcular costo dinámico de envío
+    let costoEnvio = 0;
+    if (data.logistica.tipo_entrega === 'envio_domicilio' && isEnvioActivo) {
+        if (distanciaKm <= radioBase) {
+            costoEnvio = tarifaBase;
+        } else {
+            costoEnvio = tarifaBase + (distanciaKm - radioBase) * precioKmExtra;
+        }
+    }
+    
     const finalTotal = cartTotal + costoEnvio;
 
     const qrImage = settings?.ecommerce_qr_pago;
+
+    // --- LEAFLET DYNAMIC LOADER ---
+    const [leafletLoaded, setLeafletLoaded] = React.useState(false);
+
+    React.useEffect(() => {
+        if (data.logistica.tipo_entrega === 'envio_domicilio' && !leafletLoaded) {
+            // Load CSS
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(link);
+
+            // Load JS
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.async = true;
+            script.onload = () => setLeafletLoaded(true);
+            document.body.appendChild(script);
+
+            return () => {
+                // Keep it loaded or remove it. Better to keep it to avoid re-fetching
+            };
+        }
+    }, [data.logistica.tipo_entrega]);
+
+    // Map initializer
+    React.useEffect(() => {
+        if (leafletLoaded && data.logistica.tipo_entrega === 'envio_domicilio') {
+            const mapContainer = document.getElementById('map-picker');
+            if (!mapContainer) return;
+
+            // Default location: Plaza 24 de Septiembre, Santa Cruz de la Sierra, Bolivia
+            const defaultLat = -17.7828;
+            const defaultLng = -63.1812;
+
+            // If coordinates are already set, use them, otherwise use defaults
+            const initialLat = data.logistica.gps_latitud || defaultLat;
+            const initialLng = data.logistica.gps_longitud || defaultLng;
+
+            // Initialize map
+            const map = window.L.map('map-picker').setView([initialLat, initialLng], 14);
+
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Create draggable marker
+            const marker = window.L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(map);
+
+            // Save initial coordinates if not set
+            if (!data.logistica.gps_latitud || !data.logistica.gps_longitud) {
+                setData(prev => ({
+                    ...prev,
+                    logistica: {
+                        ...prev.logistica,
+                        gps_latitud: initialLat,
+                        gps_longitud: initialLng
+                    }
+                }));
+            }
+
+            // Sync marker drag end
+            marker.on('dragend', () => {
+                const position = marker.getLatLng();
+                setData(prev => ({
+                    ...prev,
+                    logistica: {
+                        ...prev.logistica,
+                        gps_latitud: parseFloat(position.lat.toFixed(8)),
+                        gps_longitud: parseFloat(position.lng.toFixed(8))
+                    }
+                }));
+            });
+
+            // Click map to reposition marker
+            map.on('click', (e) => {
+                marker.setLatLng(e.latlng);
+                setData(prev => ({
+                    ...prev,
+                    logistica: {
+                        ...prev.logistica,
+                        gps_latitud: parseFloat(e.latlng.lat.toFixed(8)),
+                        gps_longitud: parseFloat(e.latlng.lng.toFixed(8))
+                    }
+                }));
+            });
+
+            return () => {
+                map.remove();
+            };
+        }
+    }, [leafletLoaded, data.logistica.tipo_entrega]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -77,16 +208,16 @@ export default function Checkout({ auth, settings }) {
                         transition={{ duration: 0.5 }}
                         className="flex-1"
                     >
-                        <div className="bg-card-fap rounded-2xl shadow-sm border border-brand p-6 mb-6">
-                            <h3 className="text-lg font-bold text-brand-main mb-6 flex items-center">
-                                <ShoppingBag className="w-5 h-5 mr-2 text-[#F7BD16]" /> Resumen de tu pedido
+                        <div className="bg-[var(--chk-bg)] rounded-2xl shadow-sm border border-[var(--chk-border)] p-6 mb-6">
+                            <h3 style={{ fontFamily: 'var(--chk-font)', fontWeight: 'var(--chk-weight-title)' }} className="text-[length:var(--chk-size-title)] text-[var(--chk-color-title)] mb-6 flex items-center">
+                                <ShoppingBag className="w-5 h-5 mr-2 text-[var(--chk-color-title)]" /> Resumen de tu pedido
                             </h3>
                             <div className="space-y-4">
                                 {cart.map(item => (
                                     <div key={item.id} className="flex gap-4 p-4 border border-gray-50 rounded-xl bg-brand/5/50">
                                         <div className="w-20 h-20 bg-card-fap rounded-lg border border-brand flex items-center justify-center overflow-hidden flex-shrink-0">
                                             {item.imagen_path ? (
-                                                <img src={`/storage/${item.imagen_path}`} alt={item.nombre} className="w-full h-full object-contain" />
+                                                <img src={`/storage/${Array.isArray(item.imagen_path) ? item.imagen_path[0] : item.imagen_path}`} alt={item.nombre} className="w-full h-full object-contain" />
                                             ) : (
                                                 <ShoppingBag className="w-8 h-8 text-gray-300" />
                                             )}
@@ -118,8 +249,8 @@ export default function Checkout({ auth, settings }) {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="w-full lg:w-[400px] xl:w-[480px]"
                     >
-                        <form onSubmit={submit} className="bg-card-fap rounded-2xl shadow-lg shadow-gray-200/50 border border-brand p-6 sticky top-6">
-                            <h3 className="text-xl font-extrabold text-brand-main mb-6 pb-4 border-b border-brand">Datos de Pago</h3>
+                        <form onSubmit={submit} className="bg-[var(--chk-bg)] rounded-2xl shadow-lg shadow-[var(--chk-border)]/50 border border-[var(--chk-border)] p-6 sticky top-6 text-[var(--chk-color-text)]">
+                            <h3 style={{ fontFamily: 'var(--chk-font)', fontWeight: 'var(--chk-weight-title)' }} className="text-[length:var(--chk-size-title)] text-[var(--chk-color-title)] mb-6 pb-4 border-b border-[var(--chk-border)]">Datos de Pago</h3>
 
                             {errors.checkout && (
                                 <div className="mb-6 bg-red-50 border border-red-500/50 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -197,23 +328,53 @@ export default function Checkout({ auth, settings }) {
                                         <label className={`block text-center p-4 border rounded-xl cursor-pointer transition-all ${data.logistica.tipo_entrega === 'envio_domicilio' ? 'border-[#F7BD16] bg-[#F7BD16]/5 ring-1 ring-[#F7BD16]' : 'border-brand hover:border-[#F7BD16]/40'}`}>
                                             <input type="radio" className="hidden" name="tipo_entrega" value="envio_domicilio" checked={data.logistica.tipo_entrega === 'envio_domicilio'} onChange={e => setData('logistica', { ...data.logistica, tipo_entrega: e.target.value })} />
                                             <div className="font-bold text-brand-main text-sm">Envío a Domicilio</div>
-                                            <div className="text-xs text-[#F7BD16] mt-1 font-bold">+ Bs. {precioEnvio.toFixed(2)}</div>
+                                            <div className="text-xs text-[#F7BD16] mt-1 font-bold">Costo Variable</div>
                                         </label>
                                     )}
                                 </div>
 
                                 {data.logistica.tipo_entrega === 'envio_domicilio' && (
-                                    <div className="animate-in fade-in slide-in-from-top-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Completa *</label>
-                                        <textarea
-                                            value={data.logistica.direccion_envio}
-                                            onChange={e => setData('logistica', { ...data.logistica, direccion_envio: e.target.value })}
-                                            className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16] max-h-32"
-                                            rows="2"
-                                            placeholder="Ej. Av. Blanco Galindo Km 4, Calle B #123"
-                                            required
-                                        ></textarea>
-                                        {errors['logistica.direccion_envio'] && <div className="text-red-500 text-xs mt-1">{errors['logistica.direccion_envio']}</div>}
+                                    <div className="animate-in fade-in slide-in-from-top-2 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Completa *</label>
+                                            <textarea
+                                                value={data.logistica.direccion_envio}
+                                                onChange={e => setData('logistica', { ...data.logistica, direccion_envio: e.target.value })}
+                                                className="w-full rounded-lg border-brand shadow-sm focus:border-[#F7BD16] focus:ring-[#F7BD16] max-h-32"
+                                                rows="2"
+                                                placeholder="Ej. Av. Blanco Galindo Km 4, Calle B #123"
+                                                required
+                                            ></textarea>
+                                            {errors['logistica.direccion_envio'] && <div className="text-red-500 text-xs mt-1">{errors['logistica.direccion_envio']}</div>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Ubica tu domicilio en el mapa (GPS) *</label>
+                                            <div className="text-xs text-brand-muted mb-2">Arrastra el marcador o haz clic en el mapa para fijar tu ubicación de entrega exacta.</div>
+                                            <div 
+                                                id="map-picker" 
+                                                className="h-60 w-full rounded-xl border border-brand/50 overflow-hidden shadow-inner relative z-10"
+                                                style={{ minHeight: '240px' }}
+                                            >
+                                                {!leafletLoaded && (
+                                                    <div className="absolute inset-0 bg-gray-100 flex items-center justify-center text-xs text-brand-muted font-bold">
+                                                        Cargando mapa interactivo...
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {data.logistica.gps_latitud && data.logistica.gps_longitud && (
+                                                <div className="mt-2 text-xs font-mono text-brand-muted bg-brand/5 p-3 rounded-lg border border-brand/20 space-y-1">
+                                                    <div className="flex justify-between font-bold text-brand-main">
+                                                        <span>Distancia estimada:</span>
+                                                        <span>{distanciaKm.toFixed(2)} km</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-[10px] text-gray-500">
+                                                        <span>Lat: {data.logistica.gps_latitud}</span>
+                                                        <span>Lng: {data.logistica.gps_longitud}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -242,13 +403,13 @@ export default function Checkout({ auth, settings }) {
                                     <span>Costo de Envío</span>
                                     <span>Bs. {costoEnvio.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between items-center bg-[#F7BD16]/10 p-4 rounded-xl mt-2">
-                                    <span className="text-lg font-bold text-gray-700">Total a Pagar</span>
-                                    <span className="text-3xl font-black text-[#28361d]">Bs. {finalTotal.toFixed(2)}</span>
+                                <div className="flex justify-between items-center bg-[var(--chk-border)]/10 p-4 rounded-xl mt-2">
+                                    <span className="text-lg font-bold text-[var(--chk-color-text)]">Total a Pagar</span>
+                                    <span className="text-3xl font-black text-[var(--chk-color-title)]">Bs. {finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 
-                            <button type="submit" disabled={processing} className="w-full flex items-center justify-center gap-2 bg-[#28361d] hover:bg-[#1a2312] text-white px-6 py-4 rounded-xl font-bold transition-all shadow-md disabled:opacity-50 mb-3">
+                            <button type="submit" disabled={processing} className="w-full flex items-center justify-center gap-2 bg-[var(--chk-btn-bg)] hover:bg-[var(--chk-btn-hover)] text-[var(--chk-btn-text)] px-6 py-4 rounded-xl font-bold transition-all shadow-md disabled:opacity-50 mb-3">
                                 {processing ? 'Procesando...' : <><ShieldCheck className="w-5 h-5" /> Confirmar Pedido</>}
                             </button>
 

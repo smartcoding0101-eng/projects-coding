@@ -20,9 +20,9 @@ const TestimonialsBlock = ({ data }) => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center mb-8">
-                    <h2 className="text-sm font-bold tracking-widest text-secondary uppercase mb-3 drop-shadow-sm">{subtitle || 'Confianza que nos respalda'}</h2>
-                    <h3 className="font-display text-4xl md:text-5xl font-bold md:min-h-[60px]">
-                        <TextType text={title || 'Voces de Nuestra Familia'} as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
+                    <h2 className="text-sm font-bold tracking-widest text-white uppercase mb-3 drop-shadow-sm" style={{ color: '#ffffff' }}>{subtitle || 'Confianza que nos respalda'}</h2>
+                    <h3 className="font-display text-4xl md:text-5xl font-bold text-white md:min-h-[60px]" style={{ color: '#ffffff' }}>
+                        <TextType text={title || 'Voces de Nuestra Familia'} as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" textColors={['#ffffff']} />
                     </h3>
                 </div>
 

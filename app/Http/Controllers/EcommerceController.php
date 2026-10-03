@@ -60,7 +60,7 @@ class EcommerceController extends Controller
             $query->where('precio_general', '<=', $request->max_price);
         }
 
-        $productos = $query->paginate(12)->withQueryString();
+        $productos = $query->latest()->paginate(100)->withQueryString();
         $categorias = Categoria::where('activa', true)->get();
         $settings = $this->getSettings();
 
@@ -133,7 +133,9 @@ class EcommerceController extends Controller
             'carrito.*.cantidad' => 'required|integer|min:1',
             'tipo_pago' => 'required|in:qr,credito_asociado,efectivo,transferencia',
             'logistica.tipo_entrega' => 'required|in:recojo_tienda,envio_domicilio',
-            'logistica.direccion_envio' => 'required_if:logistica.tipo_entrega,envio_domicilio|nullable|string'
+            'logistica.direccion_envio' => 'required_if:logistica.tipo_entrega,envio_domicilio|nullable|string',
+            'logistica.gps_latitud' => 'nullable|numeric',
+            'logistica.gps_longitud' => 'nullable|numeric'
         ], [
             'carrito.required' => 'El carrito está vacío.',
             'tipo_pago.required' => 'Debe seleccionar un método de pago.',
@@ -191,7 +193,8 @@ class EcommerceController extends Controller
     public function webhookQr(Request $request)
     {
         $validated = $request->validate([
-            'numero_orden' => 'required|string|exists:pedidos,numero_orden'
+            'numero_orden' => 'required|string|exists:pedidos,numero_orden',
+            'comprobante' => 'nullable|image|max:5120', // max 5MB
         ]);
 
         $pedido = Pedido::with('detalles')->where('numero_orden', $validated['numero_orden'])->firstOrFail();
@@ -202,7 +205,14 @@ class EcommerceController extends Controller
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            $pedido->update(['estado_pago' => 'pagado']);
+            $updateData = ['estado_pago' => 'pendiente_validacion']; // Cambiado a pendiente para que el admin valide el comprobante
+
+            if ($request->hasFile('comprobante')) {
+                $path = $request->file('comprobante')->store('comprobantes', 'public');
+                $updateData['comprobante_qr_path'] = $path;
+            }
+
+            $pedido->update($updateData);
 
             // NOTA: El stock NO se descuenta aquí automáticamente vía Webhook.
             // La salida de almacén se registrará formalmente cuando el administrador
@@ -215,7 +225,7 @@ class EcommerceController extends Controller
 
             session()->put('allowed_order_' . $pedido->numero_orden, true);
 
-            return redirect()->route('beneficios.success', $pedido->numero_orden)->with('success', 'Pago confirmado automáticamente por la pasarela QR.');
+            return redirect()->route('beneficios.success', $pedido->numero_orden)->with('success', 'Pago y comprobante enviados. Está pendiente de validación por la administración.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return redirect()->back()->with('error', 'Error al procesar el pago: ' . $e->getMessage());

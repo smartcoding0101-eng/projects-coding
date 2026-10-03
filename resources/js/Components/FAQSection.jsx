@@ -33,10 +33,10 @@ export default function FAQSection() {
 
                 <div className="text-center mb-10">
                     <span className="uppercase font-bold text-xs tracking-widest text-primary block mb-3">Atención Inmediata</span>
-                    <h2 className="font-display text-4xl md:text-5xl font-bold text-on-surface mb-6 md:min-h-[60px]">
+                    <h2 className="section-title font-display text-4xl md:text-5xl font-bold mb-6 md:min-h-[60px]" style={{ color: 'var(--st-color, #0f172a)' }}>
                         <TextType text="Preguntas Frecuentes" as="span" typingSpeed={75} deletingSpeed={50} showCursor cursorCharacter="_" />
                     </h2>
-                    <p className="text-xl text-gray-500 max-w-2xl mx-auto">Aclaremos tus dudas operativas antes de que tomes una decisión. Transparencia de clase mundial.</p>
+                    <p className="text-xl text-gray-500 max-w-2xl mx-auto" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>Aclaremos tus dudas operativas antes de que tomes una decisión. Transparencia de clase mundial.</p>
                 </div>
 
                 <div className="space-y-4">

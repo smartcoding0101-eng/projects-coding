@@ -5,17 +5,54 @@ import { ShieldCheck, QrCode, Lock, CheckCircle2, ZoomIn, X } from 'lucide-react
 export default function PasarelaQR({ pedido, settings }) {
     const [simulando, setSimulando] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
+    
+    // Comprobante states
+    const [comprobanteFile, setComprobanteFile] = useState(null);
+    const [comprobantePreview, setComprobantePreview] = useState(null);
 
     const qrImage = settings?.ecommerce_qr_pago;
-    const resolvedQrImage = qrImage ? (qrImage.startsWith('/') || qrImage.startsWith('http') ? qrImage : `/storage/${qrImage}`) : null;
+    const exigirComprobante = settings?.ecommerce_exigir_comprobante === 'si' || settings?.ecommerce_exigir_comprobante === true;
+    const colorTextoComprobante = settings?.ecommerce_pasarela_texto_comprobante || '#064e3b';
+    const colorBotonConfirmar = settings?.ecommerce_pasarela_btn_confirmar || '#064e3b';
+    
+    let resolvedQrImage = null;
+    if (qrImage) {
+        if (qrImage.includes('localhost') || qrImage.includes('127.0.0.1')) {
+            try {
+                // Si la BD de producción tiene guardado el dominio local por una exportación, extraer solo la ruta
+                resolvedQrImage = new URL(qrImage).pathname;
+            } catch (e) {
+                resolvedQrImage = qrImage;
+            }
+        } else if (qrImage.startsWith('http') || qrImage.startsWith('/')) {
+            resolvedQrImage = qrImage;
+        } else {
+            resolvedQrImage = `/storage/${qrImage}`;
+        }
+    }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setComprobanteFile(file);
+            setComprobantePreview(URL.createObjectURL(file));
+        } else {
+            setComprobanteFile(null);
+            setComprobantePreview(null);
+        }
+    };
 
     const simularPago = () => {
         setSimulando(true);
         // Simular retardo de red como si fuera un banco real
         setTimeout(() => {
-            router.post(route('beneficios.webhook-qr'), {
-                numero_orden: pedido.numero_orden
-            }, {
+            const formData = new FormData();
+            formData.append('numero_orden', pedido.numero_orden);
+            if (comprobanteFile) {
+                formData.append('comprobante', comprobanteFile);
+            }
+
+            router.post(route('beneficios.webhook-qr'), formData, {
                 preserveState: true,
                 onFinish: () => setSimulando(false)
             });
@@ -81,15 +118,45 @@ export default function PasarelaQR({ pedido, settings }) {
                             </ol>
                         </div>
 
-                        {/* Simulación para propósitos de Desarrollo */}
-                        <div className="mt-10 pt-6 border-t border-brand">
-                            <div className="text-xs text-center text-orange-500 font-bold mb-3">
-                                ⚠️ Desarrollar pago virtual
+                        {/* Sección de Comprobante */}
+                        <div className="mt-8 pt-6 border-t border-brand">
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-2" style={{ color: colorTextoComprobante }}>
+                                    Adjuntar el comprobante de pago, obligatorio {exigirComprobante && <span className="text-red-500">*</span>}
+                                </label>
+                                <div className="mt-2 relative group rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-brand/5 hover:border-brand transition-all duration-300 overflow-hidden">
+                                    {comprobantePreview ? (
+                                        <div className="relative p-2 flex justify-center bg-white">
+                                            <img src={comprobantePreview} alt="Comprobante" className="max-h-48 rounded-lg shadow-sm" />
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setComprobanteFile(null); setComprobantePreview(null); }}
+                                                className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2 shadow-md hover:bg-red-600 transition-colors z-10"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label htmlFor="comprobante-upload" className="flex flex-col items-center justify-center w-full px-6 pt-6 pb-6 cursor-pointer">
+                                            <svg className="mx-auto h-12 w-12 text-gray-400 group-hover:text-brand transition-colors duration-300 mb-3" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            <div className="flex text-sm text-gray-600 justify-center">
+                                                <span className="font-bold text-brand text-base group-hover:text-brand-light transition-colors">
+                                                    Haz clic para subir comprobante
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 font-medium mt-1">Formatos: PNG, JPG (Máx. 5MB)</p>
+                                            <input id="comprobante-upload" name="comprobante-upload" type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                                        </label>
+                                    )}
+                                </div>
                             </div>
+
                             <button
                                 onClick={simularPago}
-                                disabled={simulando}
-                                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all ${simulando ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                disabled={simulando || (exigirComprobante && !comprobanteFile)}
+                                style={{ backgroundColor: colorBotonConfirmar }}
+                                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-all ${(simulando || (exigirComprobante && !comprobanteFile)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {simulando ? (
                                     <span className="flex items-center">
@@ -97,11 +164,11 @@ export default function PasarelaQR({ pedido, settings }) {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Validando Pago en API...
+                                        Procesando...
                                     </span>
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        <CheckCircle2 className="w-4 h-4" /> Confirmar el pago
+                                        <CheckCircle2 className="w-4 h-4" /> Enviar y Confirmar Pago
                                     </span>
                                 )}
                             </button>

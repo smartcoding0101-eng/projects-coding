@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Productos\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Components\WordEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -40,7 +40,7 @@ class ProductoForm
                             ->default(null)
                             ->columnSpanFull()
                             ->label('Descripción Corta'),
-                        RichEditor::make('descripcion_larga')
+                        WordEditor::make('descripcion_larga')
                             ->default(null)
                             ->columnSpanFull()
                             ->label('Descripción Larga'),
@@ -52,10 +52,12 @@ class ProductoForm
                     Section::make('Multimedia')->schema([
                         FileUpload::make('imagen_path')
                             ->label('Imagen del Producto')
+                            ->multiple()
+                            ->maxFiles(5)
                             ->image()
                             ->disk('public')
                             ->directory('tienda/productos')
-                            ->helperText('📐 Dimensiones: 800 × 800 px · Relación 1:1 (Cuadrado) · Formatos: JPG, PNG, WEBP · Peso máximo: 2MB')
+                            ->helperText('📐 Dimensiones: 800 × 800 px · Relación 1:1 (Cuadrado) · Formatos: JPG, PNG, WEBP · Peso máximo: 2MB (Hasta 5 imágenes)')
                             ->hint('Se usa como thumbnail en el catálogo y como imagen principal en el detalle del producto.')
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('1:1')
