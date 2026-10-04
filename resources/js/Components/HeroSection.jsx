@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react';
-import BlurText from './BlurText';
+import SplitKineticTitle from './SplitKineticTitle';
+import { motion } from 'framer-motion';
 
 // ─── Slides de FALLBACK (se usan SOLO si Filament no tiene slides configurados) ───
 const defaultSlides = [
@@ -133,43 +134,30 @@ export default function HeroSection({ cmsSlides = [] }) {
                     <span className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-white/90">Cooperativa FAPCLAS R.L.</span>
                 </div>
 
-                {/* ─── Title con BlurText ─── */}
-                {showContent && current.title && (
-                    <BlurText
-                        key={`title-${currentSlide}`}
+                {/* ─── Títulos Cinemáticos Split Reveal ─── */}
+                {showContent && (
+                    <SplitKineticTitle
+                        key={`hero-title-${currentSlide}`}
                         text={current.title}
-                        delay={0.12}
-                        animateBy="words"
-                        direction="top"
-                        align="left"
-                        className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-0.5 sm:mb-2 font-display leading-tight text-white [text-shadow:_0_10px_20px_rgba(0,0,0,0.4)]"
+                        subtitle={current.subtitle}
+                        direction="up"
+                        delayOffset={0.05}
+                        className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-1 sm:mb-2 font-display leading-[1.08] text-white"
+                        subtitleClassName="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3 sm:mb-6 font-display leading-[1.08]"
                     />
                 )}
 
-                {/* ─── Subtitle con BlurText (dorado) ─── */}
-                {showContent && current.subtitle && (
-                    <BlurText
-                        key={`subtitle-${currentSlide}`}
-                        text={current.subtitle}
-                        delay={0.15}
-                        animateBy="words"
-                        direction="top"
-                        align="left"
-                        className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-2 sm:mb-6 font-display leading-tight text-secondary [text-shadow:_0_10px_20px_rgba(0,0,0,0.4)]"
-                    />
-                )}
-
-                {/* ─── Description con BlurText ─── */}
+                {/* ─── Description con entrada suave ─── */}
                 {showContent && current.description && (
-                    <BlurText
+                    <motion.p
                         key={`desc-${currentSlide}`}
-                        text={current.description}
-                        delay={0.04}
-                        animateBy="words"
-                        direction="top"
-                        align="left"
-                        className="text-[10px] sm:text-base md:text-lg lg:text-xl mb-4 sm:mb-12 max-w-2xl text-left text-white/90 font-medium [text-shadow:_0_2px_4px_rgba(0,0,0,0.5)]"
-                    />
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="text-xs sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-12 max-w-2xl text-left text-white/90 font-medium leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+                    >
+                        {current.description}
+                    </motion.p>
                 )}
 
                 <div className="flex flex-row items-center justify-start gap-2 sm:gap-4 w-full sm:w-auto">

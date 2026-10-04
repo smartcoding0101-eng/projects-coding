@@ -1,0 +1,28 @@
+import{r as a,j as t}from"./app-BSb154vG.js";import{I as g}from"./info-C-axIcfA.js";import{c as m}from"./createLucideIcon-CukUIkdv.js";import{X as k}from"./x-DoDNiqbQ.js";/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const j=[["path",{d:"M15 3h6v6",key:"1q9fwt"}],["path",{d:"M10 14 21 3",key:"gplh6r"}],["path",{d:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",key:"a6xqqp"}]],N=m("external-link",j);/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const _=[["path",{d:"M15 18h-5",key:"95g1m2"}],["path",{d:"M18 14h-8",key:"sponae"}],["path",{d:"M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2",key:"39pd36"}],["rect",{width:"8",height:"4",x:"10",y:"6",rx:"1",key:"aywv1n"}]],E=m("newspaper",_);/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const C=[["path",{d:"M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z",key:"vktsd0"}],["circle",{cx:"7.5",cy:"7.5",r:".5",fill:"currentColor",key:"kqv944"}]],$=m("tag",C);function S({config:e={},storageKey:n="promo_popup"}){const[l,p]=a.useState(!1),[x,b]=a.useState(!1),[u,y]=a.useState(!1),h={oferta:{label:"Oferta Especial",icon:$,bg:"bg-primary",text:"text-white",glow:"shadow-primary/40"},noticia:{label:"Noticia",icon:E,bg:"bg-blue-600",text:"text-white",glow:"shadow-blue-600/40"},informacion:{label:"Información",icon:g,bg:"bg-emerald-600",text:"text-white",glow:"shadow-emerald-600/40"}},w=e.type||"oferta",r=h[w]||h.oferta,f=r.icon,v=a.useCallback(()=>e.expires_at?new Date(e.expires_at)<new Date:!1,[e.expires_at]);a.useEffect(()=>{if(!e.enabled||!e.image&&!e.title||v()||e.show_once!==!1&&sessionStorage.getItem(n))return;const s=parseInt(e.delay_ms??800),c=setTimeout(()=>{e.show_once!==!1&&sessionStorage.setItem(n,"1"),p(!0)},s);return()=>clearTimeout(c)},[e.enabled,n]);const i=a.useCallback(()=>{b(!0),setTimeout(()=>p(!1),350)},[]);if(a.useEffect(()=>{if(!l)return;const s=c=>{c.key==="Escape"&&i()};return document.addEventListener("keydown",s),()=>document.removeEventListener("keydown",s)},[l,i]),a.useEffect(()=>(l?document.body.style.overflow="hidden":document.body.style.overflow="",()=>{document.body.style.overflow=""}),[l]),!l)return null;const d=e.image?e.image.startsWith("http")?e.image:`/storage/${e.image}`:null,o=e.title||e.description||e.button_text;return t.jsxs(t.Fragment,{children:[t.jsx("div",{className:`fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm transition-opacity duration-350 ${x?"opacity-0":"opacity-100"}`,onClick:i,"aria-hidden":"true"}),t.jsx("div",{role:"dialog","aria-modal":"true","aria-label":e.title||"Promoción",className:`
+                    fixed inset-0 z-[9999] flex items-center justify-center p-4
+                    pointer-events-none
+                `,children:t.jsxs("div",{className:`
+                        relative pointer-events-auto
+                        w-full max-w-lg sm:max-w-xl md:max-w-2xl
+                        rounded-2xl overflow-hidden
+                        shadow-2xl shadow-black/50
+                        transition-all duration-350 ease-out
+                        ${x?"opacity-0 scale-95 translate-y-4":"opacity-100 scale-100 translate-y-0"}
+                    `,onClick:s=>s.stopPropagation(),children:[t.jsx("button",{onClick:i,className:"absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm shadow-lg","aria-label":"Cerrar",children:t.jsx(k,{className:"w-4 h-4"})}),t.jsx("div",{className:"absolute top-3 left-3 z-20",children:t.jsxs("span",{className:`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${r.bg} ${r.text} ${r.glow}`,children:[t.jsx(f,{className:"w-3.5 h-3.5"}),r.label]})}),d&&t.jsxs("div",{className:`relative w-full ${o?"h-52 sm:h-64 md:h-72":"h-72 sm:h-96"}`,children:[!u&&t.jsx("div",{className:"absolute inset-0 bg-gray-800 animate-pulse"}),t.jsx("img",{src:d,alt:e.title||"Promoción",onLoad:()=>y(!0),className:`w-full h-full object-cover transition-opacity duration-500 ${u?"opacity-100":"opacity-0"}`}),o&&t.jsx("div",{className:"absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"})]}),o&&t.jsxs("div",{className:"bg-[#1a1a2e] px-6 py-5 space-y-3",children:[e.title&&t.jsx("h2",{className:"text-white text-xl sm:text-2xl font-black leading-tight tracking-tight",children:e.title}),e.description&&t.jsx("p",{className:"text-gray-300 text-sm sm:text-base leading-relaxed",children:e.description}),e.button_text&&e.button_link&&t.jsx("div",{className:"pt-1",children:t.jsxs("a",{href:e.button_link,className:"inline-flex items-center gap-2 px-6 py-3 bg-primary hover:opacity-90 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-primary/30 hover:scale-105 active:scale-95",onClick:i,children:[e.button_text,t.jsx(N,{className:"w-4 h-4"})]})})]}),!d&&!o&&t.jsx("div",{className:"bg-[#1a1a2e] p-8 text-center text-gray-400 text-sm",children:"Sin contenido configurado."})]})}),t.jsx("style",{children:`
+                .duration-350 { transition-duration: 350ms; }
+            `})]})}export{N as E,E as N,S as P,$ as T};

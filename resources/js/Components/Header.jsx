@@ -45,15 +45,15 @@ export default function Header({ settings = {} }) {
         <>
             {/* Top Utility Bar */}
             {!hideTopBar && (
-                <div className={`w-full bg-[#1b262c] text-white/80 text-[11px] font-medium py-1.5 transition-all duration-300 tracking-wider ${scrolled ? '-translate-y-full absolute opacity-0' : 'translate-y-0 relative opacity-100 z-50'}`}>
+                <div style={{ backgroundColor: 'var(--topbar-bg, #166534)', color: 'var(--topbar-text, #dcfce7)' }} className={`w-full text-[11px] font-medium py-1.5 transition-all duration-300 tracking-wider ${scrolled ? '-translate-y-full absolute opacity-0' : 'translate-y-0 relative opacity-100 z-50'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div className="flex items-center gap-5">
-                        <a href={phoneLink} className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+                        <a href={phoneLink} className="flex items-center gap-1.5 hover:text-white transition-colors">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                             Soporte Socio: {phone}
                         </a>
                         <span className="hidden sm:inline w-[1px] h-3 bg-white/20"></span>
-                        <a href={whatsappLink} target="_blank" className="hidden sm:flex items-center gap-1.5 hover:text-green-400 transition-colors">
+                        <a href={whatsappLink} target="_blank" className="hidden sm:flex items-center gap-1.5 hover:text-white transition-colors">
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.342-1.713-.65-2.816-2.39-2.903-2.505-.087-.116-.694-.925-.694-1.765s.437-1.258.59-1.423c.153-.166.332-.208.442-.208s.221-.005.317-.005c.087 0 .208-.032.325.249.122.29.418 1.02.456 1.097.038.077.063.166.012.265-.05.099-.076.158-.152.247s-.152.188-.218.261c-.073.081-.151.17-.064.321.087.151.388.642.836 1.043.578.517 1.055.679 1.206.756.151.076.241.063.33-.038s.344-.403.438-.541c.094-.138.188-.115.326-.065.138.05 .876.413 1.027.489.151.076.251.114.288.177.037.062.037.359-.107.764z" /></svg>
                             {whatsappLabel}
                         </a>
@@ -162,12 +162,12 @@ export default function Header({ settings = {} }) {
                         {/* CTAs */}
                         <div className="flex items-center gap-3 lg:gap-5 shrink-0">
                             {auth?.user ? (
-                                <Link href="/dashboard" className="hidden lg:flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                                <Link href="/dashboard" style={{ backgroundColor: 'var(--color-secondary, #F7BD16)', color: '#131d0c' }} className="hidden lg:flex font-semibold hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
                                     <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
                                     Dashboard
                                 </Link>
                             ) : (
-                                <Link href="/login" className="hidden lg:flex font-semibold text-zinc-900 hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide bg-[#F7BD16] px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
+                                <Link href="/login" style={{ backgroundColor: 'var(--color-secondary, #F7BD16)', color: '#131d0c' }} className="hidden lg:flex font-semibold hover:shadow-lg transition-colors items-center gap-1.5 text-[13px] tracking-wide px-4 py-2 rounded-full hover:brightness-110 shadow-sm transform hover:-translate-y-0.5 transition-all">
                                     <LogIn className="w-4 h-4" />
                                     {ctaPortal}
                                 </Link>
@@ -175,14 +175,15 @@ export default function Header({ settings = {} }) {
 
                             <div className="relative block">
                                 {/* Badge Flotante */}
-                                <span className="absolute -top-2.5 right-4 bg-[#F7BD16] text-[#1b262c] text-[8px] font-black tracking-wider px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
+                                <span style={{ backgroundColor: 'var(--color-secondary, #F7BD16)', color: '#131d0c' }} className="absolute -top-2.5 right-4 text-[8px] font-black tracking-wider px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
                                     <span>🏷️</span> BENEFICIOS Y OFERTAS
                                 </span>
                                 <Link
                                     href="/beneficios"
-                                    className="flex items-center gap-2 bg-[#1d2516] hover:bg-[#28361d] text-white font-semibold px-5 py-2.5 rounded-full hover:shadow-[0_0_20px_rgba(247,189,22,0.45)] shadow-[0_0_12px_rgba(247,189,22,0.25)] transition-all duration-300 transform hover:-translate-y-0.5 border border-[#F7BD16]/30 text-[13px] tracking-wide"
+                                    style={{ backgroundColor: 'var(--color-primary, #2B371D)' }}
+                                    className="flex items-center gap-2 text-white font-semibold px-5 py-2.5 rounded-full hover:brightness-110 shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-white/20 text-[13px] tracking-wide"
                                 >
-                                    <ShoppingBag className="w-4 h-4 text-[#F7BD16] stroke-[2.5]" />
+                                    <ShoppingBag className="w-4 h-4 text-white stroke-[2.5]" />
                                     <span>{ctaTienda || "Tienda de Compras"}</span>
                                 </Link>
                             </div>

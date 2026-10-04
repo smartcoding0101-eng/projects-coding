@@ -94,6 +94,13 @@
             --line-height:       {{ $g['line_height']        ?? '1.65' }};
             --letter-spacing:    {{ $g['letter_spacing']     ?? '0em' }};
 
+            /* Sincronización con Tailwind CSS v4 */
+            --brand-primary:     var(--color-primary);
+            --brand-primary-dark: var(--btns-primary-hover, #1e2814);
+            --brand-accent:      var(--color-secondary);
+            --bg-main:           var(--color-bg-page);
+            --text-main:         var(--color-text);
+
             /* ── HERO ────────────────────────────────────────── */
             --hero-font-title:        '{{ $hero['font_family_title'] ?? $g['font_family_title'] ?? 'Inter' }}', ui-sans-serif, sans-serif;
             --hero-font-weight-title: {{ $hero['font_weight_title']    ?? '900' }};
@@ -217,7 +224,7 @@
             --sh-bg:           {{ $sh['color_bg']           ?? '#0f172a' }};
             --sh-color-title:  {{ $sh['color_title']        ?? '#ffffff' }};
             --sh-color-sub:    {{ $sh['color_subtitle']     ?? '#eab308' }};
-            --sh-badge-bg:     {{ $sh['color_badge_bg']     ?? '#22c55e' }};
+            --sh-badge-bg:     {{ $sh['color_badge_bg']     ?? '#2B371D' }};
             --sh-badge-text:   {{ $sh['color_badge_text']   ?? '#ffffff' }};
 
             /* ── E-COMMERCE: TARJETA PRODUCTO ────────────────── */
@@ -229,14 +236,14 @@
             --pc-bg:              {{ $pc['color_bg']              ?? '#ffffff' }};
             --pc-bg-hover:        {{ $pc['color_bg_hover']        ?? '#f0fdf4' }};
             --pc-color-name:      {{ $pc['color_name']            ?? '#0f172a' }};
-            --pc-color-price:     {{ $pc['color_price']           ?? '#16a34a' }};
+            --pc-color-price:     {{ $pc['color_price']           ?? '#2B371D' }};
             --pc-color-credit:    {{ $pc['color_price_credit']    ?? '#eab308' }};
             --pc-color-desc:      {{ $pc['color_description']     ?? '#64748b' }};
             --pc-border:          {{ $pc['color_border']          ?? '#e2e8f0' }};
             --pc-radius:          {{ $pc['border_radius']         ?? '1rem' }};
-            --pc-btn-bg:          {{ $pc['btn_bg']                ?? '#22c55e' }};
+            --pc-btn-bg:          {{ $pc['btn_bg']                ?? '#2B371D' }};
             --pc-btn-text:        {{ $pc['btn_text']              ?? '#ffffff' }};
-            --pc-btn-hover:       {{ $pc['btn_bg_hover']          ?? '#16a34a' }};
+            --pc-btn-hover:       {{ $pc['btn_bg_hover']          ?? '#1e2814' }};
 
             /* ── E-COMMERCE: DETALLE PRODUCTO ────────────────── */
             --pd-font:         '{{ $pd['font_family_title'] ?? $g['font_family_title'] ?? 'Inter' }}', sans-serif;
@@ -244,7 +251,7 @@
             --pd-size-title:   {{ $pd['font_size_title']    ?? '1.875rem' }};
             --pd-size-price:   {{ $pd['font_size_price']    ?? '1.75rem' }};
             --pd-color-title:  {{ $pd['color_title']        ?? '#0f172a' }};
-            --pd-color-price:  {{ $pd['color_price']        ?? '#16a34a' }};
+            --pd-color-price:  {{ $pd['color_price']        ?? '#2B371D' }};
             --pd-color-credit: {{ $pd['color_price_credit'] ?? '#d97706' }};
             --pd-bg:           {{ $pd['color_bg']           ?? '#f8faf6' }};
             --pd-color-desc:   {{ $pd['color_description']  ?? '#475569' }};
@@ -253,7 +260,7 @@
             --fil-font:          '{{ $fil['font_family']          ?? $g['font_family_body'] ?? 'Inter' }}', sans-serif;
             --fil-size:          {{ $fil['font_size']              ?? '0.875rem' }};
             --fil-weight-active: {{ $fil['font_weight_active']     ?? '700' }};
-            --fil-active-bg:     {{ $fil['color_bg_active']        ?? '#22c55e' }};
+            --fil-active-bg:     {{ $fil['color_bg_active']        ?? '#2B371D' }};
             --fil-active-text:   {{ $fil['color_text_active']      ?? '#ffffff' }};
             --fil-inactive-bg:   {{ $fil['color_bg_inactive']      ?? '#f1f5f9' }};
             --fil-inactive-text: {{ $fil['color_text_inactive']    ?? '#64748b' }};
@@ -265,7 +272,7 @@
             --chk-size-item:  {{ $chk['font_size_item']          ?? '0.95rem' }};
             --chk-panel-bg:   {{ $chk['color_bg_panel']          ?? '#ffffff' }};
             --chk-total:      {{ $chk['color_total']             ?? '#0f172a' }};
-            --chk-btn-bg:     {{ $chk['color_btn_checkout_bg']   ?? '#22c55e' }};
+            --chk-btn-bg:     {{ $chk['color_btn_checkout_bg']   ?? '#2B371D' }};
             --chk-btn-text:   {{ $chk['color_btn_checkout_text'] ?? '#ffffff' }};
         }
 
@@ -324,9 +331,31 @@
             color: #ffffff !important;
         }
 
-        /* Footer: Títulos de columnas (Accesos Rápidos, Contáctanos, etc.) en color blanco */
-        footer h4, footer .font-bold.text-white, footer [data-footer-title] {
+        /* Footer dinámico desde Filament */
+        footer {
+            background-color: var(--footer-bg, #020617) !important;
+            color: var(--footer-color-text, #94a3b8) !important;
+            font-family: var(--footer-font, var(--font-body)) !important;
+        }
+        footer p, footer span, footer div {
+            color: inherit;
+        }
+        footer a {
+            color: var(--footer-color-link, #94a3b8) !important;
+            transition: color 0.2s ease;
+        }
+        footer a:hover {
+            color: var(--footer-color-hover, #22c55e) !important;
+        }
+        footer h4, footer .footer-title, footer [data-footer-title] {
             color: var(--footer-color-title, #ffffff) !important;
+            font-size: var(--footer-size-title, 1rem) !important;
+            font-weight: var(--footer-weight-title, 600) !important;
+        }
+
+        /* Hero Tienda: Títulos principales garantizados en blanco con legibilidad */
+        [data-hero-tienda] h1, .hero-tienda-title, [class*="sh-color-title"], h1[class*="text-[length:var(--sh-size-title)]"] {
+            color: var(--sh-color-title, #ffffff) !important;
         }
 
         /* Login / Auth banner: Título sobre fondo oscuro siempre blanco */

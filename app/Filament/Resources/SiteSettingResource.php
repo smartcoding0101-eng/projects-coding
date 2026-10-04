@@ -759,7 +759,7 @@ class SiteSettingResource extends Resource
                                         \Filament\Forms\Components\Select::make('global.font_weight_body')->label('Peso Cuerpo')->options(static::getFontWeightOptions())->default('400'),
                                     ])->columns(4),
                                     Group::make([
-                                        \Filament\Forms\Components\ColorPicker::make('global.color_primary')->label('Color Primario')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('global.color_primary')->label('Color Primario')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('global.color_accent')->label('Color de Acento')->default('#eab308'),
                                         \Filament\Forms\Components\ColorPicker::make('global.color_text')->label('Color Texto Base')->default('#1e293b'),
                                         \Filament\Forms\Components\ColorPicker::make('global.color_title')->label('Color Títulos Base')->default('#0f172a'),
@@ -790,7 +790,7 @@ class SiteSettingResource extends Resource
                                         \Filament\Forms\Components\ColorPicker::make('store_hero.color_bg')->label('Fondo Hero')->default('#0f172a'),
                                         \Filament\Forms\Components\ColorPicker::make('store_hero.color_title')->label('Color Título')->default('#ffffff'),
                                         \Filament\Forms\Components\ColorPicker::make('store_hero.color_subtitle')->label('Color Subtítulo')->default('#eab308'),
-                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_badge_bg')->label('Fondo Badge')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('store_hero.color_badge_bg')->label('Fondo Badge')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('store_hero.color_badge_text')->label('Texto Badge')->default('#ffffff'),
                                     ])->columns(5),
                                 ]),
@@ -811,7 +811,7 @@ class SiteSettingResource extends Resource
                                         \Filament\Forms\Components\ColorPicker::make('product_card.color_bg')->label('Fondo Tarjeta')->default('#ffffff'),
                                         \Filament\Forms\Components\ColorPicker::make('product_card.color_bg_hover')->label('Fondo Hover')->default('#f0fdf4'),
                                         \Filament\Forms\Components\ColorPicker::make('product_card.color_name')->label('Color Nombre')->default('#0f172a'),
-                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_price')->label('Color Precio')->default('#16a34a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_card.color_price')->label('Color Precio')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('product_card.color_price_credit')->label('Color Precio Crédito')->default('#eab308'),
                                     ])->columns(5),
                                     Group::make([
@@ -822,9 +822,9 @@ class SiteSettingResource extends Resource
                                     ])->columns(4),
                                     Section::make('Botón Agregar al Carrito')->schema([
                                         Group::make([
-                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg')->label('Fondo Botón')->default('#22c55e'),
+                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg')->label('Fondo Botón')->default('#2B371D'),
                                             \Filament\Forms\Components\ColorPicker::make('product_card.btn_text')->label('Texto Botón')->default('#ffffff'),
-                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg_hover')->label('Fondo Hover')->default('#16a34a'),
+                                            \Filament\Forms\Components\ColorPicker::make('product_card.btn_bg_hover')->label('Fondo Hover')->default('#1e2814'),
                                             TextInput::make('product_card.btn_font_size')->label('Tamaño Texto Botón')->default('0.875rem'),
                                             \Filament\Forms\Components\Select::make('product_card.btn_font_weight')->label('Peso Texto')->options(static::getFontWeightOptions())->default('600'),
                                         ])->columns(5),
@@ -844,7 +844,7 @@ class SiteSettingResource extends Resource
                                     ])->columns(4),
                                     Group::make([
                                         \Filament\Forms\Components\ColorPicker::make('product_detail.color_title')->label('Color del Título')->default('#0f172a'),
-                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_price')->label('Color del Precio')->default('#16a34a'),
+                                        \Filament\Forms\Components\ColorPicker::make('product_detail.color_price')->label('Color del Precio')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('product_detail.color_price_credit')->label('Color Precio Crédito')->default('#d97706'),
                                         \Filament\Forms\Components\ColorPicker::make('product_detail.color_bg')->label('Fondo Página')->default('#f8faf6'),
                                         \Filament\Forms\Components\ColorPicker::make('product_detail.color_description')->label('Color Descripción')->default('#475569'),
@@ -862,7 +862,7 @@ class SiteSettingResource extends Resource
                                         \Filament\Forms\Components\Select::make('filters.font_weight_active')->label('Peso Activo')->options(static::getFontWeightOptions())->default('700'),
                                     ])->columns(3),
                                     Group::make([
-                                        \Filament\Forms\Components\ColorPicker::make('filters.color_bg_active')->label('Fondo Categoría Activa')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('filters.color_bg_active')->label('Fondo Categoría Activa')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('filters.color_text_active')->label('Texto Activa')->default('#ffffff'),
                                         \Filament\Forms\Components\ColorPicker::make('filters.color_bg_inactive')->label('Fondo Inactiva')->default('#f1f5f9'),
                                         \Filament\Forms\Components\ColorPicker::make('filters.color_text_inactive')->label('Texto Inactiva')->default('#64748b'),
@@ -883,7 +883,7 @@ class SiteSettingResource extends Resource
                                     Group::make([
                                         \Filament\Forms\Components\ColorPicker::make('checkout.color_bg_panel')->label('Fondo Panel')->default('#ffffff'),
                                         \Filament\Forms\Components\ColorPicker::make('checkout.color_total')->label('Color Total')->default('#0f172a'),
-                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_btn_checkout_bg')->label('Botón Pagar BG')->default('#22c55e'),
+                                        \Filament\Forms\Components\ColorPicker::make('checkout.color_btn_checkout_bg')->label('Botón Pagar BG')->default('#2B371D'),
                                         \Filament\Forms\Components\ColorPicker::make('checkout.color_btn_checkout_text')->label('Botón Pagar Texto')->default('#ffffff'),
                                     ])->columns(4),
                                 ]),

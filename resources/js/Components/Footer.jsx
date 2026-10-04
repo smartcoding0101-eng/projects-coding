@@ -26,19 +26,19 @@ export default function Footer() {
                         </div>
                     </div>
                     <div>
-                        <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-sm footer-title" style={{ color: '#ffffff' }}>Accesos Rápidos</h4>
+                        <h4 className="font-bold mb-4 uppercase tracking-wider text-sm footer-title">Accesos Rápidos</h4>
                         <ul className="space-y-3">
-                            <li><a href="#ahorro" className="hover:text-primary transition-colors">Caja de Ahorro</a></li>
-                            <li><a href="#creditos" className="hover:text-primary transition-colors">Créditos de Emergencia</a></li>
-                            <li><a href="#beneficios" className="hover:text-primary transition-colors">Beneficios Exclusivos</a></li>
-                            <li><a href="#institucional" className="hover:text-primary transition-colors">Misión y Visión</a></li>
+                            <li><a href="#ahorro" className="transition-colors">Caja de Ahorro</a></li>
+                            <li><a href="#creditos" className="transition-colors">Créditos de Emergencia</a></li>
+                            <li><a href="#beneficios" className="transition-colors">Beneficios Exclusivos</a></li>
+                            <li><a href="#institucional" className="transition-colors">Misión y Visión</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-sm footer-title" style={{ color: '#ffffff' }}>Contáctanos</h4>
+                        <h4 className="font-bold mb-4 uppercase tracking-wider text-sm footer-title">Contáctanos</h4>
                         <ul className="space-y-3">
-                            <li><a href="http://wa.link/8yl8ow" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2">WhatsApp Directo</a></li>
-                            <li><a href="http://www.facebook.com/profile.php?id=61582603104419" target="_blank" className="hover:text-primary transition-colors flex items-center gap-2">Síguenos en Facebook</a></li>
+                            <li><a href="http://wa.link/8yl8ow" target="_blank" className="transition-colors flex items-center gap-2">WhatsApp Directo</a></li>
+                            <li><a href="http://www.facebook.com/profile.php?id=61582603104419" target="_blank" className="transition-colors flex items-center gap-2">Síguenos en Facebook</a></li>
                             <li>Atención Personalizada 24/7</li>
                         </ul>
                     </div>

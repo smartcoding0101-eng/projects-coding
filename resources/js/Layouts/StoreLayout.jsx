@@ -48,7 +48,7 @@ export default function StoreLayout({ children }) {
             {cartCount > 0 && (
                 <Link
                     href={route('beneficios.checkout')}
-                    className="fixed bottom-40 right-6 z-50 bg-primary text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-black/30 hover:scale-110 transition-transform"
+                    className="fixed bottom-40 right-6 z-50 bg-[var(--color-primary,#2B371D)] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-black/30 hover:scale-110 transition-transform"
                 >
                     <ShoppingCart className="w-6 h-6" />
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-md">

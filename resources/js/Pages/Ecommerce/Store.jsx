@@ -4,7 +4,6 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import { ShoppingCart, Search, Filter, ShoppingBag, ArrowRight, EyeOff, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import BlurText from '@/Components/BlurText';
 
 export default function Store({ productos, categorias, filtros, auth, settings }) {
     const { addToCart, cartCount } = useCart();
@@ -179,16 +178,12 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                             <span className="inline-block py-1.5 px-4 rounded-full bg-[var(--sh-badge-bg)] text-[var(--sh-badge-text)] text-[10px] font-black tracking-widest mb-5 uppercase shadow-lg backdrop-blur-sm">
                                 {slide.subtitle || 'BENEFICIOS EXCLUSIVOS'}
                             </span>
-                            <BlurText
-                                as="h1"
-                                text={slide.title}
-                                delay={0.12}
-                                animateBy="words"
-                                direction="top"
-                                align="left"
-                                className="text-[length:var(--sh-size-title)] font-[var(--sh-weight)] text-[var(--sh-color-title)] tracking-tighter leading-tight mb-5 drop-shadow-2xl"
-                                style={{ fontFamily: 'var(--sh-font)', textAlign: 'var(--sh-align)' }}
-                            />
+                            <h1
+                                className="text-[length:var(--sh-size-title)] font-[var(--sh-weight)] text-white text-[var(--sh-color-title)] tracking-tighter leading-tight mb-5 drop-shadow-2xl"
+                                style={{ fontFamily: 'var(--sh-font)', textAlign: 'var(--sh-align)', color: 'var(--sh-color-title, #ffffff)' }}
+                            >
+                                {slide.title}
+                            </h1>
                             <p className="text-lg text-[var(--sh-color-sub)] mb-8 font-medium leading-relaxed drop-shadow-md max-w-md" style={{ textAlign: 'var(--sh-align)' }}>
                                 {slide.description}
                             </p>

@@ -51,10 +51,10 @@ export default function BenefitsSection({ cmsData = null }) {
                 <p className="text-gray-400 text-xs font-medium" style={{ color: 'var(--st-subtitle-color, #64748b)' }}>Más allá del crédito, somos tu respaldo integral.</p>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col gap-6 overflow-hidden transition-all hover:shadow-xl group">
+            <div style={{ backgroundColor: 'var(--card-bg, #ffffff)', borderColor: 'var(--card-border, #e2e8f0)', borderRadius: 'var(--card-radius, 2.5rem)' }} className="p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] border flex flex-col gap-6 overflow-hidden transition-all hover:shadow-xl group">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {benefits.map((b, i) => (
-                        <div key={i} className="p-4 rounded-2xl bg-surface/50 border border-transparent hover:border-gray-100 transition-all hover:bg-white">
+                        <div key={i} style={{ borderRadius: 'calc(var(--card-radius, 1rem) * 0.8)' }} className="p-4 bg-surface/50 border border-transparent hover:border-gray-100 transition-all hover:bg-white">
                             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-3">
                                 {b.icon || (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
