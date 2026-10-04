@@ -134,12 +134,12 @@ export default function Store({ productos, categorias, filtros, auth, settings }
             <Head title="Beneficios y Tienda FAPCLAS" />
 
             {/* HERO: CARRUSEL CROSSFADE (sin gaps visuales) */}
-            <div className="relative h-[500px] lg:h-[650px] overflow-hidden bg-[var(--sh-bg)] border-b border-[var(--fil-border)]">
+            <div className="relative min-h-[520px] h-[580px] sm:h-[600px] lg:h-[680px] 2xl:h-[800px] overflow-hidden bg-[var(--sh-bg)] border-b border-[var(--fil-border)]">
                 {/* Enlaces de Navegación Superior Derecha */}
-                <div className="absolute top-6 right-6 lg:right-12 z-40 flex items-center gap-6 font-bold text-sm text-gray-300">
+                <div className="absolute top-4 sm:top-6 right-4 sm:right-6 lg:right-12 z-40 flex items-center gap-3 sm:gap-6 font-bold text-xs sm:text-sm text-gray-300">
                     <Link href={route('welcome')} className="hover:text-white transition-colors">Inicio</Link>
                     <Link href={route('register')} className="hover:text-white transition-colors border-b border-transparent hover:border-white">Regístrate</Link>
-                    <Link href={route('login')} className="hover:text-white transition-colors bg-card-fap/10 px-5 py-2 rounded-full border border-white/20 hover:bg-card-fap/20">Sistema</Link>
+                    <Link href={route('login')} className="hover:text-white transition-colors bg-card-fap/10 px-3 sm:px-5 py-1.5 sm:py-2 rounded-full border border-white/20 hover:bg-card-fap/20">Sistema</Link>
                 </div>
 
                 {/* Todas las imágenes montadas simultáneamente — Crossfade puro con CSS */}
@@ -179,27 +179,27 @@ export default function Store({ productos, categorias, filtros, auth, settings }
                                 {slide.subtitle || 'BENEFICIOS EXCLUSIVOS'}
                             </span>
                             <h1
-                                className="text-[length:var(--sh-size-title)] font-[var(--sh-weight)] text-white text-[var(--sh-color-title)] tracking-tighter leading-tight mb-5 drop-shadow-2xl"
+                                className="text-2xl sm:text-4xl md:text-5xl lg:text-[length:var(--sh-size-title)] 2xl:text-6xl font-[var(--sh-weight)] text-white text-[var(--sh-color-title)] tracking-tighter leading-tight mb-3 sm:mb-5 drop-shadow-2xl"
                                 style={{ fontFamily: 'var(--sh-font)', textAlign: 'var(--sh-align)', color: 'var(--sh-color-title, #ffffff)' }}
                             >
                                 {slide.title}
                             </h1>
-                            <p className="text-lg text-[var(--sh-color-sub)] mb-8 font-medium leading-relaxed drop-shadow-md max-w-md" style={{ textAlign: 'var(--sh-align)' }}>
+                            <p className="text-sm sm:text-base lg:text-lg text-[var(--sh-color-sub)] mb-5 sm:mb-8 font-medium leading-relaxed drop-shadow-md max-w-md" style={{ textAlign: 'var(--sh-align)' }}>
                                 {slide.description}
                             </p>
-                            <div className="flex flex-wrap gap-4">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 {slide.button_text && (
-                                    <a href={slide.button_link || '#catalogo'} className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-[length:var(--pc-btn-font-size)] font-[var(--pc-btn-font-weight)] rounded-2xl text-[var(--pc-btn-text)] bg-[var(--pc-btn-bg)] hover:bg-[var(--pc-btn-hover)] transition-all shadow-2xl uppercase tracking-widest group">
+                                    <a href={slide.button_link || '#catalogo'} className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-transparent text-[length:var(--pc-btn-font-size)] font-[var(--pc-btn-font-weight)] rounded-2xl text-[var(--pc-btn-text)] bg-[var(--pc-btn-bg)] hover:bg-[var(--pc-btn-hover)] transition-all shadow-2xl uppercase tracking-widest group text-xs sm:text-sm">
                                         {slide.button_text}
-                                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                                     </a>
                                 )}
                                 {auth?.user ? (
-                                    <Link href={route('dashboard')} className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
+                                    <Link href={route('dashboard')} className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-white/30 text-xs sm:text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
                                         Mi Portal Socio
                                     </Link>
                                 ) : (
-                                    <Link href="/login" className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
+                                    <Link href="/login" className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-white/30 text-xs sm:text-sm font-bold rounded-2xl text-white hover:bg-card-fap/10 transition-all backdrop-blur-sm bg-card-fap/5">
                                         Iniciar Sesión
                                     </Link>
                                 )}

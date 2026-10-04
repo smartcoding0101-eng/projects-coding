@@ -56,17 +56,17 @@ export default function SplitKineticTitle({
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 ${className}`}
+                    className={`flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 gap-y-1 ${className}`}
                 >
                     {words.map((word, idx) => (
                         <span
                             key={idx}
-                            className="inline-block overflow-hidden py-1"
+                            className="inline-block overflow-hidden py-0.5 sm:py-1 max-w-full"
                             style={{ perspective: '600px' }}
                         >
                             <motion.span
                                 variants={wordVariants}
-                                className="inline-block will-change-transform drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+                                className="inline-block will-change-transform drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] break-words"
                             >
                                 {word}
                             </motion.span>
@@ -81,17 +81,17 @@ export default function SplitKineticTitle({
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 ${subtitleClassName}`}
+                    className={`flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 gap-y-1 ${subtitleClassName}`}
                 >
                     {subWords.map((word, idx) => (
                         <span
                             key={idx}
-                            className="inline-block overflow-hidden py-1"
+                            className="inline-block overflow-hidden py-0.5 sm:py-1 max-w-full"
                             style={{ perspective: '600px' }}
                         >
                             <motion.span
                                 variants={wordVariants}
-                                className="inline-block will-change-transform bg-gradient-to-r from-[#F7BD16] via-[#ffd56b] to-[#F7BD16] bg-clip-text text-transparent drop-shadow-[0_8px_20px_rgba(247,189,22,0.3)]"
+                                className="inline-block will-change-transform bg-gradient-to-r from-[#F7BD16] via-[#ffd56b] to-[#F7BD16] bg-clip-text text-transparent drop-shadow-[0_8px_20px_rgba(247,189,22,0.3)] break-words"
                             >
                                 {word}
                             </motion.span>

@@ -171,3 +171,18 @@ body.mobile-menu-open a[href*="wa.link"],
 body.mobile-menu-open button[aria-label="Subir al inicio"] {
     display: none !important;
 }
+
+/* ═══════ PREVENCIÓN DE DESBORDAMIENTO HORIZONTAL (RESPONSIVE MÓVIL 320px) ═══════ */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════ SOPORTE ULTRA-WIDE Y PANTALLAS GIGANTES / TV 4K (2560px - 3840px) ═══════ */
+@media (min-width: 1921px) {
+    .max-w-7xl {
+        max-width: 1800px !important;
+    }
+}

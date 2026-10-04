@@ -175,16 +175,16 @@ export default function Header({ settings = {} }) {
 
                             <div className="relative block">
                                 {/* Badge Flotante */}
-                                <span style={{ backgroundColor: 'var(--color-secondary, #F7BD16)', color: '#131d0c' }} className="absolute -top-2.5 right-4 text-[8px] font-black tracking-wider px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
-                                    <span>🏷️</span> BENEFICIOS Y OFERTAS
+                                <span style={{ backgroundColor: 'var(--color-secondary, #F7BD16)', color: '#131d0c' }} className="absolute -top-2.5 right-2 sm:right-4 text-[7px] sm:text-[8px] font-black tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full uppercase shadow-md flex items-center gap-1 z-10 border border-white/20 select-none animate-pulse-badge">
+                                    <span>🏷️</span> <span className="hidden xs:inline">BENEFICIOS Y</span> OFERTAS
                                 </span>
                                 <Link
                                     href="/beneficios"
                                     style={{ backgroundColor: 'var(--color-primary, #2B371D)' }}
-                                    className="flex items-center gap-2 text-white font-semibold px-5 py-2.5 rounded-full hover:brightness-110 shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-white/20 text-[13px] tracking-wide"
+                                    className="flex items-center gap-1.5 sm:gap-2 text-white font-semibold px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:brightness-110 shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-white/20 text-[11px] sm:text-[13px] tracking-wide"
                                 >
-                                    <ShoppingBag className="w-4 h-4 text-white stroke-[2.5]" />
-                                    <span>{ctaTienda || "Tienda de Compras"}</span>
+                                    <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.5]" />
+                                    <span>{ctaTienda || "Tienda Virtual"}</span>
                                 </Link>
                             </div>
 

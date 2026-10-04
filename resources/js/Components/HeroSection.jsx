@@ -88,7 +88,7 @@ export default function HeroSection({ cmsSlides = [] }) {
     const current = slides[currentSlide];
 
     return (
-        <section className="relative h-[380px] sm:h-[500px] md:h-[650px] lg:h-[750px] flex items-center justify-center bg-zinc-900 overflow-hidden">
+        <section className="relative min-h-[400px] h-[460px] sm:h-[540px] md:h-[650px] lg:h-[750px] 2xl:h-[880px] flex items-center justify-center bg-zinc-900 overflow-hidden">
             {/* Background container — overflow-hidden ONLY here */}
             <div className="absolute inset-0 overflow-hidden">
                 {slides.map((slide, index) => (
@@ -142,8 +142,8 @@ export default function HeroSection({ cmsSlides = [] }) {
                         subtitle={current.subtitle}
                         direction="up"
                         delayOffset={0.05}
-                        className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-1 sm:mb-2 font-display leading-[1.08] text-white"
-                        subtitleClassName="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3 sm:mb-6 font-display leading-[1.08]"
+                        className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl 2xl:text-8xl font-black tracking-tight mb-1 sm:mb-2 font-display leading-[1.08] text-white"
+                        subtitleClassName="text-2xl sm:text-5xl md:text-6xl lg:text-7xl 2xl:text-8xl font-black tracking-tight mb-3 sm:mb-6 font-display leading-[1.08]"
                     />
                 )}
 
